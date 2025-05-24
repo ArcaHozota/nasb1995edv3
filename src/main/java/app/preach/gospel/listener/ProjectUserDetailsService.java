@@ -54,10 +54,11 @@ public class ProjectUserDetailsService implements UserDetailsService {
 		if (authoritiesRecords.isEmpty()) {
 			throw new AuthenticationCredentialsNotFoundException(ProjectConstants.MESSAGE_SPRINGSECURITY_LOGINERROR3);
 		}
-		final StudentDto studentDto = new StudentDto(studentsRecord.getId(), studentsRecord.getLoginAccount(),
-				studentsRecord.getUsername(), studentsRecord.getPassword(), studentsRecord.getEmail(),
+		final StudentDto studentDto = new StudentDto(studentsRecord.getId().toString(),
+				studentsRecord.getLoginAccount(), studentsRecord.getUsername(), studentsRecord.getPassword(),
+				studentsRecord.getEmail(),
 				DateTimeFormatter.ofPattern("yyyy-MM-dd").format(studentsRecord.getDateOfBirth()),
-				studentsRecord.getRoleId());
+				studentsRecord.getRoleId().toString());
 		final List<SimpleGrantedAuthority> authorities = authoritiesRecords.stream()
 				.map(item -> new SimpleGrantedAuthority(item.getName())).collect(Collectors.toList());
 		return new SecurityAdmin(studentDto, authorities);

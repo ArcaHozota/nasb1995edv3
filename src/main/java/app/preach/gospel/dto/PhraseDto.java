@@ -1,5 +1,7 @@
 package app.preach.gospel.dto;
 
+import java.io.Serializable;
+
 /**
  * 節別情報転送クラス
  *
@@ -11,7 +13,7 @@ public record PhraseDto(
 		/*
 		 * ID
 		 */
-		Long id,
+		String id,
 
 		/*
 		 * 名称
@@ -31,5 +33,5 @@ public record PhraseDto(
 		/*
 		 * 章節ID
 		 */
-		Integer chapterId) {
+		String chapterId) implements Serializable {
 }

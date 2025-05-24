@@ -33,59 +33,60 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BookServiceImpl implements IBookService {
 
-    /**
-     * 共通リポジトリ
-     */
-    private final DSLContext dslContext;
+	/**
+	 * 共通リポジトリ
+	 */
+	private final DSLContext dslContext;
 
-    @Override
-    public CoResult<List<BookDto>, DataAccessException> getBooks() {
-        try {
-            final List<BooksRecord> booksRecords = this.dslContext.selectFrom(BOOKS).orderBy(BOOKS.ID.asc())
-                    .fetchInto(BooksRecord.class);
-            final List<BookDto> bookDtos = booksRecords.stream().map(
-                            booksRecord -> new BookDto(booksRecord.getId(), booksRecord.getName(), booksRecord.getNameJp()))
-                    .toList();
-            return CoResult.ok(bookDtos);
-        } catch (final DataAccessException e) {
-            return CoResult.err(e);
-        }
-    }
+	@Override
+	public CoResult<List<BookDto>, DataAccessException> getBooks() {
+		try {
+			final List<BooksRecord> booksRecords = this.dslContext.selectFrom(BOOKS).orderBy(BOOKS.ID.asc())
+					.fetchInto(BooksRecord.class);
+			final List<BookDto> bookDtos = booksRecords.stream()
+					.map(booksRecord -> new BookDto(booksRecord.getId().toString(), booksRecord.getName(),
+							booksRecord.getNameJp()))
+					.toList();
+			return CoResult.ok(bookDtos);
+		} catch (final DataAccessException e) {
+			return CoResult.err(e);
+		}
+	}
 
-    @Override
-    public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final Short id) {
-        try {
-            final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
-                    .where(CHAPTERS.BOOK_ID.eq(id)).orderBy(CHAPTERS.ID.asc()).fetchInto(ChaptersRecord.class);
-            final List<ChapterDto> chapterDtos = chaptersRecords.stream()
-                    .map(chaptersRecord -> new ChapterDto(chaptersRecord.getId(), chaptersRecord.getName(),
-                            chaptersRecord.getNameJp(), chaptersRecord.getBookId()))
-                    .toList();
-            return CoResult.ok(chapterDtos);
-        } catch (final DataAccessException e) {
-            return CoResult.err(e);
-        }
-    }
+	@Override
+	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final Short id) {
+		try {
+			final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
+					.where(CHAPTERS.BOOK_ID.eq(id)).orderBy(CHAPTERS.ID.asc()).fetchInto(ChaptersRecord.class);
+			final List<ChapterDto> chapterDtos = chaptersRecords.stream()
+					.map(chaptersRecord -> new ChapterDto(chaptersRecord.getId().toString(), chaptersRecord.getName(),
+							chaptersRecord.getNameJp(), chaptersRecord.getBookId().toString()))
+					.toList();
+			return CoResult.ok(chapterDtos);
+		} catch (final DataAccessException e) {
+			return CoResult.err(e);
+		}
+	}
 
-    @Override
-    public CoResult<String, DataAccessException> infoStorage(final @NotNull PhraseDto phraseDto) {
-        final Long id = phraseDto.id();
-        final Integer chapterId = phraseDto.chapterId();
-        try {
-            final ChaptersRecord chaptersRecord = this.dslContext.selectFrom(CHAPTERS).where(CHAPTERS.ID.eq(chapterId))
-                    .fetchSingle();
-            final PhrasesRecord phrasesRecord = this.dslContext.newRecord(PHRASES);
-            phrasesRecord.setId((chapterId * 1000) + id);
-            phrasesRecord.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
-            phrasesRecord.setTextEn(phraseDto.textEn());
-            phrasesRecord.setTextJp(phraseDto.textJp());
-            phrasesRecord.setChapterId(chapterId);
-            phrasesRecord.setChangeLine(Boolean.FALSE);
-            phrasesRecord.insert();
-            return CoResult.ok(ProjectConstants.MESSAGE_STRING_INSERTED);
-        } catch (final DataAccessException e) {
-            return CoResult.err(e);
-        }
-    }
+	@Override
+	public CoResult<String, DataAccessException> infoStorage(final @NotNull PhraseDto phraseDto) {
+		final Long id = Long.valueOf(phraseDto.id());
+		final Integer chapterId = Integer.valueOf(phraseDto.chapterId());
+		try {
+			final ChaptersRecord chaptersRecord = this.dslContext.selectFrom(CHAPTERS).where(CHAPTERS.ID.eq(chapterId))
+					.fetchSingle();
+			final PhrasesRecord phrasesRecord = this.dslContext.newRecord(PHRASES);
+			phrasesRecord.setId((chapterId * 1000) + id);
+			phrasesRecord.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
+			phrasesRecord.setTextEn(phraseDto.textEn());
+			phrasesRecord.setTextJp(phraseDto.textJp());
+			phrasesRecord.setChapterId(chapterId);
+			phrasesRecord.setChangeLine(Boolean.FALSE);
+			phrasesRecord.insert();
+			return CoResult.ok(ProjectConstants.MESSAGE_STRING_INSERTED);
+		} catch (final DataAccessException e) {
+			return CoResult.err(e);
+		}
+	}
 
 }

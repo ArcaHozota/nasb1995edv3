@@ -1,5 +1,7 @@
 package app.preach.gospel.dto;
 
+import java.io.Serializable;
+
 /**
  * 学生情報転送クラス
  *
@@ -11,7 +13,7 @@ public record StudentDto(
 		/*
 		 * ID
 		 */
-		Long id,
+		String id,
 
 		/*
 		 * アカウント
@@ -41,5 +43,5 @@ public record StudentDto(
 		/*
 		 * 役割ID
 		 */
-		Long roleId) {
+		String roleId) implements Serializable {
 }

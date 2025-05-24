@@ -3,13 +3,13 @@ package app.preach.gospel.listener;
 import java.io.Serial;
 import java.util.Collection;
 
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import app.preach.gospel.dto.StudentDto;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * User拡張クラス(SpringSecurity関連)

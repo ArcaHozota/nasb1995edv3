@@ -1,5 +1,7 @@
 package app.preach.gospel.dto;
 
+import java.io.Serializable;
+
 /**
  * 章節情報転送クラス
  *
@@ -11,7 +13,7 @@ public record ChapterDto(
 		/*
 		 * ID
 		 */
-		Integer id,
+		String id,
 
 		/*
 		 * 名称
@@ -26,5 +28,5 @@ public record ChapterDto(
 		/*
 		 * 書別ID
 		 */
-		Short bookId) {
+		String bookId) implements Serializable {
 }
