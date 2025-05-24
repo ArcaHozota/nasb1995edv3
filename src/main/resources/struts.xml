@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 6.0//EN"
+        "https://struts.apache.org/dtds/struts-6.0.dtd">
+<struts>
+	<!-- 基本パッケージ名称 -->
+	<package name="projectPackage"
+		extends="struts-default,json-default">
+		<global-allowed-methods>
+			initial,menuInitial,toMainmenu,toMainmenuWithLogin,checkDuplicated,checkEdition,login,loginWithError,
+			checkDelete,toPages,pagination,infoDeletion,infoUpdation,infoStorage,toAddition,toEdition,toHomePage,
+			toIchiranhyo,toSystemError,commonRetrieve,getInfoById,kanumiRetrieve,toRandomFive,toScoreUpload,scoreDownload,getChapters,preLogin
+		</global-allowed-methods>
+	</package>
+	<!-- 他のパッケージ -->
+	<include file="struts-gyomu.xml" />
+	<include file="struts-kyotsu.xml" />
+	<!-- IOCコンテイナーはSpringに任す -->
+	<constant name="struts.objectFactory" value="spring" />
+	<!-- Springのアートウエアールールを設定する -->
+	<constant name="struts.objectFactory.spring.autoWire"
+		value="type" />
+	<!-- エンコーディングを設定する -->
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+	<!-- actionメソッドの中にスラッシュマークがなし -->
+	<constant name="struts.enable.SlashesInActionNames"
+		value="false" />
+	<!-- devモードが無効にする -->
+	<constant name="struts.devMode" value="false" />
+	<!-- 除外すべきURLs -->
+	<constant name="struts.action.excludePattern"
+		value="/static/.*" />
+	<!-- リクエストのsuffix -->
+	<constant name="struts.action.extension" value="" />
+	<!-- アップロードファイルのサイズは最大2MBにする -->
+	<constant name="struts.multipart.maxSize" value="2097152" />
+	<!-- アップロードファイルの一時保存するフォルダ -->
+	<constant name="struts.multipart.saveDir" value="/static/file" />
+	<!-- 例外処理ハンドラ -->
+	<constant name="struts.dispatcher.errorHandler"
+		value="app.preach.gospel.listener.ProjectExceptionHandler" />
+</struts>

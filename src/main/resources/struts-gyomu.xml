@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 6.0//EN"
+        "https://struts.apache.org/dtds/struts-6.0.dtd">
+<struts>
+	<!-- 聖書章節入力ハンドラ -->
+	<package name="booksHandler" extends="projectPackage"
+		namespace="/books">
+		<action name="info-storage"
+			class="app.preach.gospel.handler.BooksHandler" method="infoStorage">
+			<interceptor-ref name="json" />
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="get-chapters"
+			class="app.preach.gospel.handler.BooksHandler" method="getChapters">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="to-addition"
+			class="app.preach.gospel.handler.BooksHandler" method="toAddition">
+			<result name="success" type="freemarker">/templates/books-addition.ftlh
+			</result>
+		</action>
+	</package>
+	<!-- 賛美歌管理ハンドラ -->
+	<package name="hymnsHandler" extends="projectPackage"
+		namespace="/hymns">
+		<action name="common-retrieve"
+			class="app.preach.gospel.handler.HymnsHandler"
+			method="commonRetrieve">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="kanumi-retrieve"
+			class="app.preach.gospel.handler.HymnsHandler"
+			method="kanumiRetrieve">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="get-info-id"
+			class="app.preach.gospel.handler.HymnsHandler" method="getInfoById">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="get-records"
+			class="app.preach.gospel.handler.HymnsHandler" method="getRecords">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="pagination"
+			class="app.preach.gospel.handler.HymnsHandler" method="pagination">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="retrieve-random-five"
+			class="app.preach.gospel.handler.HymnsHandler"
+			method="commonRetrieve">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="to-pages"
+			class="app.preach.gospel.handler.HymnsHandler" method="toPages">
+			<result name="success" type="freemarker">/templates/hymns-pagination.ftlh
+			</result>
+		</action>
+		<action name="to-addition"
+			class="app.preach.gospel.handler.HymnsHandler" method="toAddition">
+			<result name="success" type="freemarker">/templates/hymns-addition.ftlh
+			</result>
+		</action>
+		<action name="to-edition"
+			class="app.preach.gospel.handler.HymnsHandler" method="toEdition">
+			<result name="success" type="freemarker">/templates/hymns-edition.ftlh
+			</result>
+		</action>
+		<action name="to-random-five"
+			class="app.preach.gospel.handler.HymnsHandler" method="toRandomFive">
+			<result name="success" type="freemarker">/templates/hymns-random-five.ftlh
+			</result>
+		</action>
+		<action name="to-score-upload"
+			class="app.preach.gospel.handler.ScoreUploadHandler"
+			method="toScoreUpload">
+			<result name="success" type="freemarker">/templates/hymns-score-upload.ftlh
+			</result>
+		</action>
+		<action name="score-upload"
+			class="app.preach.gospel.handler.ScoreUploadHandler" method="execute">
+			<result name="error" type="json">
+				<param name="root">responseError</param>
+			</result>
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="score-download"
+			class="app.preach.gospel.handler.ScoreUploadHandler"
+			method="scoreDownload">
+			<result name="success" type="stream">
+				<param name="contentType">${contentType}</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">attachment;filename="${fileName}"</param>
+				<param name="bufferSize">3072</param>
+			</result>
+		</action>
+		<action name="info-deletion"
+			class="app.preach.gospel.handler.HymnsHandler" method="infoDeletion">
+			<interceptor-ref name="json" />
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="info-storage"
+			class="app.preach.gospel.handler.HymnsHandler" method="infoStorage">
+			<interceptor-ref name="json" />
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="info-updation"
+			class="app.preach.gospel.handler.HymnsHandler" method="infoUpdation">
+			<interceptor-ref name="json" />
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="check-duplicated"
+			class="app.preach.gospel.handler.HymnsHandler"
+			method="checkDuplicated">
+			<result name="error" type="json">
+				<param name="root">responseError</param>
+			</result>
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="check-duplicated2"
+			class="app.preach.gospel.handler.HymnsHandler"
+			method="checkDuplicated2">
+			<result name="error" type="json">
+				<param name="root">responseError</param>
+			</result>
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="deletion-check"
+			class="app.preach.gospel.handler.HymnsHandler" method="deletionCheck">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+	</package>
+	<!-- 奉仕者管理ハンドラ -->
+	<package name="studentsHandler" extends="projectPackage"
+		namespace="/students">
+		<action name="pre-login"
+			class="app.preach.gospel.handler.StudentsHandler" method="preLogin">
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="check-duplicated"
+			class="app.preach.gospel.handler.StudentsHandler"
+			method="checkDuplicated">
+			<result name="error" type="json">
+				<param name="root">responseError</param>
+			</result>
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="info-updation"
+			class="app.preach.gospel.handler.StudentsHandler"
+			method="infoUpdation">
+			<interceptor-ref name="json" />
+			<result name="none" type="json">
+				<param name="root">responseJsonData</param>
+			</result>
+		</action>
+		<action name="to-edition"
+			class="app.preach.gospel.handler.StudentsHandler" method="toEdition">
+			<result name="success" type="freemarker">/templates/students-edition.ftlh
+			</result>
+		</action>
+	</package>
+</struts>

@@ -1,8 +1,20 @@
 server:
   port: 8277
+  servlet:
+    session:
+      timeout: 22m
+      cookie:
+        http-only: true
+        secure: true
+  compression:
+    enabled: true
+    min-response-size: 1024
 spring:
   application:
-    name: nasb1995edv3
+    name: nasb1995edv2
+  servlet:
+    multipart:
+      max-file-size: 2MB
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://52.198.76.7:5432/nasb1995
@@ -11,16 +23,13 @@ spring:
     hikari:
       maximum-pool-size: 10
       max-lifetime: 1200000
-  thymeleaf:
-    cache: false
-    mode: HTML
-    encoding: UTF-8
-    servlet:
-      content-type: text/html
-    prefix: classpath:/templates/
-    suffix: .html
-  output:
-    ansi:
-      enabled: ALWAYS
+  freemarker:
+    charset: UTF-8
+    allow-request-override: true
+    allow-session-override: true
+    template-loader-path: classpath:/templates/
+    suffix: .ftlh
+    settings:
+      {datetimeFormat: yyyy-MM-dd HH:mm:ss, templateUpdateDelay: 0ms}
   profiles:
-    active: dev
+    active: prod

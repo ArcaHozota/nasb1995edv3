@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 6.0//EN"
+        "https://struts.apache.org/dtds/struts-6.0.dtd">
+<struts>
+	<!-- インデクスハンドラ -->
+	<package name="indexHandler" extends="projectPackage"
+		namespace="/">
+		<action name="index.action"
+			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			<result name="success" type="freemarker">/templates/index.ftlh</result>
+		</action>
+		<action name=""
+			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			<result name="success" type="freemarker">/templates/index.ftlh</result>
+		</action>
+	</package>
+	<!-- ホームページハンドラ -->
+	<package name="homeHandler" extends="projectPackage"
+		namespace="/home">
+		<!-- 显式定义 home Action -->
+		<action name="to-home-page"
+			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			<result name="success" type="freemarker">/templates/index.ftlh</result>
+		</action>
+		<action name="index"
+			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			<result name="success" type="freemarker">/templates/index.ftlh</result>
+		</action>
+		<action name="page"
+			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			<result name="success" type="freemarker">/templates/index.ftlh</result>
+		</action>
+		<!-- 其他 Action 显式添加 -->
+		<action name="to-list"
+			class="app.preach.gospel.handler.HomePageHandler"
+			method="toIchiranhyo">
+			<result name="success" type="freemarker">/templates/index2.ftlh</result>
+		</action>
+	</package>
+	<!-- 共通ハンドラ -->
+	<package name="categoryHandler" extends="projectPackage"
+		namespace="/category">
+		<action name="login"
+			class="app.preach.gospel.handler.CategoryHandler" method="login">
+			<result name="login" type="freemarker">/templates/login-toroku.ftlh</result>
+		</action>
+		<action name="login-with-error"
+			class="app.preach.gospel.handler.CategoryHandler"
+			method="loginWithError">
+			<result name="login" type="freemarker">/templates/index.ftlh</result>
+		</action>
+		<action name="to-mainmenu"
+			class="app.preach.gospel.handler.CategoryHandler" method="toMainmenu">
+			<result name="success" type="freemarker">/templates/mainmenu.ftlh</result>
+		</action>
+		<action name="to-mainmenu-with-login"
+			class="app.preach.gospel.handler.CategoryHandler"
+			method="toMainmenuWithLogin">
+			<result name="success" type="freemarker">/templates/mainmenu.ftlh</result>
+		</action>
+		<action name="to-system-error"
+			class="app.preach.gospel.handler.CategoryHandler"
+			method="toSystemError">
+			<result name="success" type="freemarker">/templates/error.ftlh</result>
+		</action>
+	</package>
+</struts>

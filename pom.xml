@@ -15,6 +15,7 @@
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<struts.version>7.0.3</struts.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<repositories>
@@ -73,16 +74,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<!--
-		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf -->
+		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-freemarker -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
-		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
+			<artifactId>spring-boot-starter-freemarker</artifactId>
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jooq -->
@@ -102,12 +97,33 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency><!--
+		</dependency>
+		<!--
 		https://mvnrepository.com/artifact/org.jetbrains/annotations -->
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 			<version>26.0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.struts/struts2-core -->
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-core</artifactId>
+			<version>${struts.version}</version>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/org.apache.struts/struts2-spring-plugin -->
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-spring-plugin</artifactId>
+			<version>${struts.version}</version>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/org.apache.struts/struts2-json-plugin -->
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-json-plugin</artifactId>
+			<version>${struts.version}</version>
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
