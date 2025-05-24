@@ -1,23 +1,26 @@
-let $tableBody = $("#tableBody");
-let $kanumiSearchBtn = $("#kanamiSearchBtn");
-let $nameDisplay = $("#nameDisplay");
-let $loadingBackground2 = $("#loadingBackground2");
+// === DOM Element References ===
+const tableBody = document.getElementById("tableBody");
+const kanumiSearchBtn = document.getElementById("kanamiSearchBtn");
+const nameDisplay = document.getElementById("nameDisplay");
+const loadingBackground2 = document.getElementById("loadingBackground2");
 let keyword = null;
-$(document).ready(() => {
+
+document.addEventListener("DOMContentLoaded", () => {
     adjustWidth();
     toSelectedPg(1, keyword);
-    $kanumiSearchBtn.on("mousemove", (e) => {
-        const $btn = $(e.currentTarget);           // 常にイベント発生元
-        const offset = $btn.offset();
-        const x = e.pageX - offset.left;
-        const y = e.pageY - offset.top;
-        $btn.css('--x', `${x}px`)
-            .css('--y', `${y}px`);
+
+    kanumiSearchBtn.addEventListener("mousemove", (e) => {
+        const offset = kanumiSearchBtn.getBoundingClientRect();
+        const x = e.clientX - offset.left;
+        const y = e.clientY - offset.top;
+        kanumiSearchBtn.style.setProperty('--x', `${x}px`);
+        kanumiSearchBtn.style.setProperty('--y', `${y}px`);
     });
 });
-$kanumiSearchBtn.on("click", (e) => {
+
+kanumiSearchBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    let hymnId = $nameDisplay.attr('data-id-val');
+    const hymnId = nameDisplay.getAttribute('data-id-val');
     if (hymnId === "0" || hymnId === 0 || hymnId === null || hymnId === undefined) {
         layer.msg('賛美歌を選択してください');
     } else {
@@ -34,126 +37,198 @@ $kanumiSearchBtn.on("click", (e) => {
         }).then((result) => {
             if (result.isConfirmed) {
                 adjustWidth();
-                $loadingBackground2.show();
-                $kanumiSearchBtn.css('pointer-events', "none");
+                loadingBackground2.style.display = "block";
+                kanumiSearchBtn.style.pointerEvents = "none";
                 kanumiRetrieve(hymnId);
+
                 setTimeout(() => {
-                    $loadingBackground2.hide();
-                    $kanumiSearchBtn.css('pointer-events', "auto");
-                    let nameJp = $('.table-danger').find("td:eq(1)").children("a").text();
-                    let slashIndex = nameJp.indexOf('/');
-                    $nameDisplay.text('検索完了---' + nameJp.substring(0, slashIndex));
-                    $nameDisplay.attr('data-id-val', 0);
+                    loadingBackground2.style.display = "none";
+                    kanumiSearchBtn.style.pointerEvents = "auto";
+                    const activeRow = tableBody.querySelector(".table-danger");
+                    const nameJp = activeRow?.querySelector("td:nth-child(2) a")?.textContent || "";
+                    const slashIndex = nameJp.indexOf('/');
+                    nameDisplay.textContent = '検索完了---' + nameJp.substring(0, slashIndex);
+                    nameDisplay.setAttribute('data-id-val', 0);
                 }, 132000);
             }
         });
     }
 });
-$tableBody.on("change", '.form-check-input', (e) => {
-    $('.form-check-input').not(e.currentTarget).prop('checked', false);
-});
-$tableBody.on("click", '.form-check-input', (e) => {
-    if ($(e.currentTarget).prop('checked')) {
-        let idVal = $(e.currentTarget).val();
-        $.ajax({
-            url: '/hymns/get-info-id',
-            data: 'hymnId=' + idVal,
-            success: (response) => {
-                $nameDisplay.text(response.nameJp);
-                $nameDisplay.attr('data-id-val', response.id);
-            },
-            error: (xhr) => {
-                let message = trimQuote(xhr.responseText);
-                layer.msg(message);
-            }
-        });
-    } else {
-        $nameDisplay.attr('data-id-val', 0);
-        $.ajax({
-            url: '/hymns/get-records',
-            success: (response) => {
-                $nameDisplay.text('賛美歌' + response + '曲レコード済み');
-            },
-            error: (xhr) => {
-                let message = trimQuote(xhr.responseText);
-                layer.msg(message);
-            }
+
+tableBody.addEventListener("change", (e) => {
+    if (e.target.classList.contains("form-check-input")) {
+        const allCheckboxes = tableBody.querySelectorAll(".form-check-input");
+        allCheckboxes.forEach(cb => {
+            if (cb !== e.target) cb.checked = false;
         });
     }
 });
-$tableBody.on("click", '.link-btn', (e) => {
-    e.preventDefault();
-    let transferVal = $(e.currentTarget).attr('data-transfer-val');
-    window.open(transferVal);
+
+tableBody.addEventListener("click", (e) => {
+    if (e.target.classList.contains("form-check-input")) {
+        const checked = e.target.checked;
+        if (checked) {
+            const idVal = e.target.value;
+            fetch('/hymns/get-info-id?hymnId=' + encodeURIComponent(idVal))
+                .then(res => res.json())
+                .then(response => {
+                    nameDisplay.textContent = response.nameJp;
+                    nameDisplay.setAttribute('data-id-val', response.id);
+                })
+                .catch(async (xhr) => {
+                    const message = trimQuote(await xhr.text());
+                    layer.msg(message);
+                });
+        } else {
+            nameDisplay.setAttribute('data-id-val', 0);
+            fetch('/hymns/get-records')
+                .then(res => res.json())
+                .then(response => {
+                    nameDisplay.textContent = '賛美歌' + response + '曲レコード済み';
+                })
+                .catch(async (xhr) => {
+                    const message = trimQuote(await xhr.text());
+                    layer.msg(message);
+                });
+        }
+    }
+
+    if (e.target.classList.contains("link-btn")) {
+        e.preventDefault();
+        const transferVal = e.target.getAttribute('data-transfer-val');
+        window.open(transferVal);
+    }
 });
 
-function toSelectedPg(pageNum, keyword) {
-    $.ajax({
-        url: '/hymns/pagination',
-        data: 'pageNum=' + pageNum,
-        success: (response) => {
+function toSelectedPg(pageNum, _) {
+    fetch(`/hymns/pagination?pageNum=${pageNum}`)
+        .then(res => res.json())
+        .then(response => {
             buildTableBody1(response);
             buildPageInfos(response);
             buildPageNavi(response);
-        },
-        error: (xhr) => {
-            let message = trimQuote(xhr.responseText);
+        })
+        .catch(async (xhr) => {
+            const message = trimQuote(await xhr.text());
             layer.msg(message);
-        }
-    });
+        });
 }
 
 function buildTableBody1(response) {
-    $tableBody.empty();
-    let index = response.records;
-    $.each(index, (_, item) => {
-        let checkBoxTd = $("<td class='text-center' style='width: 10%;vertical-align: middle;'></td>")
-            .append($("<input class='form-check-input mt-0' style='vertical-align: middle;' type='checkbox' value='" + item.id + "'>"));
-        let nameMixTd = $("<td class='text-left' style='width: 70%;vertical-align: middle;'></td>")
-            .append($("<a href='#' class='link-btn' data-transfer-val='" + item.link + "'>" + item.nameJp + delimiter + item.nameKr + "</a>"));
-        let scoreTd = $("<td class='text-center' style='width: 20%;vertical-align: middle;'></td>")
-            .append($("<a href='#' class='score-download-btn' data-score-id='" + item.id + "'>&#x1D11E;</a>"));
-        $("<tr></tr>").append(checkBoxTd).append(nameMixTd).append(scoreTd).appendTo("#tableBody");
+    tableBody.innerHTML = '';
+    response.records.forEach(item => {
+        const tr = document.createElement("tr");
+
+        const checkboxTd = document.createElement("td");
+        checkboxTd.className = "text-center";
+        checkboxTd.style.cssText = "width: 10%; vertical-align: middle;";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "form-check-input mt-0";
+        checkbox.value = item.id;
+        checkbox.style.verticalAlign = "middle";
+        checkboxTd.appendChild(checkbox);
+
+        const nameTd = document.createElement("td");
+        nameTd.className = "text-left";
+        nameTd.style.cssText = "width: 70%; vertical-align: middle;";
+        const link = document.createElement("a");
+        link.href = "#";
+        link.className = "link-btn";
+        link.setAttribute("data-transfer-val", item.link);
+        link.textContent = item.nameJp + delimiter + item.nameKr;
+        nameTd.appendChild(link);
+
+        const scoreTd = document.createElement("td");
+        scoreTd.className = "text-center";
+        scoreTd.style.cssText = "width: 20%; vertical-align: middle;";
+        const scoreLink = document.createElement("a");
+        scoreLink.href = "#";
+        scoreLink.className = "score-download-btn";
+        scoreLink.setAttribute("data-score-id", item.id);
+        scoreLink.innerHTML = "&#x1D11E;";
+        scoreTd.appendChild(scoreLink);
+
+        tr.appendChild(checkboxTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(scoreTd);
+
+        tableBody.appendChild(tr);
     });
 }
 
 function kanumiRetrieve(hymnId) {
-    $.ajax({
-        url: '/hymns/kanumi-retrieve',
-        data: 'hymnId=' + hymnId,
-        success: (response) => {
-            buildTableBody2(response);
-        },
-        error: (result) => {
-            layer.msg(result.responseJSON.message);
-        }
-    });
+    fetch(`/hymns/kanumi-retrieve?hymnId=${encodeURIComponent(hymnId)}`)
+        .then(res => res.json())
+        .then(buildTableBody2)
+        .catch(err => {
+            layer.msg(err.responseJSON?.message || "通信エラー");
+        });
 }
 
 function buildTableBody2(response) {
-    $tableBody.empty();
-    $.each(response, (_, item) => {
-        let checkBoxTd = $("<td class='text-center' style='width: 10%;vertical-align: middle;'></td>")
-            .append($("<input class='form-check-input mt-0' style='vertical-align: middle;' type='checkbox' value='" + item.id + "'>"));
-        let nameMixTd = $("<td class='text-left' style='width: 70%;vertical-align: middle;'></td>")
-            .append($("<a href='#' class='link-btn' data-transfer-val='" + item.link + "'>" + item.nameJp + delimiter + item.nameKr + "</a>"));
-        let scoreTd = $("<td class='text-center' style='width: 20%;vertical-align: middle;'></td>")
-            .append($("<a href='#' class='score-download-btn' data-score-id='" + item.id + "'>&#x1D11E;</a>"));
-        if (item.lineNumber === 'BURGUNDY') {
-            $("<tr class='table-danger'></tr>").append(checkBoxTd).append(nameMixTd).append(scoreTd).appendTo("#tableBody");
-        } else if (item.lineNumber === 'NAPLES') {
-            $("<tr class='table-warning'></tr>").append(checkBoxTd).append(nameMixTd).append(scoreTd).appendTo("#tableBody");
-        } else if (item.lineNumber === 'CADMIUM') {
-            $("<tr class='table-success'></tr>").append(checkBoxTd).append(nameMixTd).append(scoreTd).appendTo("#tableBody");
-        } else {
-            $("<tr class='table-light'></tr>").append(checkBoxTd).append(nameMixTd).append(scoreTd).appendTo("#tableBody");
+    tableBody.innerHTML = emptyString;
+    response.forEach(item => {
+        const tr = document.createElement("tr");
+
+        const checkboxTd = document.createElement("td");
+        checkboxTd.className = "text-center";
+        checkboxTd.style.cssText = "width: 10%; vertical-align: middle;";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "form-check-input mt-0";
+        checkbox.value = item.id;
+        checkbox.style.verticalAlign = "middle";
+        checkboxTd.appendChild(checkbox);
+
+        const nameTd = document.createElement("td");
+        nameTd.className = "text-left";
+        nameTd.style.cssText = "width: 70%; vertical-align: middle;";
+        const link = document.createElement("a");
+        link.href = "#";
+        link.className = "link-btn";
+        link.setAttribute("data-transfer-val", item.link);
+        link.textContent = item.nameJp + delimiter + item.nameKr;
+        nameTd.appendChild(link);
+
+        const scoreTd = document.createElement("td");
+        scoreTd.className = "text-center";
+        scoreTd.style.cssText = "width: 20%; vertical-align: middle;";
+        const scoreLink = document.createElement("a");
+        scoreLink.href = "#";
+        scoreLink.className = "score-download-btn";
+        scoreLink.setAttribute("data-score-id", item.id);
+        scoreLink.innerHTML = "&#x1D11E;";
+        scoreTd.appendChild(scoreLink);
+
+        tr.appendChild(checkboxTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(scoreTd);
+
+        switch (item.lineNumber) {
+            case 'BURGUNDY':
+                tr.className = "table-danger";
+                break;
+            case 'NAPLES':
+                tr.className = "table-warning";
+                break;
+            case 'CADMIUM':
+                tr.className = "table-success";
+                break;
+            default:
+                tr.className = "table-light";
         }
+
+        tableBody.appendChild(tr);
     });
 }
 
 function adjustWidth() {
-    const $indexTable = $("#indexTable");
-    if ($indexTable.length) {
-        $('.background2').css('width', $indexTable.outerWidth() + 'px');
+    const indexTable = document.getElementById("indexTable");
+    if (indexTable) {
+        const width = indexTable.offsetWidth + "px";
+        document.querySelectorAll(".background2").forEach(bg => {
+            bg.style.width = width;
+        });
     }
-}
+} 

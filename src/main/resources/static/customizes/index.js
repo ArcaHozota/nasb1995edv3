@@ -1,82 +1,116 @@
-let $tableBody = $("#tableBody");
-let $randomSearchBtn = $("#randomSearchBtn");
-let $loadingContainer = $("#loadingContainer");
-let $loadingBackground = $("#loadingBackground");
-$(document).ready(() => {
-    adjustWidth();
-    $tableBody.hide();
-    let message2 = $("#torokuMsgContainer").val();
-    if (message2 !== emptyString && message2 !== null && message2 !== undefined) {
-        layer.msg(message2);
-    }
+const tableBody = document.getElementById("tableBody");
+const randomSearchBtn = document.getElementById("randomSearchBtn");
+const loadingContainer = document.getElementById("loadingContainer");
+const loadingBackground = document.getElementById("loadingBackground");
+const toIchiranHyoBtn = document.getElementById("toIchiranHyoBtn");
+
+document.addEventListener("DOMContentLoaded", () => {
+	adjustWidth();
+	tableBody.style.display = "none";
+
+	const message2 = document.getElementById("torokuMsgContainer")?.value;
+	if (message2 !== emptyString && message2 !== null && message2 !== undefined) {
+		layer.msg(message2);
+	}
 });
-$randomSearchBtn.on("click", () => {
-    adjustWidth();
-    $loadingBackground.show();
-    $loadingContainer.show();
-    $tableBody.show();
-    $randomSearchBtn.prop("disabled", true);
-    let keyword = $("#keywordInput").val();
-    commonRetrieve(keyword);
-    setTimeout(() => {
-        $loadingContainer.hide();
-        $loadingBackground.hide();
-        $randomSearchBtn.prop("disabled", false);
-    }, 3300);
+
+randomSearchBtn.addEventListener("click", () => {
+	adjustWidth();
+	loadingBackground.style.display = "block";
+	loadingContainer.style.display = "block";
+	tableBody.style.display = "table-row-group";
+	randomSearchBtn.disabled = true;
+
+	const keyword = document.getElementById("keywordInput")?.value;
+	commonRetrieve(keyword);
+
+	setTimeout(() => {
+		loadingContainer.style.display = "none";
+		loadingBackground.style.display = "none";
+		randomSearchBtn.disabled = false;
+	}, 3300);
 });
-$tableBody.on("click", '.link-btn', (e) => {
-    e.preventDefault();
-    let transferVal = $(e.currentTarget).attr('data-transfer-val');
-    window.open(transferVal);
+
+tableBody.addEventListener("click", (e) => {
+	if (e.target.classList.contains("link-btn")) {
+		e.preventDefault();
+		const transferVal = e.target.getAttribute("data-transfer-val");
+		if (transferVal) window.open(transferVal);
+	}
 });
-$("#toIchiranHyoBtn").on("click", () => {
-    Swal.fire({
-        title: 'メッセージ',
-        text: '賛美歌一覧表画面へ移動してよろしいでしょうか。',
-        icon: 'question',
-        showCloseButton: true,
-        confirmButtonText: 'はい',
-        confirmButtonColor: '#7F0020'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = '/home/to-list';
-        }
-    });
+
+toIchiranHyoBtn.addEventListener("click", () => {
+	Swal.fire({
+		title: 'メッセージ',
+		text: '賛美歌一覧表画面へ移動してよろしいでしょうか。',
+		icon: 'question',
+		showCloseButton: true,
+		confirmButtonText: 'はい',
+		confirmButtonColor: '#7F0020'
+	}).then((result) => {
+		if (result.isConfirmed) {
+			window.location.href = '/home/to-list';
+		}
+	});
 });
 
 function commonRetrieve(keyword) {
-    $.ajax({
-        url: '/hymns/common-retrieve',
-        data: 'keyword=' + keyword,
-        success: (response) => {
-            buildTableBody(response);
-        },
-        error: (result) => {
-            layer.msg(result.responseJSON.message);
-        }
-    });
+	fetch('/hymns/common-retrieve?keyword=' + encodeURIComponent(keyword))
+		.then(response => {
+			if (!response.ok) {
+				return response.json().then(err => { throw err; });
+			}
+			return response.json();
+		})
+		.then(buildTableBody)
+		.catch(result => {
+			layer.msg(result.message);
+		});
 }
 
 function buildTableBody(response) {
-    $tableBody.empty();
-    $.each(response, (_, item) => {
-        let nameMixTd = $("<td class='text-center' style='vertical-align: middle;'></td>")
-            .append($("<a href='#' class='link-btn' data-transfer-val='" + item.link + "'>" + item.nameJp + "/" + item.nameKr + "</a>"));
-        if (item.lineNumber === 'BURGUNDY') {
-            $("<tr class='table-danger'></tr>").append(nameMixTd).appendTo("#tableBody");
-        } else if (item.lineNumber === 'NAPLES') {
-            $("<tr class='table-warning'></tr>").append(nameMixTd).appendTo("#tableBody");
-        } else if (item.lineNumber === 'CADMIUM') {
-            $("<tr class='table-success'></tr>").append(nameMixTd).appendTo("#tableBody");
-        } else {
-            $("<tr class='table-light'></tr>").append(nameMixTd).appendTo("#tableBody");
-        }
-    });
+	tableBody.innerHTML = emptyString;
+
+	response.forEach(item => {
+		const tr = document.createElement("tr");
+		const td = document.createElement("td");
+		td.className = "text-center";
+		td.style.verticalAlign = "middle";
+
+		const a = document.createElement("a");
+		a.href = "#";
+		a.className = "link-btn";
+		a.setAttribute("data-transfer-val", item.link);
+		a.textContent = `${item.nameJp}/${item.nameKr}`;
+
+		td.appendChild(a);
+		tr.appendChild(td);
+
+		switch (item.lineNumber) {
+			case 'BURGUNDY':
+				tr.className = "table-danger";
+				break;
+			case 'NAPLES':
+				tr.className = "table-warning";
+				break;
+			case 'CADMIUM':
+				tr.className = "table-success";
+				break;
+			default:
+				tr.className = "table-light";
+		}
+
+		tableBody.appendChild(tr);
+	});
 }
 
 function adjustWidth() {
-    const $indexTable = $("#indexTable");
-    if ($indexTable.length) {
-        $('.background').css('width', $indexTable.outerWidth() + 'px');
-    }
+	const indexTable = document.getElementById("indexTable");
+	if (indexTable) {
+		const bgElements = document.querySelectorAll(".background");
+		const width = indexTable.offsetWidth + "px";
+		bgElements.forEach(el => {
+			el.style.width = width;
+		});
+	}
 }
