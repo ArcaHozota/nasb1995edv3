@@ -13,60 +13,53 @@ const DELETE = 'DELETE';
 const trimQuote = (str) => str.replace(/^"|"$/g, emptyString);
 
 function buildPageInfos(response) {
-    let $pageInfos = $("#pageInfos");
-    $pageInfos.empty();
+    const pageInfos = document.getElementById("pageInfos");
+    pageInfos.innerHTML = emptyString;
     pageNum = response.pageNum;
     totalPages = response.totalPages;
     totalRecords = response.totalRecords;
-    $pageInfos.append(totalPages + "ページ中の" + pageNum + "ページ、" + totalRecords + "件のレコードが見つかりました。");
+    pageInfos.textContent = `${totalPages}ページ中の${pageNum}ページ、${totalRecords}件のレコードが見つかりました。`;
 }
 
 function buildPageNavi(result) {
-    $("#pageNavi").empty();
-    let ul = $("<ul></ul>").addClass('pagination');
-    let firstPageLi = $("<li class='page-item'></li>").append(
-        $("<a class='page-link'></a>").append("最初へ").attr("href", "#"));
-    let prevPageLi = $("<li class='page-item'></li>").append(
-        $("<a class='page-link'></a>").append("&laquo;").attr("href", "#"));
-    if (!result.hasPrevPage) {
-        firstPageLi.addClass('disabled');
-        prevPageLi.addClass('disabled');
-    } else {
-        firstPageLi.click(() => {
-            toSelectedPg(1, keyword);
-        });
-        prevPageLi.click(() => {
-            toSelectedPg(pageNum - 1, keyword);
-        });
-    }
-    let nextPageLi = $("<li class='page-item'></li>").append(
-        $("<a class='page-link'></a>").append("&raquo;").attr("href", "#"));
-    let lastPageLi = $("<li class='page-item'></li>").append(
-        $("<a class='page-link'></a>").append("最後へ").attr("href", "#"));
-    if (!result.hasNextPage) {
-        nextPageLi.addClass('disabled');
-        lastPageLi.addClass('disabled');
-    } else {
-        lastPageLi.addClass('success');
-        nextPageLi.click(() => {
-            toSelectedPg(pageNum + 1, keyword);
-        });
-        lastPageLi.click(() => {
-            toSelectedPg(totalPages, keyword);
-        });
-    }
-    ul.append(firstPageLi).append(prevPageLi);
-    $.each(result.navigateNos, (_, item) => {
-        let numsLi = $("<li class='page-item'></li>").append(
-            $("<a class='page-link'></a>").append(item).attr("href", "#"));
-        if (pageNum === item) {
-            numsLi.attr("href", "#").addClass("active");
+    const pageNavi = document.getElementById("pageNavi");
+    pageNavi.innerHTML = emptyString;
+    const ul = document.createElement('ul');
+    ul.classList.add('pagination');
+    const createPageItem = (label, disabled, clickHandler) => {
+        const li = document.createElement('li');
+        li.className = 'page-item';
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.innerHTML = label;
+        if (disabled) {
+            li.classList.add('disabled');
+        } else if (clickHandler) {
+            li.addEventListener('click', clickHandler);
         }
-        numsLi.click(() => {
-            toSelectedPg(item, keyword);
-        });
-        ul.append(numsLi);
+        li.appendChild(a);
+        return li;
+    };
+    ul.appendChild(createPageItem("最初へ", !result.hasPrevPage, () => toSelectedPg(1, keyword)));
+    ul.appendChild(createPageItem("&laquo;", !result.hasPrevPage, () => toSelectedPg(pageNum - 1, keyword)));
+    result.navigateNos.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'page-item';
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.textContent = item;
+        if (pageNum === item) {
+            li.classList.add('active');
+        }
+        li.appendChild(a);
+        li.addEventListener('click', () => toSelectedPg(item, keyword));
+        ul.appendChild(li);
     });
-    ul.append(nextPageLi).append(lastPageLi);
-    $("<nav></nav>").append(ul).appendTo("#pageNavi");
+    ul.appendChild(createPageItem("&raquo;", !result.hasNextPage, () => toSelectedPg(pageNum + 1, keyword)));
+    ul.appendChild(createPageItem("最後へ", !result.hasNextPage, () => toSelectedPg(totalPages, keyword)));
+    const nav = document.createElement('nav');
+    nav.appendChild(ul);
+    pageNavi.appendChild(nav);
 }
