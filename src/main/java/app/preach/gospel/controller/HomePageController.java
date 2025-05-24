@@ -32,14 +32,14 @@ public final class HomePageController {
 	 *
 	 * @return ModelAndView
 	 */
-	@GetMapping(ProjectURLConstants.URL_LEDGER)
+	@GetMapping("/home/to-list")
 	public @NotNull ModelAndView toIchiranhyo() {
 		final ModelAndView modelAndView = new ModelAndView("index2");
 		final CoResult<Long, DataAccessException> totalRecords = this.iHymnService.getTotalRecords();
 		if (!totalRecords.isOk()) {
 			throw totalRecords.getErr();
 		}
-		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords);
+		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords.getData());
 		return modelAndView;
 	}
 
@@ -56,7 +56,7 @@ public final class HomePageController {
 		if (!totalRecords.isOk()) {
 			throw totalRecords.getErr();
 		}
-		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords);
+		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords.getData());
 		return modelAndView;
 	}
 
@@ -65,9 +65,9 @@ public final class HomePageController {
 	 *
 	 * @return ModelAndView
 	 */
-	@GetMapping("/category/loginWithError")
+	@GetMapping("/category/login-with-error")
 	public @NotNull ModelAndView toLoginPage() {
-		final ModelAndView modelAndView = new ModelAndView("logintoroku");
+		final ModelAndView modelAndView = new ModelAndView("login-toroku");
 		modelAndView.addObject("torokuMsg", ProjectConstants.MESSAGE_STRING_NOT_LOGIN);
 		return modelAndView;
 	}
@@ -77,7 +77,7 @@ public final class HomePageController {
 	 *
 	 * @return ModelAndView
 	 */
-	@GetMapping("/category/toMainmenuWithLogin")
+	@GetMapping("/category/to-mainmenu-with-login")
 	public @NotNull ModelAndView toMainmenuWithLogin() {
 		final ModelAndView modelAndView = new ModelAndView("mainmenu");
 		modelAndView.addObject("loginMsg", ProjectConstants.MESSAGE_STRING_LOGIN_SUCCESS);

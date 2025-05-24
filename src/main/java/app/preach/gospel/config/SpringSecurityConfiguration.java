@@ -32,24 +32,24 @@ import lombok.extern.slf4j.Slf4j;
 public class SpringSecurityConfiguration {
 
 	/**
-     * 除外するパス
-     */
-    private static final String[] IGNORANCE_PATHS = {"/index.action", "/home/**", "/static/**",
-        "/category/login-with-error", "/category/to-system-error", "/students/pre-login", "/hymns/pagination",
-        "/hymns/get-info-id", "/hymns/get-records", "/hymns/kanumi-retrieve", "/hymns/common-retrieve",
-        "/hymns/score-download"};
-
-	/**
-	 * ログインサービス
+	 * 除外するパス
 	 */
-	@Resource
-	private ProjectUserDetailsService projectUserDetailsService;
+	private static final String[] IGNORANCE_PATHS = { "/index.action", "/home/**", "/static/**",
+			"/category/login-with-error", "/category/to-system-error", "/students/pre-login", "/hymns/pagination",
+			"/hymns/get-info-id", "/hymns/get-records", "/hymns/kanumi-retrieve", "/hymns/common-retrieve",
+			"/hymns/score-download" };
 
 	/**
 	 * ログインエラー処理
 	 */
 	@Resource
 	private ProjectAuthenticationEntryPoint projectAuthenticationEntryPoint;
+
+	/**
+	 * ログインサービス
+	 */
+	@Resource
+	private ProjectUserDetailsService projectUserDetailsService;
 
 	@Bean
 	protected AuthenticationManager authenticationManager(final @NotNull AuthenticationManagerBuilder authBuilder) {
@@ -95,7 +95,7 @@ public class SpringSecurityConfiguration {
 								.concat(ProjectURLConstants.URL_TO_MAINMENU_WITH_LOGIN))
 						.permitAll().usernameParameter("loginAcct").passwordParameter("userPswd"))
 				.logout(logout -> logout
-						.logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(ProjectURLConstants.URL_LOG_OUT))
+						.logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(ProjectURLConstants.URL_LOGOUT))
 						.logoutSuccessUrl(
 								ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(ProjectURLConstants.URL_TO_LOGIN)));
 		log.info(ProjectConstants.MESSAGE_SPRING_SECURITY);

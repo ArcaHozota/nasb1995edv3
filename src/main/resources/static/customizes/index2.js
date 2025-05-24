@@ -2,7 +2,7 @@ let $tableBody = $("#tableBody");
 let $kanumiSearchBtn = $("#kanamiSearchBtn");
 let $nameDisplay = $("#nameDisplay");
 let $loadingBackground2 = $("#loadingBackground2");
-let keyword = null
+let keyword = null;
 $(document).ready(() => {
     adjustWidth();
     toSelectedPg(1, keyword);
