@@ -1,0 +1,205 @@
+* {
+	margin: 0;
+	padding: 0;
+	font-family: "Noto Sans JP", sans-serif;
+}
+
+body {
+	min-height: 100vh;
+	/* 弹性布局 居中 */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: url('../image/background.jpg') no-repeat;
+	background-size: cover;
+	background-position: center;
+}
+
+form:focus-within {
+	box-shadow: 0 0 1rem hsl(197 50% 50% / 1);
+}
+
+.container {
+	background-color: #222;
+	width: 350px;
+	height: 550px;
+	border-radius: 15px;
+	overflow: hidden;
+	position: relative;
+}
+
+.container::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	opacity: 0.8;
+	background: url('../image/background.jpg') no-repeat;
+	background-size: cover;
+	background-position: center;
+}
+
+/* 注册区域（登录区域很多样式和注册区域的一样，故而一些统一的样式写在了一起） */
+.login-box {
+	width: 70%;
+	position: absolute;
+	z-index: 1;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	transition: 0.3s ease;
+}
+
+.login-title,
+.toroku-title {
+	color: #fff;
+	font-size: 27px;
+	text-align: center;
+}
+
+.login-title span,
+.toroku-title span {
+	color: rgba(0, 0, 0, 0.4);
+	display: none;
+}
+
+.login-box .input-box,
+.toroku-box .input-box {
+	background-color: #fff;
+	border-radius: 15px;
+	overflow: hidden;
+	margin-top: 50px;
+	opacity: 1;
+	visibility: visible;
+	transition: 0.6s ease;
+}
+
+.login-box input,
+.toroku-box input {
+	width: 100%;
+	height: 30px;
+	border: none;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	font-size: 12px;
+	padding: 8px 0;
+	text-indent: 15px;
+	outline: none;
+}
+
+.login-box input {
+	font-weight: 600;
+}
+
+.login-box input:last-child,
+.toroku-box input:last-child {
+	border-bottom: none;
+}
+
+.input-box input:focus {
+	border-width: 1px;
+	border-color: #91cae1;
+}
+
+.login-box input::placeholder,
+.toroku-box input::placeholder {
+	color: rgba(0, 0, 0, 0.4);
+}
+
+.login-box button,
+.toroku-box button {
+	width: 100%;
+	padding: 15px 45px;
+	margin: 15px 0;
+	background: rgba(0, 0, 0, 0.4);
+	border: none;
+	border-radius: 15px;
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 13px;
+	font-weight: bold;
+	cursor: pointer;
+	opacity: 1;
+	visibility: visible;
+	transition: 0.3s ease;
+}
+
+.login-box button:hover,
+.toroku-box button:hover {
+	background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* 登录区域 */
+.toroku-box {
+	position: absolute;
+	inset: 0;
+	top: 20%;
+	z-index: 2;
+	background-color: #fff;
+	transition: 0.3s ease;
+}
+
+.toroku-box::before {
+	content: "";
+	background-color: #fff;
+	width: 200%;
+	height: 250px;
+	border-radius: 50%;
+	position: absolute;
+	top: -20px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.toroku-box .center {
+	width: 70%;
+	position: absolute;
+	z-index: 3;
+	left: 50%;
+	top: 40%;
+	transform: translate(-50%, -50%);
+}
+
+.toroku-title {
+	color: #000;
+}
+
+.toroku-box .input-box {
+	border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.toroku-box button {
+	background-color: #91cae1;
+}
+
+/* 注册、登录区域收起 */
+.toroku-box.slide-up {
+	top: 90%;
+}
+
+.toroku-box.slide-up .center {
+	top: 10%;
+	transform: translate(-50%, 0%);
+}
+
+.toroku-box.slide-up .toroku-title,
+.login-box.slide-up .login-title {
+	font-size: 16px;
+	cursor: pointer;
+}
+
+.toroku-box.slide-up .toroku-title span,
+.login-box.slide-up .login-title span {
+	margin-right: 5px;
+	display: inline-block;
+}
+
+.toroku-box.slide-up .input-box,
+.toroku-box.slide-up .button,
+.login-box.slide-up .input-box,
+.login-box.slide-up .button {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.login-box.slide-up {
+	top: 6%;
+	transform: translate(-50%, 0%);
+}

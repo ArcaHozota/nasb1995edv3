@@ -1,0 +1,33 @@
+a {
+	text-decoration: none;
+}
+
+.bg-dark {
+	background-color: #000000 !important;
+}
+
+.effect-shine {
+	transition: 500ms;
+}
+
+.effect-shine:hover {
+	animation: shine 1500ms infinite alternate;
+}
+
+@keyframes shine {
+	from {
+		color: #fff;
+		text-shadow: 0 0 5px #03e9f4,
+			0 0 25px #03e9f4,
+			0 0 50px #03e9f4,
+			0 0 100px #03e9f4;
+	}
+
+	to {
+		color: #fff;
+		text-shadow: 0 0 2px #03e9f4,
+			0 0 5px #03e9f4,
+			0 0 7px #03e9f4,
+			0 0 10px #03e9f4;
+	}
+}

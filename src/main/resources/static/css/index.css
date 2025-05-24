@@ -1,0 +1,106 @@
+body {
+	background: url('../image/bg202503.webp') no-repeat;
+	background-size: cover;
+	/* 使背景图片覆盖整个页面 */
+	background-position: center;
+	/* 居中显示背景图片 */
+	background-attachment: fixed;
+	/* 背景固定，不随页面滚动 */
+	/*background-color: rgba(0, 0, 0, 0.5);*/
+	/* 使用背景色实现半透明效果 */
+	background-blend-mode: overlay;
+	/* 混合模式，使背景图半透明 */
+}
+
+.card {
+	background: rgba(248, 249, 250, 0.5);
+}
+
+.background {
+	position: absolute;
+	height: 60%;
+	background: #f8f9fa;
+}
+
+.circle {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.core {
+	height: 10px;
+	width: 10px;
+	background: #7f0020;
+	border-radius: 50%;
+}
+
+.small {
+	padding: 7px;
+	border-top: 2px solid transparent;
+	border-right: 2px solid transparent;
+	border-bottom: 2px solid #353542;
+	border-left: 2px solid #353542;
+	border-radius: 50%;
+	animation: small 1000ms linear infinite;
+}
+
+.medium {
+	padding: 7px;
+	border-top: 2px solid #353542;
+	border-right: 2px solid #353542;
+	border-bottom: 2px solid transparent;
+	border-left: 2px solid transparent;
+	border-radius: 50%;
+	animation: medium 1000ms linear infinite;
+}
+
+.large {
+	padding: 7px;
+	border-top: 2px solid transparent;
+	border-right: 2px solid transparent;
+	border-bottom: 2px solid #353542;
+	border-left: 2px solid #353542;
+	border-radius: 50%;
+	animation: large 1000ms linear infinite;
+}
+
+h1 {
+	position: absolute;
+	left: -12%;
+	font-family: Verdana;
+	font-size: 15px;
+	font-weight: 600;
+	color: #353542;
+}
+
+@keyframes small {
+	0% {
+		transform: rotate(720deg);
+	}
+
+	100% {
+		transform: rotate(0deg);
+	}
+}
+
+@keyframes medium {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(720deg);
+	}
+}
+
+@keyframes large {
+	0% {
+		transform: rotate(360deg);
+	}
+
+	100% {
+		transform: rotate(0deg);
+	}
+}

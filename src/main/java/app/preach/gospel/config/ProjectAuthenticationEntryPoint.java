@@ -1,0 +1,37 @@
+package app.preach.gospel.config;
+
+import java.io.IOException;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import app.preach.gospel.common.ProjectConstants;
+import app.preach.gospel.common.ProjectURLConstants;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * ログインエラーコントローラ
+ *
+ * @author ArkamaHozota
+ * @since 1.00beta
+ */
+@Slf4j
+@Component
+public class ProjectAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+	@Override
+	public void commence(final HttpServletRequest request, final HttpServletResponse response,
+			final AuthenticationException authException) throws IOException {
+		response.setStatus(HttpStatus.UNAUTHORIZED.value());
+		response.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+		response.sendRedirect(
+				ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(ProjectURLConstants.URL_TO_LOGIN_WITH_ERROR));
+		log.warn(ProjectConstants.MESSAGE_STRING_NOT_LOGIN);
+	}
+
+}
