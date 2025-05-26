@@ -243,8 +243,7 @@ public final class HymnServiceImpl implements IHymnService {
 	public CoResult<Pagination<HymnDto>, DataAccessException> getHymnsByKeyword(final Integer pageNum,
 			final String keyword) {
 		try {
-			final String searchStr = CoProjectUtils.HANKAKU_PERCENTSIGN.concat(keyword)
-					.concat(CoProjectUtils.HANKAKU_PERCENTSIGN);
+			final String searchStr = getHymnSpecification(keyword);
 			final Long totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr))).fetchSingle()
 					.into(Long.class);
