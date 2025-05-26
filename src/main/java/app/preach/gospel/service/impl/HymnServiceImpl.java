@@ -24,12 +24,9 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.JoinType;
 import org.jooq.exception.ConfigurationException;
 import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
-import org.jooq.impl.QOM.Join;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.atilika.kuromoji.ipadic.Token;
@@ -37,9 +34,7 @@ import com.atilika.kuromoji.ipadic.Tokenizer;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
-import app.preach.gospel.entity.Hymn;
 import app.preach.gospel.jooq.Keys;
-import app.preach.gospel.jooq.tables.HymnsWork;
 import app.preach.gospel.jooq.tables.records.HymnsRecord;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 import app.preach.gospel.jooq.tables.records.StudentsRecord;
@@ -293,12 +288,6 @@ public final class HymnServiceImpl implements IHymnService {
 				final List<HymnDto> hymnDtos1 = this.randomFiveLoop2(totalRecords);
 				return CoResult.ok(hymnDtos1);
 			}
-			final Specification<Hymn> specification1 = (root, query, criteriaBuilder) -> {
-				final Join<Hymn, HymnsWork> hymnsJoin = root.join(HYMNS_WORK, JoinType.INNER);
-				return criteriaBuilder.or(criteriaBuilder.equal(root.get(NAME_JP), keyword),
-						criteriaBuilder.equal(root.get(NAME_KR), keyword),
-						criteriaBuilder.like(hymnsJoin.get(NAME_JP_RA), "%[".concat(keyword).concat("]%")));
-			};
 			final List<HymnDto> withName = this.mapToDtos(this.dslContext.select(HYMNS.fields()).from(HYMNS)
 					.innerJoin(HYMNS_WORK).onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))
@@ -306,9 +295,15 @@ public final class HymnServiceImpl implements IHymnService {
 					.fetchInto(HymnsRecord.class), LineNumber.CADMIUM);
 			final List<HymnDto> hymnDtos = new ArrayList<>(withName);
 			final List<String> withNameIds = withName.stream().map(HymnDto::id).toList();
-			final String specification2 = getHymnSpecification(keyword);
-			final List<HymnDto> withNameLike = this.mapToDtos(this.hymnRepository.findAll(specification2).stream()
-					.filter(a -> !withNameIds.contains(a.getId().toString())).toList(), LineNumber.BURGUNDY);
+			final String specification = getHymnSpecification(keyword);
+			final List<HymnDto> withNameLike = this.mapToDtos(
+					this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+							.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+							.and(HYMNS.NAME_JP.like(specification).or(HYMNS.NAME_KR.like(specification))
+									.or(HYMNS_WORK.NAME_JP_RATIONAL.like(specification)))
+							.fetchInto(HymnsRecord.class).stream()
+							.filter(a -> !withNameIds.contains(a.getId().toString())).toList(),
+					LineNumber.BURGUNDY);
 			hymnDtos.addAll(withNameLike);
 			final List<String> withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
@@ -319,7 +314,12 @@ public final class HymnServiceImpl implements IHymnService {
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final List<HymnDto> withRandomFive = this
 					.mapToDtos(
-							this.hymnRepository.retrieveRandomFive(detailKeyword).stream()
+							this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+									.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+									.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
+											.or(HYMNS_WORK.NAME_JP_RATIONAL.like(detailKeyword)
+													.or(HYMNS.SERIF.like(detailKeyword))))
+									.fetchInto(HymnsRecord.class).stream()
 									.filter(a -> !withNameIds.contains(a.getId().toString())
 											&& !withNameLikeIds.contains(a.getId().toString()))
 									.toList(),
@@ -333,7 +333,8 @@ public final class HymnServiceImpl implements IHymnService {
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
-			final List<HymnDto> totalRecords = this.mapToDtos(this.hymnRepository.findAll(COMMON_CONDITION),
+			final List<HymnDto> totalRecords = this.mapToDtos(
+					this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).fetchInto(HymnsRecord.class),
 					LineNumber.SNOWY);
 			final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos, totalRecords);
 			return CoResult.ok(randomFiveLoop.stream()
@@ -366,7 +367,7 @@ public final class HymnServiceImpl implements IHymnService {
 	}
 
 	@Override
-	public CoResult<Long, DataAccessException> getTotalRecords() {
+	public CoResult<Long, DataAccessException> getTotalCounts() {
 		try {
 			final Long totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
@@ -564,15 +565,14 @@ public final class HymnServiceImpl implements IHymnService {
 	}
 
 	@Override
-	public CoResult<String, DataAccessException> scoreStorage(final @NotNull HymnDto hymnDto) {
+	public CoResult<String, DataAccessException> scoreStorage(final @NotNull byte[] file, final Long id) {
 		try {
 			final HymnsWorkRecord hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK)
-					.where(HYMNS_WORK.WORK_ID.eq(Long.valueOf(hymnDto.id()))).fetchSingle();
-			final byte[] score = hymnDto.score();
-			if (Arrays.equals(hymnsWorkRecord.getScore(), score)) {
+					.where(HYMNS_WORK.WORK_ID.eq(id)).fetchSingle();
+			if (Arrays.equals(hymnsWorkRecord.getScore(), file)) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
-			hymnsWorkRecord.setScore(score);
+			hymnsWorkRecord.setScore(file);
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsWorkRecord.update();
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
