@@ -54,10 +54,11 @@ public final class BookServiceImpl implements IBookService {
 	}
 
 	@Override
-	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final Short id) {
+	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final String id) {
 		try {
 			final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
-					.where(CHAPTERS.BOOK_ID.eq(id)).orderBy(CHAPTERS.ID.asc()).fetchInto(ChaptersRecord.class);
+					.where(CHAPTERS.BOOK_ID.eq(Short.valueOf(id))).orderBy(CHAPTERS.ID.asc())
+					.fetchInto(ChaptersRecord.class);
 			final List<ChapterDto> chapterDtos = chaptersRecords.stream()
 					.map(chaptersRecord -> new ChapterDto(chaptersRecord.getId().toString(), chaptersRecord.getName(),
 							chaptersRecord.getNameJp(), chaptersRecord.getBookId().toString()))

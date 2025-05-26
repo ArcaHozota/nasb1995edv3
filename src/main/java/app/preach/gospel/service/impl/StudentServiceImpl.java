@@ -42,14 +42,14 @@ public final class StudentServiceImpl implements IStudentService {
 	protected static final Condition COMMON_CONDITION = STUDENTS.VISIBLE_FLG.eq(Boolean.TRUE);
 
 	/**
-	 * 日時フォマーター
-	 */
-	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-	/**
 	 * 共通検索条件
 	 */
 	private static final PasswordEncoder ENCODER = new BCryptPasswordEncoder(BCryptVersion.$2A, 7);
+
+	/**
+	 * 日時フォマーター
+	 */
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	/**
 	 * 共通リポジトリ
@@ -78,9 +78,9 @@ public final class StudentServiceImpl implements IStudentService {
 		try {
 			final StudentsRecord studentsRecord = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.ID.eq(id)).fetchSingle();
-			final StudentDto studentDto = new StudentDto(studentsRecord.getId(), studentsRecord.getLoginAccount(),
-					studentsRecord.getUsername(), studentsRecord.getPassword(), studentsRecord.getEmail(),
-					FORMATTER.format(studentsRecord.getDateOfBirth()), null);
+			final StudentDto studentDto = new StudentDto(studentsRecord.getId().toString(),
+					studentsRecord.getLoginAccount(), studentsRecord.getUsername(), studentsRecord.getPassword(),
+					studentsRecord.getEmail(), FORMATTER.format(studentsRecord.getDateOfBirth()), null);
 			return CoResult.ok(studentDto);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -91,7 +91,7 @@ public final class StudentServiceImpl implements IStudentService {
 	public CoResult<String, DataAccessException> infoUpdation(final @NotNull StudentDto studentDto) {
 		try {
 			final StudentsRecord studentsRecord = this.dslContext.newRecord(STUDENTS);
-			studentsRecord.setId(studentDto.id());
+			studentsRecord.setId(Long.valueOf(studentDto.id()));
 			studentsRecord.setLoginAccount(studentDto.loginAccount());
 			studentsRecord.setUsername(studentDto.username());
 			studentsRecord.setDateOfBirth(LocalDate.parse(studentDto.dateOfBirth(), FORMATTER));
