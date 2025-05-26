@@ -1,99 +1,113 @@
-$(document).ready(() => {
-    // initialStudent();
+// === DOM Element References ===
+const toStudentsPages = document.getElementById("toStudentsPages");
+const accountEdit = document.getElementById("accountEdit");
+const infoUpdateBtn = document.getElementById("infoUpdateBtn");
+const restoreBtn = document.getElementById("restoreBtn");
+const editForm = document.getElementById("editForm");
+const idContainer = document.getElementById("idContainer");
+const nameEdit = document.getElementById("nameEdit");
+const passwordEdit = document.getElementById("passwordEdit");
+const birthdayEdit = document.getElementById("birthdayEdit");
+const emailEdit = document.getElementById("emailEdit");
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    initialStudent();
 });
-$("#toStudentsPages").on("click", (e) => {
+
+toStudentsPages.addEventListener("click", (e) => {
     e.preventDefault();
     layer.msg(delayApology);
 });
-$("#accountEdit").on("change", () => {
-    checkStudentName(this, $("#idContainer").val());
+
+accountEdit.addEventListener("change", function () {
+    checkStudentName(this, idContainer.value);
 });
-$("#infoUpdateBtn").on("click", () => {
-    let inputArrays = ["#accountEdit", "#nameEdit", "#passwordEdit", "#birthdayEdit", "#emailEdit"];
-    for (const array of inputArrays) {
-        $(array).removeClass("is-valid is-invalid");
-        $(array).next("span").removeClass("valid-feedback invalid-feedback");
-        $(array).next("span").text(emptyString);
-    }
-    let listArray = projectInputContextGet(inputArrays);
+
+infoUpdateBtn.addEventListener("click", () => {
+    const inputArrays = [accountEdit, nameEdit, passwordEdit, birthdayEdit, emailEdit];
+
+    inputArrays.forEach(el => {
+        el.classList.remove("is-valid", "is-invalid");
+        const feedback = el.nextElementSibling;
+        if (feedback?.tagName === "SPAN") {
+            feedback.classList.remove("valid-feedback", "invalid-feedback");
+            feedback.textContent = emptyString;
+        }
+    });
+
+    const listArray = projectInputContextGet(inputArrays.map(el => `#${el.id}`));
+
     if (listArray.includes(emptyString)) {
-        projectNullInputBoxDiscern(inputArrays);
-    } else if ($("#editForm").find('*').hasClass('is-invalid')) {
+        projectNullInputBoxDiscern(inputArrays.map(el => `#${el.id}`));
+    } else if (editForm.querySelector(".is-invalid")) {
         layer.msg(inputWarning);
     } else {
-        let editId = $("#idContainer").val();
-        let putData = JSON.stringify({
-            'id': editId,
-            'loginAccount': $("#accountEdit").val().trim(),
-            'username': $("#nameEdit").val().trim(),
-            'password': $("#passwordEdit").val(),
-            'email': $("#emailEdit").val(),
-            'dateOfBirth': $("#birthdayEdit").val()
+        const putData = JSON.stringify({
+            id: idContainer.value,
+            loginAccount: accountEdit.value.trim(),
+            username: nameEdit.value.trim(),
+            password: passwordEdit.value,
+            email: emailEdit.value,
+            dateOfBirth: birthdayEdit.value
         });
+
         projectAjaxModify('/students/info-update', PUT, putData, studentsPutSuccessFunction);
     }
 });
-$("#restoreBtn").on("click", () => {
+
+restoreBtn.addEventListener("click", () => {
     formReset("#editForm");
-    // initialStudent();
+    initialStudent();
 });
 
 function studentsPutSuccessFunction(response) {
-    let message = trimQuote(response);
+    const message = trimQuote(response);
     localStorage.setItem('redirectMessage', message);
     window.location.replace('/category/to-mainmenu');
 }
 
-function checkStudentName(studentName, idVal) {
-    let nameVal = $(studentName).val().trim();
+function checkStudentName(studentNameInput, idVal) {
+    const nameVal = studentNameInput.value.trim();
     if (nameVal === emptyString) {
-        showValidationMsg(studentName, responseFailure, "名称を空になってはいけません。");
+        showValidationMsg(studentNameInput, responseFailure, "名称を空になってはいけません。");
     } else {
-        $.ajax({
-            url: '/students/check-duplicated',
-            data: {
-                'id': idVal,
-                'loginAccount': nameVal
-            },
-            success: (xhr) => {
-                showValidationMsg(studentName, responseSuccess, xhr.responseText);
-            },
-            error: (xhr) => {
-                showValidationMsg(studentName, responseFailure, xhr.responseText);
-            }
-        });
+        fetch(`/students/check-duplicated?id=${encodeURIComponent(idVal)}&loginAccount=${encodeURIComponent(nameVal)}`)
+            .then(async res => {
+                const text = await res.text();
+                if (res.ok) {
+                    showValidationMsg(studentNameInput, responseSuccess, text);
+                } else {
+                    showValidationMsg(studentNameInput, responseFailure, text);
+                }
+            })
+            .catch(() => {
+                showValidationMsg(studentNameInput, responseFailure, "通信エラー");
+            });
     }
 }
 
 function initialStudent() {
-    let editId = $("#idContainer").val();
-    $.ajax({
-        url: '/students/initial',
-        data: 'editId=' + editId,
-        success: (response) => {
-            $("#accountEdit").val(response.loginAccount);
-            $("#nameEdit").val(response.username);
-            $("#passwordEdit").val(response.password);
-            $("#birthdayEdit").val(toDateInputValue(response.dateOfBirth));
-            $("#emailEdit").val(response.email);
-        },
-        error: (xhr) => {
-            let message = trimQuote(xhr.responseText);
+    const editId = idContainer.value;
+    fetch(`/students/initial?editId=${encodeURIComponent(editId)}`)
+        .then(res => res.json())
+        .then(response => {
+            accountEdit.value = response.loginAccount;
+            nameEdit.value = response.username;
+            passwordEdit.value = response.password;
+            birthdayEdit.value = toDateInputValue(response.dateOfBirth);
+            emailEdit.value = response.email;
+        })
+        .catch(async (xhr) => {
+            const message = trimQuote(await xhr.text());
             layer.msg(message);
-        }
-    });
+        });
 }
 
-/**
- * 文字列・数値・Date 何が来ても HTML date 用の YYYY-MM-DD に整形
- */
 function toDateInputValue(src) {
     if (!src) return emptyString;
-    // すでに YYYY-MM-DD ならそのまま
     if (/^\d{4}-\d{2}-\d{2}$/.test(src)) return src;
-    // ISO 8601 やタイムスタンプを Date に変換
     const d = new Date(src);
-    // タイムゾーン影響を避けつつローカル日付を取り出す
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
