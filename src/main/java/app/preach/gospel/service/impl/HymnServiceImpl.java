@@ -255,11 +255,7 @@ public final class HymnServiceImpl implements IHymnService {
 			final List<HymnsRecord> hymnsRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr))).orderBy(HYMNS.ID.asc())
 					.limit(ProjectConstants.DEFAULT_PAGE_SIZE).offset(offset).fetchInto(HymnsRecord.class);
-			final List<HymnDto> hymnDtos = hymnsRecords.stream()
-					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
-							hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null,
-							null, null))
-					.toList();
+			final List<HymnDto> hymnDtos = this.mapToDtos(hymnsRecords, LineNumber.SNOWY);
 			final Pagination<HymnDto> pagination = Pagination.of(hymnDtos, totalRecords, pageNum,
 					ProjectConstants.DEFAULT_PAGE_SIZE);
 			return CoResult.ok(pagination);
@@ -355,10 +351,7 @@ public final class HymnServiceImpl implements IHymnService {
 			final List<HymnsRecord> hymnsRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.ID.ne(id)).fetchInto(HymnsRecord.class);
 			final List<HymnsRecord> topTwoMatches = this.findTopTwoMatches(hymnsRecord.getSerif(), hymnsRecords);
-			final List<HymnDto> list = topTwoMatches.stream()
-					.map(item -> new HymnDto(item.getId().toString(), item.getNameJp(), item.getNameKr(),
-							item.getSerif(), item.getLink(), null, null, null, null, LineNumber.NAPLES))
-					.toList();
+			final List<HymnDto> list = this.mapToDtos(topTwoMatches, LineNumber.NAPLES);
 			hymnDtos.addAll(list);
 			return CoResult.ok(hymnDtos);
 		} catch (final DataAccessException e) {
