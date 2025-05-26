@@ -9,6 +9,20 @@ server:
   compression:
     enabled: true
     min-response-size: 1024
+  tomcat:
+    keep-alive-timeout: 15s  # Keep-Alive 超时时间
+    max-keep-alive-requests: 2  # 每个连接的最大 Keep-Alive 请求数
+    threads:
+      max: 20  # 最大线程数
+      min-spare: 2  # 最小空闲线程数
+    accept-count: 10  # 连接请求队列最大长度
+    max-connections: 20  # 允许的最大连接数
+    connection-timeout: 120s  # 连接超时时间
+    uri-encoding: UTF-8  # 设置 URI 编码
+    accesslog:
+      enabled: true  # 启用访问日志
+      directory: logs  # 访问日志存储目录
+      pattern: "%h %l %u %t \"%r\" %s %b"  # 访问日志格式
 spring:
   application:
     name: nasb1995edv2
