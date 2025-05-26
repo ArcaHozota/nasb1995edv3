@@ -139,12 +139,12 @@
 			<version>2.0.53</version>
 		</dependency>
 		<!--
-		https://mvnrepository.com/artifact/com.atilika.kuromoji/kuromoji-ipadic -->
+		https://mvnrepository.com/artifact/com.atilika.kuromoji/kuromoji-ipadic 
 		<dependency>
 			<groupId>com.atilika.kuromoji</groupId>
 			<artifactId>kuromoji-ipadic</artifactId>
 			<version>0.9.0</version>
-		</dependency>
+		</dependency> -->
 		<!-- https://mvnrepository.com/artifact/com.github.shin285/KOMORAN -->
 		<dependency>
 			<groupId>com.github.shin285</groupId>
@@ -155,6 +155,14 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/jakarta.servlet.jsp/jakarta.servlet.jsp-api -->
+		<dependency>
+			<groupId>jakarta.servlet.jsp</groupId>
+			<artifactId>jakarta.servlet.jsp-api</artifactId>
+			<version>4.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>

@@ -29,9 +29,6 @@ import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
 import org.springframework.stereotype.Service;
 
-import com.atilika.kuromoji.ipadic.Token;
-import com.atilika.kuromoji.ipadic.Tokenizer;
-
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.jooq.Keys;
@@ -446,32 +443,6 @@ public final class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		}
-	}
-
-	/**
-	 * 漢字から片仮名へ転換する
-	 *
-	 * @param inputText インプットストリング
-	 * @return 片仮名
-	 */
-	private @NotNull String kanjiToKatakana(final @NotNull String inputText) {
-		// レギューラーエクスプレスで漢字、平仮名及び片仮名を抽出する
-		final String regex1 = "[\\p{IsHiragana}\\p{IsKatakana}\\p{IsHan}\\p{IsLatin}\\p{Nd}]+";
-		final String regex2 = "[\\p{IsKatakana}\\p{IsLatin}\\p{Nd}]+";
-		final StringBuilder builder = new StringBuilder();
-		final Tokenizer tokenizer = new Tokenizer();
-		for (final char ch : inputText.toCharArray()) {
-			final String inputChar = String.valueOf(ch);
-			if (!Pattern.matches(regex1, inputChar) || Pattern.matches(regex2, inputChar)) {
-				builder.append(inputChar);
-			} else {
-				final List<Token> tokens = tokenizer.tokenize(inputChar);
-				for (final Token token : tokens) {
-					builder.append(token.getReading());
-				}
-			}
-		}
-		return builder.toString();
 	}
 
 	/**
