@@ -58,7 +58,7 @@ public final class HymnsController {
 		if (!checkDuplicated.isOk()) {
 			throw checkDuplicated.getErr();
 		}
-		final Integer checkDuplicatedOk = checkDuplicated.getData();
+		final Integer checkDuplicatedOk = checkDuplicated.getOk();
 		if (checkDuplicatedOk >= 1) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ProjectConstants.MESSAGE_HYMN_NAME_DUPLICATED);
 		}
@@ -79,7 +79,7 @@ public final class HymnsController {
 		if (!checkDuplicated.isOk()) {
 			throw checkDuplicated.getErr();
 		}
-		final Integer checkDuplicatedOk = checkDuplicated.getData();
+		final Integer checkDuplicatedOk = checkDuplicated.getOk();
 		if (checkDuplicatedOk >= 1) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ProjectConstants.MESSAGE_HYMN_NAME_DUPLICATED);
 		}
@@ -100,7 +100,7 @@ public final class HymnsController {
 		if (!hymnsRandomFive.isOk()) {
 			throw hymnsRandomFive.getErr();
 		}
-		final List<HymnDto> hymnDtos = hymnsRandomFive.getData();
+		final List<HymnDto> hymnDtos = hymnsRandomFive.getOk();
 		return ResponseEntity.ok(hymnDtos);
 	}
 
@@ -128,7 +128,7 @@ public final class HymnsController {
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}
-		return ResponseEntity.ok(hymnInfoById.getData());
+		return ResponseEntity.ok(hymnInfoById.getOk());
 	}
 
 	/**
@@ -144,7 +144,7 @@ public final class HymnsController {
 		if (!infoDeletion.isOk()) {
 			throw infoDeletion.getErr();
 		}
-		return ResponseEntity.ok(infoDeletion.getData());
+		return ResponseEntity.ok(infoDeletion.getOk());
 	}
 
 	/**
@@ -160,7 +160,7 @@ public final class HymnsController {
 		if (!infoStorage.isOk()) {
 			throw infoStorage.getErr();
 		}
-		return ResponseEntity.ok(infoStorage.getData());
+		return ResponseEntity.ok(infoStorage.getOk());
 	}
 
 	/**
@@ -176,7 +176,7 @@ public final class HymnsController {
 		if (!infoUpdation.isOk()) {
 			throw infoUpdation.getErr();
 		}
-		return ResponseEntity.ok(infoUpdation.getData());
+		return ResponseEntity.ok(infoUpdation.getOk());
 	}
 
 	/**
@@ -192,7 +192,7 @@ public final class HymnsController {
 		if (!kanumiList.isOk()) {
 			throw kanumiList.getErr();
 		}
-		return ResponseEntity.ok(kanumiList.getData());
+		return ResponseEntity.ok(kanumiList.getOk());
 	}
 
 	/**
@@ -211,7 +211,7 @@ public final class HymnsController {
 		if (!hymnsByKeyword.isOk()) {
 			throw hymnsByKeyword.getErr();
 		}
-		final Pagination<HymnDto> pagination = hymnsByKeyword.getData();
+		final Pagination<HymnDto> pagination = hymnsByKeyword.getOk();
 		return ResponseEntity.ok(pagination);
 	}
 
@@ -228,7 +228,7 @@ public final class HymnsController {
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}
-		final HymnDto hymnDto = hymnInfoById.getData();
+		final HymnDto hymnDto = hymnInfoById.getOk();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_PDF);
 		headers.setContentDispositionFormData("attachment", hymnDto.id() + ".pdf");
@@ -248,7 +248,7 @@ public final class HymnsController {
 		if (!scoreStorage.isOk()) {
 			throw scoreStorage.getErr();
 		}
-		return ResponseEntity.ok(scoreStorage.getData());
+		return ResponseEntity.ok(scoreStorage.getOk());
 	}
 
 	/**
@@ -278,7 +278,7 @@ public final class HymnsController {
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}
-		final HymnDto hymnDto = hymnInfoById.getData();
+		final HymnDto hymnDto = hymnInfoById.getOk();
 		modelAndView.addObject(ProjectConstants.ATTRNAME_EDITED_INFO, hymnDto);
 		modelAndView.addObject(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 		return modelAndView;
@@ -314,7 +314,7 @@ public final class HymnsController {
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}
-		final HymnDto hymnDto = hymnInfoById.getData();
+		final HymnDto hymnDto = hymnInfoById.getOk();
 		modelAndView.addObject(ProjectConstants.ATTRNAME_EDITED_INFO, hymnDto);
 		modelAndView.addObject(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 		return modelAndView;

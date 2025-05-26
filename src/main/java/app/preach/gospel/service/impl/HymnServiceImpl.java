@@ -24,9 +24,12 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
 import org.jooq.exception.ConfigurationException;
 import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
+import org.jooq.impl.QOM.Join;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.atilika.kuromoji.ipadic.Token;
@@ -34,7 +37,9 @@ import com.atilika.kuromoji.ipadic.Tokenizer;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
+import app.preach.gospel.entity.Hymn;
 import app.preach.gospel.jooq.Keys;
+import app.preach.gospel.jooq.tables.HymnsWork;
 import app.preach.gospel.jooq.tables.records.HymnsRecord;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 import app.preach.gospel.jooq.tables.records.StudentsRecord;
@@ -107,6 +112,17 @@ public final class HymnServiceImpl implements IHymnService {
 			return 0; // 避免除0
 		}
 		return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+	}
+
+	/**
+	 * 通常検索条件を取得する
+	 *
+	 * @param keyword キーワード
+	 * @return Specification<Hymn>
+	 */
+	private static @NotNull String getHymnSpecification(final String keyword) {
+		return CoProjectUtils.isEmpty(keyword) ? CoProjectUtils.HANKAKU_PERCENTSIGN
+				: CoProjectUtils.HANKAKU_PERCENTSIGN.concat(keyword).concat(CoProjectUtils.HANKAKU_PERCENTSIGN);
 	}
 
 	/**
@@ -221,9 +237,10 @@ public final class HymnServiceImpl implements IHymnService {
 					.where(StudentServiceImpl.COMMON_CONDITION).and(STUDENTS.ID.eq(hymnsRecord.getUpdatedUser()))
 					.fetchSingle();
 			final ZonedDateTime zonedDateTime = hymnsRecord.getUpdatedTime().atZoneSameInstant(ZoneOffset.ofHours(9));
-			final HymnDto hymnDto = new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(), hymnsRecord.getNameKr(),
-					hymnsRecord.getSerif(), hymnsRecord.getLink(), hymnsWorkRecord.getScore(),
-					studentsRecord.getUsername(), FORMATTER.format(zonedDateTime.toLocalDateTime()), null);
+			final HymnDto hymnDto = new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
+					hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), hymnsWorkRecord.getScore(),
+					hymnsWorkRecord.getBiko(), studentsRecord.getUsername(),
+					FORMATTER.format(zonedDateTime.toLocalDateTime()), null);
 			return CoResult.ok(hymnDto);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -244,9 +261,9 @@ public final class HymnServiceImpl implements IHymnService {
 					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr))).orderBy(HYMNS.ID.asc())
 					.limit(ProjectConstants.DEFAULT_PAGE_SIZE).offset(offset).fetchInto(HymnsRecord.class);
 			final List<HymnDto> hymnDtos = hymnsRecords.stream()
-					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
+					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
 							hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null,
-							null))
+							null, null))
 					.toList();
 			final Pagination<HymnDto> pagination = Pagination.of(hymnDtos, totalRecords, pageNum,
 					ProjectConstants.DEFAULT_PAGE_SIZE);
@@ -260,72 +277,54 @@ public final class HymnServiceImpl implements IHymnService {
 	public CoResult<List<HymnDto>, DataAccessException> getHymnsRandomFive(final String keyword) {
 		try {
 			for (final String starngement : STRANGE_ARRAY) {
-				if (keyword.toLowerCase().contains(starngement) || (keyword.length() >= 100)) {
-					final List<HymnDto> hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-							.orderBy(HYMNS.ID.asc()).limit(ProjectConstants.DEFAULT_PAGE_SIZE)
-							.fetchInto(HymnsRecord.class).stream()
-							.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
-									hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null,
-									null, LineNumber.SNOWY))
-							.toList();
+				if (keyword.toLowerCase().contains(starngement) || keyword.length() >= 100) {
+					final List<HymnDto> hymnDtos = this.mapToDtos(
+							this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
+									.limit(ProjectConstants.DEFAULT_PAGE_SIZE).fetchInto(HymnsRecord.class),
+							LineNumber.SNOWY);
 					log.error("怪しいキーワード： " + keyword);
 					return CoResult.ok(hymnDtos);
 				}
 			}
-			final List<HymnDto> hymnDtos = new ArrayList<>();
 			if (CoProjectUtils.isEmpty(keyword)) {
-				final List<HymnDto> totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-						.fetchInto(HymnsRecord.class).stream()
-						.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
-								hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null,
-								null, LineNumber.SNOWY))
-						.toList();
+				final List<HymnDto> totalRecords = this.mapToDtos(
+						this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).fetchInto(HymnsRecord.class),
+						LineNumber.SNOWY);
 				final List<HymnDto> hymnDtos1 = this.randomFiveLoop2(totalRecords);
 				return CoResult.ok(hymnDtos1);
 			}
-			final List<HymnDto> withName = this.dslContext.select().from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+			final Specification<Hymn> specification1 = (root, query, criteriaBuilder) -> {
+				final Join<Hymn, HymnsWork> hymnsJoin = root.join(HYMNS_WORK, JoinType.INNER);
+				return criteriaBuilder.or(criteriaBuilder.equal(root.get(NAME_JP), keyword),
+						criteriaBuilder.equal(root.get(NAME_KR), keyword),
+						criteriaBuilder.like(hymnsJoin.get(NAME_JP_RA), "%[".concat(keyword).concat("]%")));
+			};
+			final List<HymnDto> withName = this.mapToDtos(this.dslContext.select(HYMNS.fields()).from(HYMNS)
+					.innerJoin(HYMNS_WORK).onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))
 							.or(HYMNS_WORK.NAME_JP_RATIONAL.like("%[".concat(keyword).concat("]%"))))
-					.fetchInto(HymnsRecord.class).stream()
-					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
-							hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null,
-							LineNumber.CADMIUM))
-					.toList();
-			hymnDtos.addAll(withName);
-			final List<Long> withNameIds = withName.stream().map(HymnDto::id).toList();
-			final String searchStr = CoProjectUtils.HANKAKU_PERCENTSIGN.concat(keyword)
-					.concat(CoProjectUtils.HANKAKU_PERCENTSIGN);
-			final List<HymnDto> withNameLike = this.dslContext.select().from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr))
-							.or(HYMNS_WORK.NAME_JP_RATIONAL.like(searchStr)))
-					.fetchInto(HymnsRecord.class).stream().filter(a -> !withNameIds.contains(a.getId()))
-					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
-							hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null,
-							LineNumber.BURGUNDY))
-					.toList();
+					.fetchInto(HymnsRecord.class), LineNumber.CADMIUM);
+			final List<HymnDto> hymnDtos = new ArrayList<>(withName);
+			final List<String> withNameIds = withName.stream().map(HymnDto::id).toList();
+			final String specification2 = getHymnSpecification(keyword);
+			final List<HymnDto> withNameLike = this.mapToDtos(this.hymnRepository.findAll(specification2).stream()
+					.filter(a -> !withNameIds.contains(a.getId().toString())).toList(), LineNumber.BURGUNDY);
 			hymnDtos.addAll(withNameLike);
-			final List<Long> withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
+			final List<String> withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
 				final List<HymnDto> randomFiveLoop = this.randomFiveLoop(withName, withNameLike);
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
-			final List<HymnDto> withRandomFive = this.dslContext.select().from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
-							.or(HYMNS.SERIF.like(detailKeyword)).or(HYMNS_WORK.NAME_JP_RATIONAL.like(detailKeyword))
-							.or(HYMNS.ID.like(detailKeyword)))
-					.fetchInto(HymnsRecord.class).stream()
-					.filter(a -> !withNameIds.contains(a.getId()) && !withNameLikeIds.contains(a.getId()))
-					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
-							hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null,
-							LineNumber.NAPLES))
-					.toList();
+			final List<HymnDto> withRandomFive = this
+					.mapToDtos(
+							this.hymnRepository.retrieveRandomFive(detailKeyword).stream()
+									.filter(a -> !withNameIds.contains(a.getId().toString())
+											&& !withNameLikeIds.contains(a.getId().toString()))
+									.toList(),
+							LineNumber.NAPLES);
 			hymnDtos.addAll(withRandomFive);
-			final List<Long> withRandomFiveIds = withRandomFive.stream().map(HymnDto::id).toList();
 			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
 				final List<HymnDto> hymnDtos2 = new ArrayList<>();
 				hymnDtos2.addAll(withName);
@@ -334,31 +333,8 @@ public final class HymnServiceImpl implements IHymnService {
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
-			final List<HymnDto> totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-					.fetchInto(HymnsRecord.class).stream()
-					.map(hymnsRecord -> new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(),
-							hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null,
-							LineNumber.SNOWY))
-					.toList();
-			final String kanjiToKatakanaKeyword = this.kanjiToKatakana(keyword);
-			final List<HymnDto> filteredList = totalRecords.stream().filter(item -> {
-				if (withNameIds.contains(item.id()) || withNameLikeIds.contains(item.id())
-						|| withRandomFiveIds.contains(item.id())) {
-					return false;
-				}
-				final String kanjiToKatakanaKashi = this.kanjiToKatakana(item.serif());
-				return kanjiToKatakanaKashi.contains(kanjiToKatakanaKeyword);
-			}).toList();
-			hymnDtos.addAll(filteredList);
-			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
-				final List<HymnDto> hymnDtos2 = new ArrayList<>();
-				hymnDtos2.addAll(withName);
-				hymnDtos2.addAll(withNameLike);
-				hymnDtos2.addAll(withRandomFive);
-				final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos2, filteredList);
-				return CoResult.ok(randomFiveLoop.stream()
-						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
-			}
+			final List<HymnDto> totalRecords = this.mapToDtos(this.hymnRepository.findAll(COMMON_CONDITION),
+					LineNumber.SNOWY);
 			final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos, totalRecords);
 			return CoResult.ok(randomFiveLoop.stream()
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
@@ -373,13 +349,15 @@ public final class HymnServiceImpl implements IHymnService {
 			final HymnsRecord hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.ID.eq(id)).fetchSingle();
 			final List<HymnDto> hymnDtos = new ArrayList<>();
-			hymnDtos.add(new HymnDto(hymnsRecord.getId(), hymnsRecord.getNameJp(), hymnsRecord.getNameKr(),
-					hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null, LineNumber.BURGUNDY));
+			hymnDtos.add(new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(), hymnsRecord.getNameKr(),
+					hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null, null, LineNumber.BURGUNDY));
 			final List<HymnsRecord> hymnsRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.ID.ne(id)).fetchInto(HymnsRecord.class);
 			final List<HymnsRecord> topTwoMatches = this.findTopTwoMatches(hymnsRecord.getSerif(), hymnsRecords);
-			final List<HymnDto> list = topTwoMatches.stream().map(item -> new HymnDto(item.getId(), item.getNameJp(),
-					item.getNameKr(), item.getSerif(), item.getLink(), null, null, null, LineNumber.NAPLES)).toList();
+			final List<HymnDto> list = topTwoMatches.stream()
+					.map(item -> new HymnDto(item.getId().toString(), item.getNameJp(), item.getNameKr(),
+							item.getSerif(), item.getLink(), null, null, null, null, LineNumber.NAPLES))
+					.toList();
 			hymnDtos.addAll(list);
 			return CoResult.ok(hymnDtos);
 		} catch (final DataAccessException e) {
@@ -443,7 +421,7 @@ public final class HymnServiceImpl implements IHymnService {
 	public CoResult<String, DataAccessException> infoUpdation(final @NotNull HymnDto hymnDto) {
 		try {
 			final HymnsRecord hymnsRecord = this.dslContext.newRecord(HYMNS);
-			hymnsRecord.setId(hymnDto.id());
+			hymnsRecord.setId(Long.valueOf(hymnDto.id()));
 			hymnsRecord.setNameJp(hymnDto.nameJp());
 			hymnsRecord.setNameKr(hymnDto.nameKr());
 			hymnsRecord.setLink(hymnDto.link());
@@ -503,6 +481,21 @@ public final class HymnServiceImpl implements IHymnService {
 	}
 
 	/**
+	 * DTOへ変換する
+	 *
+	 * @param hymns      賛美歌リスト
+	 * @param lineNumber 行番号
+	 * @return List<HymnDto>
+	 */
+	private List<HymnDto> mapToDtos(final @NotNull List<HymnsRecord> hymns, final LineNumber lineNumber) {
+		return hymns.stream()
+				.map(hymnsRecord -> new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
+						hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null, null,
+						lineNumber))
+				.toList();
+	}
+
+	/**
 	 * コーパスを取得する
 	 *
 	 * @param originalTexts
@@ -532,7 +525,7 @@ public final class HymnServiceImpl implements IHymnService {
 	 */
 	private @NotNull List<HymnDto> randomFiveLoop(final @NotNull List<HymnDto> hymnsRecords,
 			final @NotNull List<HymnDto> totalRecords) {
-		final List<Long> ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
+		final List<String> ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
 		final List<HymnDto> filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
 		final List<HymnDto> concernList1 = new ArrayList<>(hymnsRecords);
 		if (hymnsRecords.size() < ProjectConstants.DEFAULT_PAGE_SIZE) {
@@ -574,7 +567,7 @@ public final class HymnServiceImpl implements IHymnService {
 	public CoResult<String, DataAccessException> scoreStorage(final @NotNull HymnDto hymnDto) {
 		try {
 			final HymnsWorkRecord hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK)
-					.where(HYMNS_WORK.WORK_ID.eq(hymnDto.id())).fetchSingle();
+					.where(HYMNS_WORK.WORK_ID.eq(Long.valueOf(hymnDto.id()))).fetchSingle();
 			final byte[] score = hymnDto.score();
 			if (Arrays.equals(hymnsWorkRecord.getScore(), score)) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));

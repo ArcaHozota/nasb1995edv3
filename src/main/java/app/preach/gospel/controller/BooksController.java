@@ -51,7 +51,7 @@ public final class BooksController {
 		if (!chaptersByBookId.isOk()) {
 			throw chaptersByBookId.getErr();
 		}
-		final List<ChapterDto> chapterDtos = chaptersByBookId.getData();
+		final List<ChapterDto> chapterDtos = chaptersByBookId.getOk();
 		return ResponseEntity.ok(chapterDtos);
 	}
 
@@ -67,7 +67,7 @@ public final class BooksController {
 		if (!infoStorage.isOk()) {
 			throw infoStorage.getErr();
 		}
-		return ResponseEntity.ok(infoStorage.getData());
+		return ResponseEntity.ok(infoStorage.getOk());
 	}
 
 	/**
@@ -87,8 +87,8 @@ public final class BooksController {
 		if (!chaptersByBookId.isOk()) {
 			throw chaptersByBookId.getErr();
 		}
-		modelAndView.addObject("bookDtos", books.getData());
-		modelAndView.addObject("chapterDtos", chaptersByBookId.getData());
+		modelAndView.addObject("bookDtos", books.getOk());
+		modelAndView.addObject("chapterDtos", chaptersByBookId.getOk());
 		return modelAndView;
 	}
 

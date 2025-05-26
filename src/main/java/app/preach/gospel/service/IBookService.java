@@ -30,7 +30,7 @@ public interface IBookService {
 	 * @param id 書別ID
 	 * @return CoResult<List<ChapterDto>, DataAccessException>
 	 */
-	CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(Short id);
+	CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(String id);
 
 	/**
 	 * 聖書節別情報を保存する

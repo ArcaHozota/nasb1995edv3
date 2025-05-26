@@ -1,5 +1,8 @@
 package app.preach.gospel.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Controller;
@@ -8,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.common.ProjectURLConstants;
+import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoResult;
 import jakarta.annotation.Resource;
@@ -32,14 +36,18 @@ public final class HomePageController {
 	 *
 	 * @return ModelAndView
 	 */
-	@GetMapping("/home/to-list")
+	@GetMapping(ProjectURLConstants.URL_LEDGER)
 	public @NotNull ModelAndView toIchiranhyo() {
 		final ModelAndView modelAndView = new ModelAndView("index2");
-		final CoResult<Long, DataAccessException> totalRecords = this.iHymnService.getTotalRecords();
+		final CoResult<List<HymnDto>, DataAccessException> totalRecords = this.iHymnService.getTotalRecords();
 		if (!totalRecords.isOk()) {
 			throw totalRecords.getErr();
 		}
-		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords.getData());
+		final List<HymnDto> hymnDtos = new ArrayList<>();
+		hymnDtos.add(new HymnDto(0L, ProjectConstants.DEFAULT_LEDGER_NAME, null, null, null, null, null, null, null));
+		hymnDtos.addAll(totalRecords.getOk());
+		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords.getOk().size());
+		modelAndView.addObject(ProjectConstants.ATTRNAME_HYMNDTOS, hymnDtos);
 		return modelAndView;
 	}
 
@@ -52,11 +60,11 @@ public final class HomePageController {
 			ProjectURLConstants.URL_HOMEPAGE3, ProjectURLConstants.URL_HOMEPAGE4, ProjectURLConstants.URL_HOMEPAGE5 })
 	public @NotNull ModelAndView toIndex() {
 		final ModelAndView modelAndView = new ModelAndView("index");
-		final CoResult<Long, DataAccessException> totalRecords = this.iHymnService.getTotalRecords();
+		final CoResult<List<HymnDto>, DataAccessException> totalRecords = this.iHymnService.getTotalRecords();
 		if (!totalRecords.isOk()) {
 			throw totalRecords.getErr();
 		}
-		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords.getData());
+		modelAndView.addObject(ProjectConstants.ATTRNAME_RECORDS, totalRecords.getOk().size());
 		return modelAndView;
 	}
 
@@ -65,9 +73,9 @@ public final class HomePageController {
 	 *
 	 * @return ModelAndView
 	 */
-	@GetMapping("/category/login-with-error")
+	@GetMapping("/category/loginWithError")
 	public @NotNull ModelAndView toLoginPage() {
-		final ModelAndView modelAndView = new ModelAndView("login-toroku");
+		final ModelAndView modelAndView = new ModelAndView("logintoroku");
 		modelAndView.addObject("torokuMsg", ProjectConstants.MESSAGE_STRING_NOT_LOGIN);
 		return modelAndView;
 	}
@@ -77,7 +85,7 @@ public final class HomePageController {
 	 *
 	 * @return ModelAndView
 	 */
-	@GetMapping("/category/to-mainmenu-with-login")
+	@GetMapping("/category/toMainmenuWithLogin")
 	public @NotNull ModelAndView toMainmenuWithLogin() {
 		final ModelAndView modelAndView = new ModelAndView("mainmenu");
 		modelAndView.addObject("loginMsg", ProjectConstants.MESSAGE_STRING_LOGIN_SUCCESS);

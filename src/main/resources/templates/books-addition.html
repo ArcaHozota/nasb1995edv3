@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja-JP" xmlns:th="https://www.thymeleaf.org">
+<div th:replace="~{commons::header}"></div>
+
+<body>
+	<div th:replace="~{commons::navibar}"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div th:insert="~{commons::sidebar}"></div>
+			<div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+				<div class="card border-tunagray mb-3" style="margin: 10px 0 0 0;">
+					<div class="card-header text-bg-tunagray mb-3">
+						<h5 class="card-title" style="padding-top: 8px;">
+							<i class="fa-solid fa-bars-staggered"></i> 聖書章節入力
+						</h5>
+					</div>
+					<div class="card-body">
+						<form class="row" id="inputForm" style="height: 5.7vh;">
+							<div class="col-md-3">
+								<select id="bookInput" class="form-select">
+									<option th:each="bookDto:${bookDtos}" th:value="${bookDto.id}"
+										th:text="${bookDto.name}"></option>
+								</select>
+							</div>
+							<div class="col-md-4">
+								<select id="chapterInput" class="form-select">
+									<option th:each="chapterDto:${chapterDtos}" th:value="${chapterDto.id}"
+										th:text="${chapterDto.name}"></option>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<input id="phraseIdInput" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="button" class="btn btn-primary my-2 my-sm-0" id="infoStorageBtn">
+									<i class="fa-solid fa-book"></i> 追加
+								</button>
+							</div>
+						</form>
+						<form id="inputForm2">
+							<div class="form-group row">
+								<label for="phraseTextEnInput" class="col-md-1 col-form-label text-end">内容</label>
+								<div class="col-md-11" style="height: 12vh;">
+									<textarea class="form-control" style="height: 100%"
+										id="phraseTextEnInput"></textarea>
+								</div>
+							</div>
+							<div class="form-group row">
+								<label for="phraseTextJpInput" class="col-md-1 col-form-label text-end">内容(日本語)</label>
+								<div class="col-md-11" style="height: 12vh;">
+									<textarea class="form-control" style="height: 100%"
+										id="phraseTextJpInput"></textarea>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" th:src="@{/static/customizes/books-addition.js}"></script>
+</body>
+
+</html>

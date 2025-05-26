@@ -30,7 +30,7 @@ public interface IHymnService {
 	 *
 	 * @param id     ID
 	 * @param nameJp 韓国語名称
-	 * @return CoResult<Integer, DataAccessException>
+	 * @return CoResult<Integer, DataAccessDataAccessException>
 	 */
 	CoResult<Integer, DataAccessException> checkDuplicated2(String id, String nameKr);
 
@@ -72,7 +72,7 @@ public interface IHymnService {
 	 *
 	 * @return CoResult<Long, DataAccessException>
 	 */
-	CoResult<Long, DataAccessException> getTotalRecords();
+	CoResult<Long, DataAccessException> getTotalCounts();
 
 	/**
 	 * 賛美情報を削除する
@@ -101,8 +101,9 @@ public interface IHymnService {
 	/**
 	 * 賛美歌楽譜の情報を保存する
 	 *
-	 * @param hymnDto 情報転送クラス
+	 * @param file 楽譜ファイル
+	 * @param id   ID
 	 * @return CoResult<String, DataAccessException>
 	 */
-	CoResult<String, DataAccessException> scoreStorage(HymnDto hymnDto);
+	CoResult<String, DataAccessException> scoreStorage(byte[] file, Long id);
 }

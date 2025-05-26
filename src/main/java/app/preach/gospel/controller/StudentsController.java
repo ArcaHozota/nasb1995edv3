@@ -53,7 +53,7 @@ public final class StudentsController {
 		if (!checkDuplicated.isOk()) {
 			throw checkDuplicated.getErr();
 		}
-		final Integer checkDuplicatedOk = checkDuplicated.getData();
+		final Integer checkDuplicatedOk = checkDuplicated.getOk();
 		if (checkDuplicatedOk >= 1) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ProjectConstants.MESSAGE_STUDENT_NAME_DUPLICATED);
 		}
@@ -73,7 +73,7 @@ public final class StudentsController {
 		if (!infoUpdation.isOk()) {
 			throw infoUpdation.getErr();
 		}
-		return ResponseEntity.ok(infoUpdation.getData());
+		return ResponseEntity.ok(infoUpdation.getOk());
 	}
 
 	/**
@@ -92,7 +92,7 @@ public final class StudentsController {
 		if (!preLoginUpdation.isOk()) {
 			throw preLoginUpdation.getErr();
 		}
-		return ResponseEntity.ok(preLoginUpdation.getData());
+		return ResponseEntity.ok(preLoginUpdation.getOk());
 	}
 
 	/**
@@ -109,7 +109,7 @@ public final class StudentsController {
 		if (!studentInfoById.isOk()) {
 			throw studentInfoById.getErr();
 		}
-		final StudentDto studentDto = studentInfoById.getData();
+		final StudentDto studentDto = studentInfoById.getOk();
 		modelAndView.addObject(ProjectConstants.ATTRNAME_EDITED_INFO, studentDto);
 		return modelAndView;
 	}
