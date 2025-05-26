@@ -1,20 +1,25 @@
-$(document).ready(() => {
-	let treeData = [
+// === DOM Ready Handler ===
+document.addEventListener("DOMContentLoaded", () => {
+	const logoutBtn = document.getElementById("logoutBtn");
+	const toMainmenu = document.getElementById("toMainmenu");
+	const toMainmenu2 = document.getElementById("toMainmenu2");
+	const toPersonal = document.getElementById("toPersonal");
+	const toMessage = document.getElementById("toMessage");
+	const toBookSearch = document.getElementById("toBookSearch");
+	const toTemporary = document.getElementById("toTemporary");
+	const toCollection = document.getElementById("toCollection");
+	const toRandomFive = document.getElementById("toRandomFive");
+	const logoutForm = document.getElementById("logoutForm");
+	const mainmenuTree = document.getElementById("mainmenuTree");
+	// bstreeview plugin init (requires original plugin, not converted)
+	const treeData = [
 		{
 			text: "聖書奉読",
 			icon: "fa-solid fa-book-bible",
 			expanded: true,
 			nodes: [
-				{
-					id: "toBookSearch",
-					text: "章節選択",
-					icon: "fa-solid fa-anchor"
-				},
-				{
-					id: "toTemporary",
-					text: "章節入力",
-					icon: "fa-solid fa-box-archive"
-				}
+				{ id: "toBookSearch", text: "章節選択", icon: "fa-solid fa-anchor" },
+				{ id: "toTemporary", text: "章節入力", icon: "fa-solid fa-box-archive" }
 			]
 		},
 		{
@@ -22,20 +27,12 @@ $(document).ready(() => {
 			icon: "fa-solid fa-music",
 			expanded: true,
 			nodes: [
-				{
-					id: "toCollection",
-					text: "コレクション一覧",
-					icon: "fa-solid fa-rss"
-				},
-				{
-					id: "toRandomFive",
-					text: "ランダム五つ",
-					icon: "fa-regular fa-copyright"
-				}
+				{ id: "toCollection", text: "コレクション一覧", icon: "fa-solid fa-rss" },
+				{ id: "toRandomFive", text: "ランダム五つ", icon: "fa-regular fa-copyright" }
 			]
 		}
 	];
-	$("#mainmenuTree").bstreeview({
+	mainmenuTree.bstreeview({
 		data: treeData,
 		expandIcon: 'fa fa-angle-down fa-fw',
 		collapseIcon: 'fa fa-angle-right fa-fw',
@@ -43,7 +40,8 @@ $(document).ready(() => {
 		parentsMarginLeft: '1.25rem',
 		openNodeLinkOnNewTab: true
 	});
-	$("#logoutBtn").on("click", () => {
+
+	logoutBtn?.addEventListener("click", () => {
 		Swal.fire({
 			title: '警告',
 			text: 'ログアウトしてよろしいでしょうか。',
@@ -55,137 +53,142 @@ $(document).ready(() => {
 			denyButtonColor: '#002fa7'
 		}).then((result) => {
 			if (result.isConfirmed) {
-				$("#logoutForm").submit();
+				logoutForm.submit();
 			}
 		});
 	});
-	// usernameInitial();
-	$("#toMainmenu").on("click", (e) => {
+
+	[toMainmenu, toMainmenu2].forEach(el => el?.addEventListener("click", (e) => {
 		e.preventDefault();
 		window.location.replace('/category/to-mainmenu');
-	});
-	$("#toMainmenu2").on("click", (e) => {
+	}));
+
+	toPersonal?.addEventListener("click", (e) => {
 		e.preventDefault();
-		window.location.replace('/category/to-mainmenu');
+		const userId = toPersonal.querySelector("input")?.value;
+		if (userId) window.location.replace('/students/to-edition?userId=' + userId);
 	});
-	$("#toPersonal").on("click", (e) => {
-		e.preventDefault();
-		let userId = $(e.currentTarget).find("input").val();
-		window.location.replace('/students/to-edition?userId=' + userId);
-	});
-	$("#toMessage").on("click", (e) => {
+
+	toMessage?.addEventListener("click", (e) => {
 		e.preventDefault();
 		layer.msg(delayApology);
 	});
-	$("#toBookSearch").on("click", (e) => {
+
+	toBookSearch?.addEventListener("click", (e) => {
 		e.preventDefault();
 		layer.msg(delayApology);
-		// let url = '/books/to-pages?pageNum=1';
-		// checkPermissionAndTransfer(url);
 	});
-	$("#toTemporary").on("click", (e) => {
+
+	toTemporary?.addEventListener("click", (e) => {
 		e.preventDefault();
-		let url = '/books/to-addition';
-		checkPermissionAndTransfer(url);
+		checkPermissionAndTransfer('/books/to-addition');
 	});
-	$("#toCollection").on("click", (e) => {
+
+	toCollection?.addEventListener("click", (e) => {
 		e.preventDefault();
 		window.location.replace('/hymns/to-pages?pageNum=1');
 	});
-	$("#toRandomFive").on("click", (e) => {
+
+	toRandomFive?.addEventListener("click", (e) => {
 		e.preventDefault();
 		window.location.replace('/hymns/to-random-five');
 	});
 });
 
 function checkPermissionAndTransfer(stringUrl) {
-	let ajaxResponse = $.ajax({
-		url: stringUrl,
-		type: GET,
-		async: false
-	});
-	if (ajaxResponse.status === 200) {
-		window.location.replace(stringUrl);
-	} else {
-		layer.msg(ajaxResponse.message);
-	}
+	fetch(stringUrl, { method: 'GET' })
+		.then(res => {
+			if (res.ok) {
+				window.location.replace(stringUrl);
+			} else {
+				return res.text().then(msg => layer.msg(msg));
+			}
+		})
+		.catch(() => layer.msg("通信エラー"));
 }
 
-function formReset(element) {
-	$(element)[0].reset();
-	$(element).find(".form-control").removeClass('is-valid is-invalid');
-	$(element).find(".form-select").removeClass('is-valid is-invalid');
-	$(element).find(".form-text").removeClass('valid-feedback invalid-feedback');
-	$(element).find(".form-text").text(emptyString);
+function formReset(selector) {
+	const form = document.querySelector(selector);
+	if (!form) return;
+	form.reset();
+	form.querySelectorAll(".form-control, .form-select").forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+	form.querySelectorAll(".form-text").forEach(el => {
+		el.classList.remove('valid-feedback', 'invalid-feedback');
+		el.textContent = emptyString;
+	});
 }
 
 function showValidationMsg(element, status, msg) {
-	$(element).removeClass('is-valid is-invalid');
-	$(element).next("span").removeClass('valid-feedback invalid-feedback');
-	$(element).next("span").text(emptyString);
+	const el = typeof element === 'string' ? document.querySelector(element) : element;
+	const span = el.nextElementSibling;
+	el.classList.remove('is-valid', 'is-invalid');
+	span?.classList.remove('valid-feedback', 'invalid-feedback');
+	span && (span.textContent = emptyString);
 	if (status === responseSuccess) {
-		$(element).addClass('is-valid');
-		$(element).next("span").addClass('valid-feedback');
+		el.classList.add('is-valid');
+		span?.classList.add('valid-feedback');
 	} else {
-		$(element).addClass('is-invalid');
-		$(element).next("span").addClass('invalid-feedback').text(msg);
+		el.classList.add('is-invalid');
+		span?.classList.add('invalid-feedback');
+		if (span) span.textContent = msg;
 	}
 }
 
 function projectAjaxModify(url, type, data, successFunction) {
-	let header = $("meta[name=_csrf_header]").attr("content");
-	let token = $("meta[name=_csrf_token]").attr("content");
-	$.ajax({
-		url: url,
-		type: type,
-		data: data,
+	const header = document.querySelector("meta[name=_csrf_header]")?.content;
+	const token = document.querySelector("meta[name=_csrf_token]")?.content;
+	fetch(url, {
+		method: type,
 		headers: {
-			[header]: token
+			'Content-Type': 'application/json;charset=UTF-8',
+			...(header && token ? { [header]: token } : {})
 		},
-		dataType: 'json',
-		contentType: 'application/json;charset=UTF-8',
-		success: successFunction,
-		error: (xhr) => {
-			let message = trimQuote(xhr.responseText);
+		body: data
+	})
+		.then(res => res.json())
+		.then(successFunction)
+		.catch(async (xhr) => {
+			const message = trimQuote(await xhr.text());
 			layer.msg(message);
+		});
+}
+
+function projectNullInputBoxDiscern(inputArrays) {
+	inputArrays.forEach(selector => {
+		const el = document.querySelector(selector);
+		if (el.value.trim() === emptyString) {
+			showValidationMsg(el, responseFailure, '上記の入力ボックスを空になってはいけません。');
 		}
 	});
 }
 
-function projectNullInputBoxDiscern(inputArrays) {
-	for (const element of inputArrays) {
-		if ($(element).val().trim() === emptyString) {
-			showValidationMsg(element, responseFailure, '上記の入力ボックスを空になってはいけません。');
-		}
-	}
-}
-
 function projectInputContextGet(inputArrays) {
-	let listArray = [];
-	for (const element of inputArrays) {
-		let inputContext = $(element).val().trim();
-		if (!$(element).hasClass('is-invalid')) {
+	const listArray = [];
+	inputArrays.forEach(selector => {
+		const el = document.querySelector(selector);
+		const inputContext = el.value.trim();
+		if (!el.classList.contains('is-invalid')) {
 			listArray.push(inputContext);
-			showValidationMsg(element, responseSuccess, emptyString);
+			showValidationMsg(el, responseSuccess, emptyString);
 		}
-	}
+	});
 	return listArray;
 }
 
 function normalDeleteSuccessFunction(result) {
+	layer.msg(result.message);
 	if (result.status === responseSuccess) {
-		layer.msg(result.message);
 		toSelectedPg(pageNum, keyword);
-	} else {
-		layer.msg(result.message);
 	}
 }
 
 function normalDeleteBtnFunction(url, message, deleteId) {
-	$.ajax({
-		url: url + 'deletion-check',
-		type: GET,
-		success: () => {
+	fetch(url + 'deletion-check')
+		.then(res => {
+			if (!res.ok) throw res;
+			return res.text();
+		})
+		.then(() => {
 			Swal.fire({
 				title: 'メッセージ',
 				text: message,
@@ -198,23 +201,21 @@ function normalDeleteBtnFunction(url, message, deleteId) {
 					projectAjaxModify(url + 'info-delete?id=' + deleteId, 'DELETE', null, normalDeleteSuccessFunction);
 				}
 			});
-		},
-		error: (xhr) => {
-			let message = trimQuote(xhr.responseText);
+		})
+		.catch(async (xhr) => {
+			const message = trimQuote(await xhr.text());
 			layer.msg(message);
-		}
-	});
+		});
 }
 
 function usernameInitial() {
-	$.ajax({
-		url: '/category/get-username',
-		success: (response) => {
-			$("#userNameContainer").text(response);
-		},
-		error: (xhr) => {
-			let message = trimQuote(xhr.responseText);
+	fetch('/category/get-username')
+		.then(res => res.text())
+		.then(response => {
+			document.getElementById("userNameContainer").textContent = response;
+		})
+		.catch(async (xhr) => {
+			const message = trimQuote(await xhr.text());
 			layer.msg(message);
-		}
-	});
+		});
 }
