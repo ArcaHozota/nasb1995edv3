@@ -1,55 +1,70 @@
-let pageNum = $("#pageNumContainer").val();
-$(document).ready(() => {
-    let $toCollection = $("#toCollection");
-    $toCollection.css('color', '#006b3c');
-    $toCollection.addClass('animate__animated animate__flipInY');
+const pageNum = document.getElementById("pageNumContainer")?.value;
+
+document.addEventListener("DOMContentLoaded", () => {
+    const toCollection = document.getElementById("toCollection");
+    if (toCollection) {
+        toCollection.style.color = '#006b3c';
+        toCollection.classList.add('animate__animated', 'animate__flipInY');
+    }
 });
-$("#toHymnPages").on("click", (e) => {
+
+document.getElementById("toHymnPages")?.addEventListener("click", (e) => {
     e.preventDefault();
-    let url = '/hymns/to-pages?pageNum=' + pageNum;
+    const url = '/hymns/to-pages?pageNum=' + pageNum;
     checkPermissionAndTransfer(url);
 });
-$("#scoreUploadBtn").on("click", () => {
-    let inputArrays = ["#scoreEdit"];
-    for (const array of inputArrays) {
-        $(array).removeClass('is-valid is-invalid');
-        $(array).next("span").removeClass('valid-feedback invalid-feedback');
-        $(array).next("span").text(emptyString);
-    }
-    let listArray = projectInputContextGet(inputArrays);
+
+document.getElementById("scoreUploadBtn")?.addEventListener("click", () => {
+    const inputSelectors = ["#scoreEdit"];
+
+    inputSelectors.forEach(sel => {
+        const el = document.querySelector(sel);
+        el.classList.remove("is-valid", "is-invalid");
+        const span = el.nextElementSibling;
+        if (span?.tagName === "SPAN") {
+            span.classList.remove("valid-feedback", "invalid-feedback");
+            span.textContent = emptyString;
+        }
+    });
+
+    const listArray = projectInputContextGet(inputSelectors);
+
     if (listArray.includes(emptyString)) {
-        projectNullInputBoxDiscern(inputArrays);
+        projectNullInputBoxDiscern(inputSelectors);
         return;
     }
-    let editId = $("#idContainer").val();
-    let fileInput = document.getElementById("scoreEdit");
-    let file = fileInput.files[0];
-    let reader = new FileReader();
+
+    const editId = document.getElementById("idContainer")?.value;
+    const fileInput = document.getElementById("scoreEdit");
+    const file = fileInput?.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
     reader.onload = (e) => {
-        // 将文件内容转换为 base64 字符串
-        let base64File = e.target.result.split(",")[1]; // 只取 base64 数据部分
-        // 创建 JSON 数据
-        let jsonData = JSON.stringify({
-            'id': editId,
-            'score': base64File
+        const base64File = e.target.result.split(",")[1];
+        const jsonData = JSON.stringify({
+            id: editId,
+            score: base64File
         });
-        // 发送 AJAX 请求
-        $.ajax({
-            url: '/hymns/score-upload',
-            type: POST,
-            data: jsonData,
-            contentType: 'application/json',
-            success: (response) => {
-                let message = trimQuote(response);
-                localStorage.setItem('redirectMessage', message);
-                window.location.replace('/hymns/to-pages?pageNum=' + pageNum);
+
+        fetch('/hymns/score-upload', {
+            method: POST,
+            headers: {
+                'Content-Type': 'application/json'
             },
-            error: (xhr) => {
-                let message = trimQuote(xhr.responseText);
-                layer.msg(message);
-            }
+            body: jsonData
+        })
+        .then(res => res.text())
+        .then(response => {
+            const message = trimQuote(response);
+            localStorage.setItem('redirectMessage', message);
+            window.location.replace('/hymns/to-pages?pageNum=' + pageNum);
+        })
+        .catch(async (xhr) => {
+            const message = trimQuote(await xhr.text());
+            layer.msg(message);
         });
     };
-    // 启动文件读取并转换为 base64 格式
+
     reader.readAsDataURL(file);
 });
