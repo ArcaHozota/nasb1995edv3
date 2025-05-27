@@ -1,37 +1,53 @@
-let $tableBody = $("#tableBody");
-$(document).ready(() => {
-    let $toRandomFive = $("#toRandomFive");
-    $toRandomFive.css('color', '#006b3c');
-    $toRandomFive.addClass('animate__animated animate__flipInY');
+const tableBody = document.getElementById("tableBody");
+
+document.addEventListener("DOMContentLoaded", () => {
+    const toRandomFive = document.getElementById("toRandomFive");
+    if (toRandomFive) {
+        toRandomFive.style.color = '#006b3c';
+        toRandomFive.classList.add('animate__animated', 'animate__flipInY');
+    }
 });
-$("#randomSearchBtn").on("click", () => {
-    keyword = $("#keywordInput").val();
+
+document.getElementById("randomSearchBtn")?.addEventListener("click", () => {
+    keyword = document.getElementById("keywordInput")?.value;
     retrieveRandomFive(keyword);
 });
-$tableBody.on("click", '.link-btn', (e) => {
-    e.preventDefault();
-    let transferVal = $(e.currentTarget).attr('data-transfer-val');
-    window.open(transferVal);
+
+tableBody?.addEventListener("click", (e) => {
+    const target = e.target.closest(".link-btn");
+    if (target) {
+        e.preventDefault();
+        const transferVal = target.getAttribute("data-transfer-val");
+        window.open(transferVal);
+    }
 });
 
 function retrieveRandomFive(keyword) {
-    $.ajax({
-        url: '/hymns/random-five-retrieve',
-        data: 'keyword=' + keyword,
-        success: (response) => {
-            buildTableBody(response);
-        },
-        error: (result) => {
-            layer.msg(result.responseJSON.message);
-        }
-    });
+    fetch(`/hymns/random-five-retrieve?keyword=${encodeURIComponent(keyword)}`)
+        .then(res => res.json())
+        .then(response => buildTableBody(response))
+        .catch(err => {
+            layer.msg(err.responseJSON?.message || "通信エラー");
+        });
 }
 
 function buildTableBody(response) {
-    $tableBody.empty();
-    $.each(response, (_, item) => {
-        let nameMixTd = $("<td class='text-center' style='vertical-align: middle;'></td>")
-            .append($("<a href='#' class='link-btn' data-transfer-val='" + item.link + "'>" + item.nameJp + delimiter + item.nameKr + "</a>"));
-        $("<tr></tr>").append(nameMixTd).appendTo("#tableBody");
+    tableBody.innerHTML = emptyString;
+    response.forEach(item => {
+        const td = document.createElement("td");
+        td.className = "text-center";
+        td.style.verticalAlign = "middle";
+
+        const a = document.createElement("a");
+        a.href = "#";
+        a.className = "link-btn";
+        a.setAttribute("data-transfer-val", item.link);
+        a.textContent = `${item.nameJp}${delimiter}${item.nameKr}`;
+
+        td.appendChild(a);
+
+        const tr = document.createElement("tr");
+        tr.appendChild(td);
+        tableBody.appendChild(tr);
     });
 }

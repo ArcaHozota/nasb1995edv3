@@ -1,95 +1,142 @@
-let $tableBody = $("#tableBody");
-let pageNum = $("#pageNumContainer").val();
+const tableBody = document.getElementById("tableBody");
+let pageNum = document.getElementById("pageNumContainer")?.value;
 let totalRecords, totalPages, keyword;
-$(document).ready(() => {
-    let $toCollection = $("#toCollection");
-    $toCollection.css('color', '#006b3c');
-    $toCollection.addClass('animate__animated animate__flipInY');
+
+document.addEventListener("DOMContentLoaded", () => {
+    const toCollection = document.getElementById("toCollection");
+    if (toCollection) {
+        toCollection.style.color = '#006b3c';
+        toCollection.classList.add('animate__animated', 'animate__flipInY');
+    }
     if (keyword === undefined) {
         keyword = emptyString;
     }
-    let message = localStorage.getItem('redirectMessage');
+    const message = localStorage.getItem('redirectMessage');
     if (message) {
         layer.msg(message);
         localStorage.removeItem('redirectMessage');
     }
     toSelectedPg(pageNum, keyword);
 });
-$("#searchBtn2").on("click", () => {
-    keyword = $("#keywordInput").val();
+
+document.getElementById("searchBtn2")?.addEventListener("click", () => {
+    keyword = document.getElementById("keywordInput")?.value;
     toSelectedPg(1, keyword);
 });
-$tableBody.on("click", '.delete-btn', (e) => {
-    let deleteId = $(e.currentTarget).attr("data-delete-id");
-    let nameJp = $(e.currentTarget).parents("tr").find("th").text().trim();
-    normalDeleteBtnFunction('/hymns/', 'この「' + nameJp + '」という歌の情報を削除するとよろしいでしょうか。', deleteId);
+
+tableBody?.addEventListener("click", (e) => {
+    const target = e.target.closest(".delete-btn, .edit-btn, .score-btn, .link-btn, .score-download-btn");
+    if (!target) return;
+
+    if (target.classList.contains("delete-btn")) {
+        const deleteId = target.getAttribute("data-delete-id");
+        const nameJp = target.closest("tr")?.querySelector("th")?.textContent.trim();
+        normalDeleteBtnFunction('/hymns/', `この「${nameJp}」という歌の情報を削除するとよろしいでしょうか。`, deleteId);
+    } else if (target.classList.contains("edit-btn")) {
+        const editId = target.getAttribute("data-edit-id");
+        const url = `/hymns/to-edition?editId=${editId}&pageNum=${pageNum}`;
+        checkPermissionAndTransfer(url);
+    } else if (target.classList.contains("score-btn")) {
+        const scoreId = target.getAttribute("data-score-id");
+        const url = `/hymns/to-score-upload?scoreId=${scoreId}&pageNum=${pageNum}`;
+        checkPermissionAndTransfer(url);
+    } else if (target.classList.contains("link-btn")) {
+        e.preventDefault();
+        const transferVal = target.getAttribute("data-transfer-val");
+        window.open(transferVal);
+    } else if (target.classList.contains("score-download-btn")) {
+        e.preventDefault();
+        const scoreId = target.getAttribute("data-score-id");
+        window.location.href = `/hymns/score-download?scoreId=${scoreId}`;
+    }
 });
-$("#infoAdditionBtn").on("click", (e) => {
+
+document.getElementById("infoAdditionBtn")?.addEventListener("click", (e) => {
     e.preventDefault();
-    let url = '/hymns/to-addition?pageNum=' + pageNum;
+    const url = `/hymns/to-addition?pageNum=${pageNum}`;
     checkPermissionAndTransfer(url);
-});
-$tableBody.on("click", '.edit-btn', (e) => {
-    let editId = $(e.currentTarget).attr("data-edit-id");
-    let url = '/hymns/to-edition?editId=' + editId + '&pageNum=' + pageNum;
-    checkPermissionAndTransfer(url);
-});
-$tableBody.on("click", '.score-btn', (e) => {
-    let scoreId = $(e.currentTarget).attr('data-score-id');
-    let url = '/hymns/to-score-upload?scoreId=' + scoreId + '&pageNum=' + pageNum;
-    checkPermissionAndTransfer(url);
-});
-$tableBody.on("click", '.link-btn', (e) => {
-    e.preventDefault();
-    let transferVal = $(e.currentTarget).attr('data-transfer-val');
-    window.open(transferVal);
-});
-$tableBody.on("click", '.score-download-btn', (e) => {
-    e.preventDefault();
-    let scoreId = $(e.currentTarget).attr('data-score-id');
-    window.location.href = '/hymns/score-download?scoreId=' + scoreId;
 });
 
 function toSelectedPg(pageNum, keyword) {
-    $.ajax({
-        url: '/hymns/pagination',
-        data: {
-            'pageNum': pageNum,
-            'keyword': keyword
-        },
-        success: (response) => {
+    fetch(`/hymns/pagination?pageNum=${encodeURIComponent(pageNum)}&keyword=${encodeURIComponent(keyword)}`)
+        .then(res => res.json())
+        .then(response => {
             buildTableBody(response);
             buildPageInfos(response);
             buildPageNavi(response);
-        },
-        error: (xhr) => {
-            let message = trimQuote(xhr.responseText);
+        })
+        .catch(async (xhr) => {
+            const message = trimQuote(await xhr.text());
             layer.msg(message);
-        }
-    });
+        });
 }
 
 function buildTableBody(response) {
-    $tableBody.empty();
-    let index = response.records;
-    $.each(index, (index, item) => {
-        let nameJpTd = $("<th class='text-left' style='width: 130px;vertical-align: middle;'></th>").append(item.nameJp);
-        let nameKrTd = $("<td class='text-left' style='width: 100px;vertical-align: middle;'></td>").append(item.nameKr);
-        let linkTd = $("<td class='text-center' style='width: 20px;vertical-align: middle;'></td>")
-            .append($("<a href='#' class='link-btn' data-transfer-val='" + item.link + "'>Link</a>"));
-        let scoreTd = $("<td class='text-center' style='width: 20px;vertical-align: middle;'></td>")
-            .append($("<a href='#' class='score-download-btn' data-score-id='" + item.id + "'>&#x1D11E;</a>"));
-        let scoreBtn = $("<button></button>").addClass("btn btn-success btn-sm score-btn")
-            .append($("<i class='fa-solid fa-music'></i>")).append("楽譜");
-        scoreBtn.attr("data-score-id", item.id);
-        let editBtn = $("<button></button>").addClass("btn btn-primary btn-sm edit-btn")
-            .append($("<i class='fa-solid fa-pencil'></i>")).append("編集");
-        editBtn.attr("data-edit-id", item.id);
-        let deleteBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete-btn")
-            .append($("<i class='fa-solid fa-trash'></i>")).append("削除");
-        deleteBtn.attr("data-delete-id", item.id);
-        let btnTd = $("<td class='text-center' style='width: 80px;vertical-align: middle;'></td>")
-            .append(scoreBtn).append(" ").append(editBtn).append(" ").append(deleteBtn);
-        $("<tr></tr>").append(nameJpTd).append(nameKrTd).append(linkTd).append(scoreTd).append(btnTd).appendTo("#tableBody");
+    tableBody.innerHTML = emptyString;
+    const index = response.records;
+    index.forEach(item => {
+        const nameJpTd = document.createElement("th");
+        nameJpTd.className = "text-left";
+        nameJpTd.style = "width: 130px; vertical-align: middle;";
+        nameJpTd.textContent = item.nameJp;
+
+        const nameKrTd = document.createElement("td");
+        nameKrTd.className = "text-left";
+        nameKrTd.style = "width: 100px; vertical-align: middle;";
+        nameKrTd.textContent = item.nameKr;
+
+        const linkTd = document.createElement("td");
+        linkTd.className = "text-center";
+        linkTd.style = "width: 20px; vertical-align: middle;";
+        const linkA = document.createElement("a");
+        linkA.href = "#";
+        linkA.className = "link-btn";
+        linkA.setAttribute("data-transfer-val", item.link);
+        linkA.textContent = "Link";
+        linkTd.appendChild(linkA);
+
+        const scoreTd = document.createElement("td");
+        scoreTd.className = "text-center";
+        scoreTd.style = "width: 20px; vertical-align: middle;";
+        const scoreA = document.createElement("a");
+        scoreA.href = "#";
+        scoreA.className = "score-download-btn";
+        scoreA.setAttribute("data-score-id", item.id);
+        scoreA.innerHTML = "&#x1D11E;";
+        scoreTd.appendChild(scoreA);
+
+        const btnTd = document.createElement("td");
+        btnTd.className = "text-center";
+        btnTd.style = "width: 80px; vertical-align: middle;";
+
+        const scoreBtn = document.createElement("button");
+        scoreBtn.className = "btn btn-success btn-sm score-btn";
+        scoreBtn.setAttribute("data-score-id", item.id);
+        scoreBtn.innerHTML = '<i class="fa-solid fa-music"></i> 楽譜';
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn btn-primary btn-sm edit-btn";
+        editBtn.setAttribute("data-edit-id", item.id);
+        editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i> 編集';
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn btn-danger btn-sm delete-btn";
+        deleteBtn.setAttribute("data-delete-id", item.id);
+        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> 削除';
+
+        btnTd.appendChild(scoreBtn);
+        btnTd.append(" ");
+        btnTd.appendChild(editBtn);
+        btnTd.append(" ");
+        btnTd.appendChild(deleteBtn);
+
+        const tr = document.createElement("tr");
+        tr.appendChild(nameJpTd);
+        tr.appendChild(nameKrTd);
+        tr.appendChild(linkTd);
+        tr.appendChild(scoreTd);
+        tr.appendChild(btnTd);
+
+        tableBody.appendChild(tr);
     });
 }

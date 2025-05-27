@@ -1,41 +1,59 @@
-$(document).ready(() => {
-    let $toTemporary = $("#toTemporary");
-    $toTemporary.css('color', '#006b3c');
-    $toTemporary.addClass('animate__animated animate__flipInY');
+// === DOM Ready Handler ===
+document.addEventListener("DOMContentLoaded", () => {
+    const toTemporary = document.getElementById("toTemporary");
+    if (toTemporary) {
+        toTemporary.style.color = '#006b3c';
+        toTemporary.classList.add('animate__animated', 'animate__flipInY');
+    }
 });
-$("#bookInput").on("change", (e) => {
-    $("#chapterInput").empty();
-    let bookId = $(e.currentTarget).val();
-    $.ajax({
-        url: '/books/get-chapters',
-        data: 'bookId=' + bookId,
-        success: (response) => {
-            $.each(response, (_, item) => {
-                let optionElement = $("<option></option>").val(item.id).text(item.name);
-                optionElement.appendTo("#chapterInput");
+
+const bookInput = document.getElementById("bookInput");
+const chapterInput = document.getElementById("chapterInput");
+const infoStorageBtn = document.getElementById("infoStorageBtn");
+const inputForm = document.getElementById("inputForm");
+
+bookInput?.addEventListener("change", (e) => {
+    chapterInput.innerHTML = '';
+    const bookId = e.target.value;
+    fetch('/books/get-chapters?bookId=' + encodeURIComponent(bookId))
+        .then(res => res.json())
+        .then(response => {
+            response.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = item.name;
+                chapterInput.appendChild(option);
             });
+        });
+});
+
+infoStorageBtn?.addEventListener("click", () => {
+    const inputSelectors = ["#phraseIdInput", "#phraseTextEnInput", "#phraseTextJpInput"];
+
+    inputSelectors.forEach(sel => {
+        const el = document.querySelector(sel);
+        el.classList.remove("is-valid", "is-invalid");
+        const span = el.nextElementSibling;
+        if (span?.tagName === "SPAN") {
+            span.classList.remove("valid-feedback", "invalid-feedback");
+            span.textContent = emptyString;
         }
     });
-});
-$("#infoStorageBtn").on("click", () => {
-    let inputArrays = ["#phraseIdInput", "#phraseTextEnInput", "#phraseTextJpInput"];
-    for (const array of inputArrays) {
-        $(array).removeClass("is-valid is-invalid");
-        $(array).next("span").removeClass("valid-feedback invalid-feedback");
-        $(array).next("span").text(emptyString);
-    }
-    let listArray = projectInputContextGet(inputArrays);
+
+    const listArray = projectInputContextGet(inputSelectors);
+
     if (listArray.includes(emptyString)) {
-        projectNullInputBoxDiscern(inputArrays);
-    } else if ($("#inputForm").find('*').hasClass('is-invalid')) {
+        projectNullInputBoxDiscern(inputSelectors);
+    } else if (inputForm.querySelector(".is-invalid")) {
         layer.msg(inputWarning);
     } else {
-        let postData = JSON.stringify({
-            'chapterId': $("#chapterInput").val(),
-            'id': $("#phraseIdInput").val().trim(),
-            'textEn': $("#phraseTextEnInput").val().trim(),
-            'textJp': $("#phraseTextJpInput").val().trim()
+        const postData = JSON.stringify({
+            chapterId: chapterInput.value,
+            id: document.getElementById("phraseIdInput").value.trim(),
+            textEn: document.getElementById("phraseTextEnInput").value.trim(),
+            textJp: document.getElementById("phraseTextJpInput").value.trim()
         });
+
         projectAjaxModify('/books/info-storage', POST, postData, booksPostSuccessFunction);
     }
 });
