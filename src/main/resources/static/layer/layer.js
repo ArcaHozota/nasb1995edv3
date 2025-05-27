@@ -118,6 +118,20 @@ const layer = {
       yes,
       btn2: cancel
     });
+  },
+
+  msg(content, time = 3000, end) {
+    return this.open({
+      content,
+      time,
+      title: false,
+      btn: false,
+      success: (_, index) => {
+        if (typeof end === 'function') {
+          setTimeout(() => end(index), time);
+        }
+      }
+    });
   }
 };
 
