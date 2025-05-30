@@ -18,7 +18,7 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Corinthia:wght@700&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap">
 	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.min.js" nonce="${nonce}"></script>
 	<script type="text/javascript" src="/static/bstreeview/js/bstreeview.min.js" nonce="${nonce}"></script>
-	<script type="text/javascript" src="/static/layer/layer.js" nonce="${nonce}"></script>
+	<script type="text/javascript" src="/static/layer/neo-layer.js" nonce="${nonce}"></script>
 	<script type="text/javascript" src="/static/customizes/constants.js" nonce="${nonce}"></script>
 	<script type="text/javascript" src="/static/customizes/commons.js" nonce="${nonce}"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sweetalert2@11" nonce="${nonce}"></script>

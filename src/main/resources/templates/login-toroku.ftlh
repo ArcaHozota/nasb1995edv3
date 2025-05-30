@@ -35,7 +35,7 @@
 			font-size: 1.2em;
 		}
 	</style>
-	<script type="text/javascript" src="/static/layer/layer.js"></script>
+	<script type="text/javascript" src="/static/layer/neo-layer.js"></script>
 	<script type="text/javascript" src="/static/customizes/constants.js"></script>
 </head>
 

@@ -30,7 +30,7 @@
 		}
 	</style>
 	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
-	<script type="text/javascript" src="/static/layer/layer.js"></script>
+	<script type="text/javascript" src="/static/layer/neo-layer.js"></script>
 	<script type="text/javascript" src="/static/customizes/constants.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
