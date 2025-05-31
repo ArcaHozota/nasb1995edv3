@@ -75,7 +75,7 @@
 			const head = document.head;
 			const link = document.createElement('link');
 
-			const finalName = (cssname || href).replace(/\\.\\|\\/ / g, '');
+			const finalName = (cssname || href).replace(/[./]/g, '');
 			const id = `layuicss-${finalName}`;
 			const STATUS_CREATING = 'creating';
 
