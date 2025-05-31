@@ -1846,6 +1846,8 @@
 			return o.index;
 		};
 	};
+	
+	ready.run(); // 自动初始化 layer.open
 
 	// 标准 UMD 模板
 	if (typeof define === 'function' && define.amd) {
