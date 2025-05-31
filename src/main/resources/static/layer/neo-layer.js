@@ -550,10 +550,9 @@
 
 		/* 兼容 jQuery3 动画影响尺寸：纯 class 操作 */
 		if (doms.anim[cfg.anim]) {
-			const animClass = `layer-anim ${doms.anim[cfg.anim]}`;
-			that.layero.classList.add(animClass);
+			that.layero.classList.add('layer-anim', doms.anim[cfg.anim]);
 			that.layero.addEventListener('animationend', () => {
-				that.layero.classList.remove(animClass);
+				that.layero.classList.remove('layer-anim', doms.anim[cfg.anim]);
 			}, { once: true });
 		}
 
