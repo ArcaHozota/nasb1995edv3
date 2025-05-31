@@ -1833,31 +1833,29 @@
 
 	/* ---------- 主入口：原生 JS 版 ---------- */
 	ready.run = () => {
-		// window 对象本身就足够，不再包一层 jQuery
 		win = window;
-
-		// <html> 元素，用于后续操作（等价 $('html')）
 		doms.html = document.documentElement;
 
-		// API 保持不变
+		// 确保 layer 是对象
+		if (typeof layer !== 'object') {
+			throw new Error('`layer` must be initialized as an object before calling ready.run()');
+		}
+
 		layer.open = (deliver) => {
 			const o = new Class(deliver);
 			return o.index;
 		};
 	};
 
-	//加载方式
-	if (typeof module !== 'undefined' && module.exports) module.exports = layer;
-	else if (typeof define === 'function' && define.amd) define(() => layer);
-	else window.layer = layer;
+	// 标准 UMD 模板
+	if (typeof define === 'function' && define.amd) {
+		define([], function() {
+			return layer;
+		});
+	} else if (typeof exports === 'object') {
+		module.exports = layer;
+	} else {
+		window.layer = layer;
+	}
 
 }(window);
-
-
-
-
-
-// UMD export
-// if (typeof module !== 'undefined' && module.exports) module.exports = layer;
-// else if (typeof define === 'function' && define.amd) define(() => layer);
-// else window.layer = layer;
