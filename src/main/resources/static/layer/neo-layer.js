@@ -1465,15 +1465,29 @@
 		if (typeof type === 'function') {
 			callback = type;
 			type = null;
-		};
-		var domsElem = $('.' + doms[0]);
-		$.each(domsElem, function(_index) {
-			var othis = $(this);
-			var is = type ? (othis.attr('type') === type) : 1;
-			is && layer.close(othis.attr('times'), _index === domsElem.length - 1 ? callback : null);
-			is = null;
+		}
+
+		const domsElem = document.querySelectorAll(`.${doms[0]}`);
+		let closedCount = 0;
+
+		domsElem.forEach((el, idx) => {
+			const elType = el.getAttribute('type');
+			const times = el.getAttribute('times');
+
+			const shouldClose = type ? (elType === type) : true;
+
+			if (shouldClose) {
+				const isLast = idx === domsElem.length - 1;
+				layer.close(times, isLast ? callback : null);
+				closedCount++;
+			}
 		});
-		if (domsElem.length === 0) typeof callback === 'function' && callback();
+
+		if (domsElem.length === 0 || closedCount === 0) {
+			if (typeof callback === 'function') {
+				callback();
+			}
+		}
 	};
 
 	/** 
@@ -1846,7 +1860,7 @@
 			return o.index;
 		};
 	};
-	
+
 	ready.run(); // 自动初始化 layer.open
 
 	// 标准 UMD 模板
