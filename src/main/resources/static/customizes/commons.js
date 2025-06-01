@@ -1,6 +1,7 @@
 // === DOM Ready Handler ===
 document.addEventListener("DOMContentLoaded", () => {
-
+	
+	const mainmenuTree = document.getElementById("mainmenuTree");
 	// bstreeview plugin init (requires original plugin, not converted)
 	const treeData = [
 		{
@@ -44,7 +45,6 @@ const toTemporary = document.getElementById("toTemporary");
 const toCollection = document.getElementById("toCollection");
 const toRandomFive = document.getElementById("toRandomFive");
 const logoutForm = document.getElementById("logoutForm");
-const mainmenuTree = document.getElementById("mainmenuTree");
 
 logoutBtn?.addEventListener("click", () => {
 	Swal.fire({
