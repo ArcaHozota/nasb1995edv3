@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			]
 		}
 	];
+
 	mainmenuTree.bstreeview({
 		data: treeData,
 		expandIcon: 'fa fa-angle-down fa-fw',
