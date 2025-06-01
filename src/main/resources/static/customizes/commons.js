@@ -32,71 +32,71 @@ document.addEventListener("DOMContentLoaded", () => {
 		parentsMarginLeft: '1.25rem',
 		openNodeLinkOnNewTab: true
 	});
+	
+	const logoutBtn = document.getElementById("logoutBtn");
+	const toMainmenu = document.getElementById("toMainmenu");
+	const toMainmenu2 = document.getElementById("toMainmenu2");
+	const toPersonal = document.getElementById("toPersonal");
+	const toMessage = document.getElementById("toMessage");
+	const toBookSearch = document.getElementById("toBookSearch");
+	const toTemporary = document.getElementById("toTemporary");
+	const toCollection = document.getElementById("toCollection");
+	const toRandomFive = document.getElementById("toRandomFive");
+	const logoutForm = document.getElementById("logoutForm");
 
-});
-
-const logoutBtn = document.getElementById("logoutBtn");
-const toMainmenu = document.getElementById("toMainmenu");
-const toMainmenu2 = document.getElementById("toMainmenu2");
-const toPersonal = document.getElementById("toPersonal");
-const toMessage = document.getElementById("toMessage");
-const toBookSearch = document.getElementById("toBookSearch");
-const toTemporary = document.getElementById("toTemporary");
-const toCollection = document.getElementById("toCollection");
-const toRandomFive = document.getElementById("toRandomFive");
-const logoutForm = document.getElementById("logoutForm");
-
-logoutBtn?.addEventListener("click", () => {
-	Swal.fire({
-		title: '警告',
-		text: 'ログアウトしてよろしいでしょうか。',
-		icon: 'warning',
-		showDenyButton: true,
-		denyButtonText: 'いいえ',
-		confirmButtonText: 'はい',
-		confirmButtonColor: '#7f0020',
-		denyButtonColor: '#002fa7'
-	}).then((result) => {
-		if (result.isConfirmed) {
-			logoutForm.submit();
-		}
+	logoutBtn?.addEventListener("click", () => {
+		Swal.fire({
+			title: '警告',
+			text: 'ログアウトしてよろしいでしょうか。',
+			icon: 'warning',
+			showDenyButton: true,
+			denyButtonText: 'いいえ',
+			confirmButtonText: 'はい',
+			confirmButtonColor: '#7f0020',
+			denyButtonColor: '#002fa7'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				logoutForm.submit();
+			}
+		});
 	});
-});
 
-[toMainmenu, toMainmenu2].forEach(el => el?.addEventListener("click", (e) => {
-	e.preventDefault();
-	window.location.replace('/category/to-mainmenu');
-}));
+	[toMainmenu, toMainmenu2].forEach(el => el?.addEventListener("click", (e) => {
+		e.preventDefault();
+		window.location.replace('/category/to-mainmenu');
+	}));
 
-toPersonal?.addEventListener("click", (e) => {
-	e.preventDefault();
-	const userId = toPersonal.querySelector("input")?.value;
-	if (userId) window.location.replace('/students/to-edition?userId=' + userId);
-});
+	toPersonal?.addEventListener("click", (e) => {
+		e.preventDefault();
+		const userId = toPersonal.querySelector("input")?.value;
+		if (userId) window.location.replace('/students/to-edition?userId=' + userId);
+	});
 
-toMessage?.addEventListener("click", (e) => {
-	e.preventDefault();
-	layer.msg(delayApology);
-});
+	toMessage?.addEventListener("click", (e) => {
+		e.preventDefault();
+		layer.msg(delayApology);
+	});
 
-toBookSearch?.addEventListener("click", (e) => {
-	e.preventDefault();
-	layer.msg(delayApology);
-});
+	toBookSearch?.addEventListener("click", (e) => {
+		e.preventDefault();
+		layer.msg(delayApology);
+	});
 
-toTemporary?.addEventListener("click", (e) => {
-	e.preventDefault();
-	checkPermissionAndTransfer('/books/to-addition');
-});
+	toTemporary?.addEventListener("click", (e) => {
+		e.preventDefault();
+		checkPermissionAndTransfer('/books/to-addition');
+	});
 
-toCollection?.addEventListener("click", (e) => {
-	e.preventDefault();
-	window.location.replace('/hymns/to-pages?pageNum=1');
-});
+	toCollection?.addEventListener("click", (e) => {
+		e.preventDefault();
+		window.location.replace('/hymns/to-pages?pageNum=1');
+	});
 
-toRandomFive?.addEventListener("click", (e) => {
-	e.preventDefault();
-	window.location.replace('/hymns/to-random-five');
+	toRandomFive?.addEventListener("click", (e) => {
+		e.preventDefault();
+		window.location.replace('/hymns/to-random-five');
+	});
+
 });
 
 function checkPermissionAndTransfer(stringUrl) {
