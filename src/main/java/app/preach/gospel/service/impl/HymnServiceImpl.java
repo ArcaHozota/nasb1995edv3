@@ -43,6 +43,7 @@ import app.preach.gospel.utils.Pagination;
 import app.preach.gospel.utils.SnowflakeUtils;
 import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
+import kr.co.shineware.nlp.komoran.model.Token;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -562,9 +563,8 @@ public final class HymnServiceImpl implements IHymnService {
 		if (CoProjectUtils.isEmpty(koreanText)) {
 			return new LinkedHashMap<>();
 		}
-		final List<kr.co.shineware.nlp.komoran.model.Token> tokenList = KOMORAN.analyze(koreanText).getTokenList();
-		return tokenList.stream()
-				.collect(Collectors.toMap(kr.co.shineware.nlp.komoran.model.Token::getMorph, t -> 1, Integer::sum));
+		final List<Token> tokenList = KOMORAN.analyze(koreanText).getTokenList();
+		return tokenList.stream().collect(Collectors.toMap(Token::getMorph, t -> 1, Integer::sum));
 	}
 
 	/**
