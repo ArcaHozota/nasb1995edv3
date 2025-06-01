@@ -64,33 +64,33 @@ document.addEventListener("DOMContentLoaded", () => {
 		window.location.replace('/category/to-mainmenu');
 	}));
 
-	toPersonal?.addEventListener("click", (e) => {
+	toPersonal.addEventListener("click", (e) => {
 		e.preventDefault();
 		const userId = toPersonal.querySelector("input")?.value;
 		if (userId) window.location.replace('/students/to-edition?userId=' + userId);
 	});
 
-	toMessage?.addEventListener("click", (e) => {
+	toMessage.addEventListener("click", (e) => {
 		e.preventDefault();
 		layer.msg(delayApology);
 	});
 
-	toBookSearch?.addEventListener("click", (e) => {
+	toBookSearch.addEventListener("click", (e) => {
 		e.preventDefault();
 		layer.msg(delayApology);
 	});
 
-	toTemporary?.addEventListener("click", (e) => {
+	toTemporary.addEventListener("click", (e) => {
 		e.preventDefault();
 		checkPermissionAndTransfer('/books/to-addition');
 	});
 
-	toCollection?.addEventListener("click", (e) => {
+	toCollection.addEventListener("click", (e) => {
 		e.preventDefault();
 		window.location.replace('/hymns/to-pages?pageNum=1');
 	});
 
-	toRandomFive?.addEventListener("click", (e) => {
+	toRandomFive.addEventListener("click", (e) => {
 		e.preventDefault();
 		window.location.replace('/hymns/to-random-five');
 	});
@@ -109,7 +109,7 @@ function checkPermissionAndTransfer(stringUrl) {
 }
 
 function formReset(selector) {
-	const form = document.querySelector(selector);
+	const form = document.getElementById(selector);
 	if (!form) return;
 	form.reset();
 	form.querySelectorAll(".form-control, .form-select").forEach(el => el.classList.remove('is-valid', 'is-invalid'));

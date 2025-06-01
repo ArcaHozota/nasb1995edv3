@@ -72,7 +72,7 @@
 						</form>
 					</div>
 					<div class="card-footer d-flex justify-content-end">
-						<button type="button" class="btn btn-primary my-2 my-sm-0" id="infoUpdationBtn">
+						<button type="button" class="btn btn-primary my-2 my-sm-0" id="infoUpdateBtn">
 							<i class="fa-solid fa-bolt-lightning"></i> 更新
 						</button>
 						<button type="button" class="btn btn-secondary my-2 my-sm-0" id="restoreBtn">
