@@ -17,31 +17,25 @@
 		                    width="16" height="16" aria-hidden="true">
 		                    <use xlink:href="#home"></use>
 		                </svg>
-		                Home
+		                聖書章節選択
 		            </a> </li>
 		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
 		                    aria-hidden="true">
 		                    <use xlink:href="#speedometer2"></use>
 		                </svg>
-		                Dashboard
+		                聖書章節入力
 		            </a> </li>
 		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
 		                    aria-hidden="true">
 		                    <use xlink:href="#table"></use>
 		                </svg>
-		                Orders
+		                賛美歌集め
 		            </a> </li>
 		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
 		                    aria-hidden="true">
 		                    <use xlink:href="#grid"></use>
 		                </svg>
-		                Products
-		            </a> </li>
-		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
-		                    aria-hidden="true">
-		                    <use xlink:href="#people-circle"></use>
-		                </svg>
-		                Customers
+		                ランダム五つ
 		            </a> </li>
 		    </ul>
 		    <hr>
