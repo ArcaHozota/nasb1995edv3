@@ -1,6 +1,38 @@
 // === DOM Ready Handler ===
 document.addEventListener("DOMContentLoaded", () => {
 	
+	const mainmenuTree = document.getElementById("mainmenuTree");
+	// bstreeview plugin init (requires original plugin, not converted)
+	const treeData = [
+		{
+			text: "聖書奉読",
+			icon: "fa-solid fa-book-bible",
+			expanded: true,
+			nodes: [
+				{ id: "toBookSearch", text: "章節選択", icon: "fa-solid fa-anchor" },
+				{ id: "toTemporary", text: "章節入力", icon: "fa-solid fa-box-archive" }
+			]
+		},
+		{
+			text: "賛美歌集め",
+			icon: "fa-solid fa-music",
+			expanded: true,
+			nodes: [
+				{ id: "toCollection", text: "コレクション一覧", icon: "fa-solid fa-rss" },
+				{ id: "toRandomFive", text: "ランダム五つ", icon: "fa-regular fa-copyright" }
+			]
+		}
+	];
+
+	mainmenuTree.bstreeview({
+		data: treeData,
+		expandIcon: 'fa fa-angle-down fa-fw',
+		collapseIcon: 'fa fa-angle-right fa-fw',
+		indent: 1.5,
+		parentsMarginLeft: '1.25rem',
+		openNodeLinkOnNewTab: true
+	});
+	
 	const logoutBtn = document.getElementById("logoutBtn");
 	const toMainmenu = document.getElementById("toMainmenu");
 	const toMainmenu2 = document.getElementById("toMainmenu2");

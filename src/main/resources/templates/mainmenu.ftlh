@@ -17,10 +17,10 @@
 		}
 	</style>
 	<#include "include-navbar.ftlh">
+	<#include "include-sidebar.ftlh">
 	<div class="container-fluid">
 		<div class="row">
-			<#include "include-sidebar.ftlh">
-			<div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+			<div class="col-md-10 ms-auto main">
 				<#if loginMsg?exists>
 					<input type="hidden" value="${loginMsg}" id="torokuMsgContainer">
 				<#else>

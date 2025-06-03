@@ -10,9 +10,9 @@
 		}
 	</style>
 	<#include "include-navbar.ftlh">
+	<#include "include-sidebar.ftlh">
 	<div class="container-fluid">
 		<div class="row">
-			<#include "include-sidebar.ftlh">
 			<div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
 				<nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
 					aria-label="breadcrumb">

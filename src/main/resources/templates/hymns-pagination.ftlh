@@ -9,9 +9,9 @@
 		}
 	</style>
 	<#include "include-navbar.ftlh">
+	<#include "include-sidebar.ftlh">
 	<div class="container-fluid">
 		<div class="row">
-			<#include "include-sidebar.ftlh">
 			<div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
 				<div class="card border-tunagray mb-3" style="margin-top: 1rem;">
 					<div class="card-header text-bg-tunagray mb-3">
