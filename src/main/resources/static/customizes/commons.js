@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	logoutBtn2?.addEventListener("click", (e) => {
 		e.preventDefault();
 		logoutForm.submit();
-	})
+	});
 
 	[toMainmenu, toMainmenu2].forEach(el => el?.addEventListener("click", (e) => {
 		e.preventDefault();
