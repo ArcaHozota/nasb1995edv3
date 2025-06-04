@@ -63,7 +63,7 @@
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
-		<action name="retrieve-random-five"
+		<action name="random-five-retrieve"
 			class="app.preach.gospel.handler.HymnsHandler"
 			method="commonRetrieve">
 			<result name="none" type="json">

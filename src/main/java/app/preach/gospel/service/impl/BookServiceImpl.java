@@ -19,6 +19,7 @@ import app.preach.gospel.jooq.tables.records.BooksRecord;
 import app.preach.gospel.jooq.tables.records.ChaptersRecord;
 import app.preach.gospel.jooq.tables.records.PhrasesRecord;
 import app.preach.gospel.service.IBookService;
+import app.preach.gospel.utils.CoProjectUtils;
 import app.preach.gospel.utils.CoResult;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +57,19 @@ public final class BookServiceImpl implements IBookService {
 	@Override
 	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final String id) {
 		try {
+			if (CoProjectUtils.isDigital(id)) {
+				final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
+						.where(CHAPTERS.BOOK_ID.eq(Short.valueOf(id))).orderBy(CHAPTERS.ID.asc())
+						.fetchInto(ChaptersRecord.class);
+				final List<ChapterDto> chapterDtos = chaptersRecords.stream()
+						.map(chaptersRecord -> new ChapterDto(chaptersRecord.getId().toString(),
+								chaptersRecord.getName(), chaptersRecord.getNameJp(),
+								chaptersRecord.getBookId().toString()))
+						.toList();
+				return CoResult.ok(chapterDtos);
+			}
 			final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
-					.where(CHAPTERS.BOOK_ID.eq(Short.valueOf(id))).orderBy(CHAPTERS.ID.asc())
+					.where(CHAPTERS.BOOK_ID.eq(Short.valueOf("1"))).orderBy(CHAPTERS.ID.asc())
 					.fetchInto(ChaptersRecord.class);
 			final List<ChapterDto> chapterDtos = chaptersRecords.stream()
 					.map(chaptersRecord -> new ChapterDto(chaptersRecord.getId().toString(), chaptersRecord.getName(),

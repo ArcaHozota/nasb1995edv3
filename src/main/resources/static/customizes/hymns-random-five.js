@@ -23,7 +23,7 @@ tableBody?.addEventListener("click", (e) => {
 });
 
 function retrieveRandomFive(keyword) {
-	fetch(`/hymns/random-five-retrieve?keyword=${keyword}`)
+	fetch(`/hymns/random-five-retrieve?keyword=${encodeURIComponent(keyword)}`)
 		.then(res => res.json())
 		.then(response => buildTableBody(response))
 		.catch(err => {
