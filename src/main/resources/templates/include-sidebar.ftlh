@@ -7,36 +7,44 @@
 		<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 100%;height: 100%;"> 
 			<div class="d-flex justify-content-start">
 				<img src="/static/image/cross.svg" alt="img01" width="36" height="54">
-				<a class="navbar-brand effect-shine" style="font-size: 33px;" href="/category/to-mainmenu">
+				<a class="navbar-brand effect-shine" style="font-size: 33px;" href="#" id="toMainmenu">
 					NASB1995
 				</a>
 			</div>
 		    <hr>
 		    <ul class="nav nav-pills flex-column mb-auto">
-		        <li class="nav-item"> <a href="#" class="nav-link active" aria-current="page"> <svg class="bi pe-none me-2"
-		                    width="16" height="16" aria-hidden="true">
-		                    <use xlink:href="#home"></use>
+		        <li class="nav-item"> 
+		        	<a href="#" class="nav-link text-white" id="toBookSearch"> 
+		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
+		        			<use xlink:href="#"></use>
 		                </svg>
 		                聖書章節選択
-		            </a> </li>
-		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
-		                    aria-hidden="true">
-		                    <use xlink:href="#speedometer2"></use>
+		            </a>
+		        </li>
+		        <li> 
+		        	<a href="#" class="nav-link text-white" id="toTemporary"> 
+		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
+		        			<use xlink:href="#"></use>
 		                </svg>
 		                聖書章節入力
-		            </a> </li>
-		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
-		                    aria-hidden="true">
-		                    <use xlink:href="#table"></use>
+		            </a> 
+		        </li>
+		        <li> 
+		        	<a href="#" class="nav-link text-white" id="toCollection"> 
+		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
+		        			<use xlink:href="#"></use>
 		                </svg>
 		                賛美歌集め
-		            </a> </li>
-		        <li> <a href="#" class="nav-link text-white"> <svg class="bi pe-none me-2" width="16" height="16"
-		                    aria-hidden="true">
-		                    <use xlink:href="#grid"></use>
+		            </a> 
+		        </li>
+		        <li> 
+		        	<a href="#" class="nav-link text-white" id="toRandomFive"> 
+		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
+		        			<use xlink:href="#"></use>
 		                </svg>
 		                ランダム五つ
-		            </a> </li>
+		            </a> 
+		        </li>
 		    </ul>
 		    <hr>
 		    <div class="dropdown"> <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
@@ -57,7 +65,7 @@
 		            <li>
 		                <hr class="dropdown-divider">
 		            </li>
-		            <li><a class="dropdown-item" href="#">Sign out</a></li>
+		            <li><a class="dropdown-item" href="#" id="logoutBtn2">Sign out</a></li>
 		        </ul>
 		    </div>
 		</div>

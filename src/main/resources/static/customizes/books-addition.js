@@ -2,8 +2,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const toTemporary = document.getElementById("toTemporary");
     if (toTemporary) {
-        toTemporary.style.color = '#006b3c';
-        toTemporary.classList.add('animate__animated', 'animate__flipInY');
+        toTemporary.classList.remove('text-white');
+		toTemporary.classList.add('active');
     }
 });
 

@@ -1,7 +1,8 @@
 // === DOM Ready Handler ===
 document.addEventListener("DOMContentLoaded", () => {
-	
+
 	const logoutBtn = document.getElementById("logoutBtn");
+	const logoutBtn2 = document.getElementById("logoutBtn2");
 	const toMainmenu = document.getElementById("toMainmenu");
 	const toMainmenu2 = document.getElementById("toMainmenu2");
 	const toPersonal = document.getElementById("toPersonal");
@@ -29,6 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	});
 
+	logoutBtn2?.addEventListener("click", (e) => {
+		e.preventDefault();
+		logoutForm.submit();
+	})
+
 	[toMainmenu, toMainmenu2].forEach(el => el?.addEventListener("click", (e) => {
 		e.preventDefault();
 		window.location.replace('/category/to-mainmenu');
@@ -47,21 +53,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	toBookSearch?.addEventListener("click", (e) => {
 		e.preventDefault();
+		checkLink(e);
 		layer.msg(delayApology);
 	});
 
 	toTemporary?.addEventListener("click", (e) => {
 		e.preventDefault();
+		checkLink(e);
 		checkPermissionAndTransfer('/books/to-addition');
 	});
 
 	toCollection?.addEventListener("click", (e) => {
 		e.preventDefault();
+		checkLink(e);
 		window.location.replace('/hymns/to-pages?pageNum=1');
 	});
 
 	toRandomFive?.addEventListener("click", (e) => {
 		e.preventDefault();
+		checkLink(e);
 		window.location.replace('/hymns/to-random-five');
 	});
 
@@ -190,4 +200,17 @@ function usernameInitial() {
 			const message = trimQuote(await xhr.text());
 			layer.msg(message);
 		});
+}
+
+function checkLink(element) {
+	const allLinkedNavs = document.querySelectorAll('.nav-link');
+	allLinkedNavs.forEach(nl => {
+		if (nl !== element.currentTarget) {
+			nl.classList.remove('active');
+			nl.classList.add('text-white');
+		} else {
+			nl.classList.remove('text-white');
+			nl.classList.add('active');
+		}
+	})
 }

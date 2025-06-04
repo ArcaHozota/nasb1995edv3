@@ -46,4 +46,4 @@ spring:
     settings:
       {datetimeFormat: yyyy-MM-dd HH:mm:ss, templateUpdateDelay: 0ms}
   profiles:
-    active: dev
+    active: prod
