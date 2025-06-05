@@ -28,6 +28,10 @@
 		a.effect-shine {
 			font-family: "Niconne", serif;
 		}
+		
+		.navbar {
+			background-color: #000000 !important;
+		}
 	</style>
 	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
 	<script type="text/javascript" src="/static/layer/neo-layer.js"></script>

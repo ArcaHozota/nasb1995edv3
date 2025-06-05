@@ -6,7 +6,7 @@
 	<div class="col-md-2 position-fixed top-0 start-0 text-bg-dark" style="height: 100vh; z-index: 1040;">
 		<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 100%;height: 100%;"> 
 			<div class="d-flex justify-content-start">
-				<img src="/static/image/cross.svg" alt="img01" width="36" height="54">
+				<img src="/static/image/cross.svg" alt="img01" width="45" height="54">
 				<a class="navbar-brand effect-shine" style="font-size: 33px;" href="#" id="toMainmenu">
 					NASB1995
 				</a>
