@@ -65,7 +65,11 @@
 		            <li>
 		                <hr class="dropdown-divider">
 		            </li>
-		            <li><a class="dropdown-item" href="#" id="logoutBtn2">Sign out</a></li>
+		            <li>
+		            	<a class="dropdown-item" href="#" id="logoutBtn2">
+		            		<i class="fa-solid fa-right-from-bracket"></i> Sign out
+		            	</a>
+		            </li>
 		        </ul>
 		    </div>
 		</div>
