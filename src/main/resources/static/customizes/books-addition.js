@@ -59,7 +59,7 @@ infoStorageBtn?.addEventListener("click", () => {
 });
 
 function booksPostSuccessFunction(response) {
-    formReset("#inputForm");
-    formReset("#inputForm2");
+    formReset("inputForm");
+    formReset("inputForm2");
     layer.msg(response);
 }
