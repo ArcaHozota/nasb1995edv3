@@ -90,6 +90,23 @@ public final class BookServiceImpl implements IBookService {
 					.fetchSingle();
 			final PhrasesRecord phrasesRecord = this.dslContext.newRecord(PHRASES);
 			phrasesRecord.setId((chapterId * 1000) + id);
+			final PhrasesRecord fetchOne = this.dslContext.selectFrom(PHRASES)
+					.where(PHRASES.ID.eq(phrasesRecord.getId())).fetchOne();
+			if (fetchOne != null) {
+				fetchOne.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
+				fetchOne.setTextJp(phraseDto.textJp());
+				fetchOne.setChapterId(chapterId);
+				final String textEn = phraseDto.textEn();
+				if (textEn.endsWith("#")) {
+					fetchOne.setTextEn(textEn.replace("#", CoProjectUtils.EMPTY_STRING));
+					fetchOne.setChangeLine(Boolean.TRUE);
+				} else {
+					fetchOne.setTextEn(phraseDto.textEn());
+					fetchOne.setChangeLine(Boolean.FALSE);
+				}
+				fetchOne.update();
+				return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
+			}
 			phrasesRecord.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
 			phrasesRecord.setTextJp(phraseDto.textJp());
 			phrasesRecord.setChapterId(chapterId);
