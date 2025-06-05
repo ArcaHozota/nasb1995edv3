@@ -18,7 +18,7 @@
 		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
 		        			<use xlink:href="#"></use>
 		                </svg>
-		                聖書章節選択
+		                <i class="fa-solid fa-anchor"></i> 聖書章節選択
 		            </a>
 		        </li>
 		        <li> 
@@ -26,7 +26,7 @@
 		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
 		        			<use xlink:href="#"></use>
 		                </svg>
-		                聖書章節入力
+		                <i class="fa-solid fa-box-archive"></i> 聖書章節入力
 		            </a> 
 		        </li>
 		        <li> 
@@ -34,7 +34,7 @@
 		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
 		        			<use xlink:href="#"></use>
 		                </svg>
-		                賛美歌集め
+		                <i class="fa-solid fa-rss"></i> 賛美歌集め
 		            </a> 
 		        </li>
 		        <li> 
@@ -42,7 +42,7 @@
 		        		<svg class="bi pe-none me-2" width="16" height="16" aria-hidden="true">
 		        			<use xlink:href="#"></use>
 		                </svg>
-		                ランダム五つ
+		                <i class="fa-solid fa-copyright"></i> ランダム五つ
 		            </a> 
 		        </li>
 		    </ul>
