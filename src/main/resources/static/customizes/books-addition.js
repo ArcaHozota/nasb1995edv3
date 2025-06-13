@@ -1,10 +1,10 @@
 // === DOM Ready Handler ===
 document.addEventListener("DOMContentLoaded", () => {
-	//const toTemporary = document.getElementById("toTemporary");
-	//if (toTemporary) {
-	//toTemporary.classList.remove('text-white');
-	//toTemporary.classList.add('active');
-	//}
+	const toTemporary = document.getElementById("toTemporary");
+	if (toTemporary) {
+		toTemporary.classList.remove('text-white');
+		toTemporary.classList.add('active');
+	}
 });
 
 const bookInput = document.getElementById("bookInput");

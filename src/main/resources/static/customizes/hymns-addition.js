@@ -1,6 +1,11 @@
 let pageNum = document.getElementById("pageNumContainer")?.value;
 
 document.addEventListener("DOMContentLoaded", () => {
+	const toCollection = document.getElementById("toCollection");
+	if (toCollection) {
+		toCollection.classList.remove('text-white');
+		toCollection.classList.add('active');
+	}
 });
 
 document.getElementById("toHymnPages")?.addEventListener("click", (e) => {

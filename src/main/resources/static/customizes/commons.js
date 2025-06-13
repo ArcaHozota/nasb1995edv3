@@ -53,25 +53,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	toBookSearch?.addEventListener("click", (e) => {
 		e.preventDefault();
-		checkLink(e);
+		//checkLink(e);
 		layer.msg(delayApology);
 	});
 
 	toTemporary?.addEventListener("click", (e) => {
 		e.preventDefault();
-		checkLink(e);
+		//checkLink(e);
 		checkPermissionAndTransfer('/books/to-addition');
 	});
 
 	toCollection?.addEventListener("click", (e) => {
 		e.preventDefault();
-		checkLink(e);
+		//checkLink(e);
 		window.location.replace('/hymns/to-pages?pageNum=1');
 	});
 
 	toRandomFive?.addEventListener("click", (e) => {
 		e.preventDefault();
-		checkLink(e);
+		//checkLink(e);
 		window.location.replace('/hymns/to-random-five');
 	});
 

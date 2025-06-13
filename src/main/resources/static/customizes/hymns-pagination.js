@@ -3,6 +3,11 @@ let pageNum = document.getElementById("pageNumContainer")?.value;
 let totalRecords, totalPages, keyword;
 
 document.addEventListener("DOMContentLoaded", () => {
+	const toCollection = document.getElementById("toCollection");
+	if (toCollection) {
+		toCollection.classList.remove('text-white');
+		toCollection.classList.add('active');
+	}
 	if (keyword === undefined) {
 		keyword = emptyString;
 	}
