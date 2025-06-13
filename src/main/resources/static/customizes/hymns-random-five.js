@@ -1,11 +1,6 @@
 const tableBody = document.getElementById("tableBody");
 
 document.addEventListener("DOMContentLoaded", () => {
-	const toRandomFive = document.getElementById("toRandomFive");
-	if (toRandomFive) {
-		toRandomFive.classList.remove('text-white');
-		toRandomFive.classList.add('active');
-	}
 });
 
 document.getElementById("randomSearchBtn")?.addEventListener("click", () => {
