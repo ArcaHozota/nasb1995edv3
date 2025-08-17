@@ -31,7 +31,7 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class CategoryHandler extends DefaultActionSupport implements ServletRequestAware {
+public class HomepageHandler extends DefaultActionSupport implements ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = -3971408230922185628L;
@@ -79,6 +79,29 @@ public class CategoryHandler extends DefaultActionSupport implements ServletRequ
 		ActionContext.getContext().put(ProjectConstants.ATTRNAME_RECORDS, totalCounts.getData());
 		ActionContext.getContext().put(ProjectConstants.ATTRNAME_TOROKU_MSG, ProjectConstants.MESSAGE_STRING_NOT_LOGIN);
 		return LOGIN;
+	}
+
+	/**
+	 * インデクスへ移動する
+	 *
+	 * @return String
+	 */
+	public String toHomePage() {
+		final CoResult<Long, DataAccessException> totalCounts = this.iHymnService.getTotalCounts();
+		if (!totalCounts.isOk()) {
+			throw totalCounts.getErr();
+		}
+		ActionContext.getContext().put(ProjectConstants.ATTRNAME_RECORDS, totalCounts.getData());
+		return SUCCESS;
+	}
+
+	/**
+	 * 一覧表へ移動する
+	 *
+	 * @return String
+	 */
+	public String toIchiranhyo() {
+		return this.toHomePage();
 	}
 
 	/**
