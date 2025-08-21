@@ -7,11 +7,11 @@
 	<package name="indexHandler" extends="projectPackage"
 		namespace="/">
 		<action name="index.action"
-			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			class="app.preach.gospel.handler.HomepageHandler" method="toHomePage">
 			<result name="success" type="freemarker">/templates/index.ftlh</result>
 		</action>
 		<action name=""
-			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			class="app.preach.gospel.handler.HomepageHandler" method="toHomePage">
 			<result name="success" type="freemarker">/templates/index.ftlh</result>
 		</action>
 	</package>
@@ -20,20 +20,20 @@
 		namespace="/home">
 		<!-- 显式定义 home Action -->
 		<action name="to-home-page"
-			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			class="app.preach.gospel.handler.HomepageHandler" method="toHomePage">
 			<result name="success" type="freemarker">/templates/index.ftlh</result>
 		</action>
 		<action name="index"
-			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			class="app.preach.gospel.handler.HomepageHandler" method="toHomePage">
 			<result name="success" type="freemarker">/templates/index.ftlh</result>
 		</action>
 		<action name="page"
-			class="app.preach.gospel.handler.HomePageHandler" method="toHomePage">
+			class="app.preach.gospel.handler.HomepageHandler" method="toHomePage">
 			<result name="success" type="freemarker">/templates/index.ftlh</result>
 		</action>
 		<!-- 其他 Action 显式添加 -->
 		<action name="to-list"
-			class="app.preach.gospel.handler.HomePageHandler"
+			class="app.preach.gospel.handler.HomepageHandler"
 			method="toIchiranhyo">
 			<result name="success" type="freemarker">/templates/index2.ftlh</result>
 		</action>
@@ -42,25 +42,25 @@
 	<package name="categoryHandler" extends="projectPackage"
 		namespace="/category">
 		<action name="login"
-			class="app.preach.gospel.handler.CategoryHandler" method="login">
+			class="app.preach.gospel.handler.HomepageHandler" method="login">
 			<result name="login" type="freemarker">/templates/login-toroku.ftlh</result>
 		</action>
 		<action name="login-with-error"
-			class="app.preach.gospel.handler.CategoryHandler"
+			class="app.preach.gospel.handler.HomepageHandler"
 			method="loginWithError">
 			<result name="login" type="freemarker">/templates/index.ftlh</result>
 		</action>
 		<action name="to-mainmenu"
-			class="app.preach.gospel.handler.CategoryHandler" method="toMainmenu">
+			class="app.preach.gospel.handler.HomepageHandler" method="toMainmenu">
 			<result name="success" type="freemarker">/templates/mainmenu.ftlh</result>
 		</action>
 		<action name="to-mainmenu-with-login"
-			class="app.preach.gospel.handler.CategoryHandler"
+			class="app.preach.gospel.handler.HomepageHandler"
 			method="toMainmenuWithLogin">
 			<result name="success" type="freemarker">/templates/mainmenu.ftlh</result>
 		</action>
 		<action name="to-system-error"
-			class="app.preach.gospel.handler.CategoryHandler"
+			class="app.preach.gospel.handler.HomepageHandler"
 			method="toSystemError">
 			<result name="success" type="freemarker">/templates/error.ftlh</result>
 		</action>
