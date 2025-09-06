@@ -6,21 +6,27 @@ package app.preach.gospel.jooq.tables;
 
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.Public;
+import app.preach.gospel.jooq.tables.Books.BooksPath;
+import app.preach.gospel.jooq.tables.Phrases.PhrasesPath;
 import app.preach.gospel.jooq.tables.records.ChaptersRecord;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function4;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Records;
-import org.jooq.Row4;
+import org.jooq.SQL;
 import org.jooq.Schema;
-import org.jooq.SelectField;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -72,11 +78,11 @@ public class Chapters extends TableImpl<ChaptersRecord> {
     public final TableField<ChaptersRecord, Short> BOOK_ID = createField(DSL.name("book_id"), SQLDataType.SMALLINT.nullable(false), this, "書別ID");
 
     private Chapters(Name alias, Table<ChaptersRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private Chapters(Name alias, Table<ChaptersRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private Chapters(Name alias, Table<ChaptersRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -100,8 +106,37 @@ public class Chapters extends TableImpl<ChaptersRecord> {
         this(DSL.name("chapters"), null);
     }
 
-    public <O extends Record> Chapters(Table<O> child, ForeignKey<O, ChaptersRecord> key) {
-        super(child, key, CHAPTERS);
+    public <O extends Record> Chapters(Table<O> path, ForeignKey<O, ChaptersRecord> childPath, InverseForeignKey<O, ChaptersRecord> parentPath) {
+        super(path, childPath, parentPath, CHAPTERS);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class ChaptersPath extends Chapters implements Path<ChaptersRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> ChaptersPath(Table<O> path, ForeignKey<O, ChaptersRecord> childPath, InverseForeignKey<O, ChaptersRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private ChaptersPath(Name alias, Table<ChaptersRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public ChaptersPath as(String alias) {
+            return new ChaptersPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public ChaptersPath as(Name alias) {
+            return new ChaptersPath(alias, this);
+        }
+
+        @Override
+        public ChaptersPath as(Table<?> alias) {
+            return new ChaptersPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -119,16 +154,29 @@ public class Chapters extends TableImpl<ChaptersRecord> {
         return Arrays.asList(Keys.CHAPTERS__CHAPTERS_BOOKS_TO_CHAPTER);
     }
 
-    private transient Books _books;
+    private transient BooksPath _books;
 
     /**
      * Get the implicit join path to the <code>public.books</code> table.
      */
-    public Books books() {
+    public BooksPath books() {
         if (_books == null)
-            _books = new Books(this, Keys.CHAPTERS__CHAPTERS_BOOKS_TO_CHAPTER);
+            _books = new BooksPath(this, Keys.CHAPTERS__CHAPTERS_BOOKS_TO_CHAPTER, null);
 
         return _books;
+    }
+
+    private transient PhrasesPath _phrases;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.phrases</code>
+     * table
+     */
+    public PhrasesPath phrases() {
+        if (_phrases == null)
+            _phrases = new PhrasesPath(this, null, Keys.PHRASES__PHRASES_CHAPTERS_TO_PHRASE.getInverseKey());
+
+        return _phrases;
     }
 
     @Override
@@ -170,27 +218,87 @@ public class Chapters extends TableImpl<ChaptersRecord> {
         return new Chapters(name.getQualifiedName(), null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row4 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
-    public Row4<Integer, String, String, Short> fieldsRow() {
-        return (Row4) super.fieldsRow();
+    public Chapters where(Condition condition) {
+        return new Chapters(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Function4<? super Integer, ? super String, ? super String, ? super Short, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
+    @Override
+    public Chapters where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function4<? super Integer, ? super String, ? super String, ? super Short, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
+    @Override
+    public Chapters where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Chapters where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Chapters where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Chapters where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Chapters where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Chapters where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Chapters whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Chapters whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

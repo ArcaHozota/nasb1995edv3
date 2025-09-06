@@ -10,6 +10,7 @@ import app.preach.gospel.jooq.tables.Chapters;
 import app.preach.gospel.jooq.tables.Hymns;
 import app.preach.gospel.jooq.tables.HymnsWork;
 import app.preach.gospel.jooq.tables.Phrases;
+import app.preach.gospel.jooq.tables.Receipts;
 import app.preach.gospel.jooq.tables.RoleAuth;
 import app.preach.gospel.jooq.tables.Roles;
 import app.preach.gospel.jooq.tables.Students;
@@ -66,6 +67,11 @@ public class Public extends SchemaImpl {
     public final Phrases PHRASES = Phrases.PHRASES;
 
     /**
+     * レシート
+     */
+    public final Receipts RECEIPTS = Receipts.RECEIPTS;
+
+    /**
      * The table <code>public.role_auth</code>.
      */
     public final RoleAuth ROLE_AUTH = RoleAuth.ROLE_AUTH;
@@ -102,6 +108,7 @@ public class Public extends SchemaImpl {
             Hymns.HYMNS,
             HymnsWork.HYMNS_WORK,
             Phrases.PHRASES,
+            Receipts.RECEIPTS,
             RoleAuth.ROLE_AUTH,
             Roles.ROLES,
             Students.STUDENTS

@@ -10,6 +10,7 @@ import app.preach.gospel.jooq.tables.Chapters;
 import app.preach.gospel.jooq.tables.Hymns;
 import app.preach.gospel.jooq.tables.HymnsWork;
 import app.preach.gospel.jooq.tables.Phrases;
+import app.preach.gospel.jooq.tables.Receipts;
 import app.preach.gospel.jooq.tables.RoleAuth;
 import app.preach.gospel.jooq.tables.Roles;
 import app.preach.gospel.jooq.tables.Students;
@@ -50,6 +51,11 @@ public class Tables {
      * The table <code>public.phrases</code>.
      */
     public static final Phrases PHRASES = Phrases.PHRASES;
+
+    /**
+     * レシート
+     */
+    public static final Receipts RECEIPTS = Receipts.RECEIPTS;
 
     /**
      * The table <code>public.role_auth</code>.

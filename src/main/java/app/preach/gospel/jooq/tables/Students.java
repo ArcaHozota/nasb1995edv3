@@ -7,24 +7,30 @@ package app.preach.gospel.jooq.tables;
 import app.preach.gospel.jooq.Indexes;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.Public;
+import app.preach.gospel.jooq.tables.Hymns.HymnsPath;
+import app.preach.gospel.jooq.tables.Roles.RolesPath;
 import app.preach.gospel.jooq.tables.records.StudentsRecord;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function9;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Records;
-import org.jooq.Row9;
+import org.jooq.SQL;
 import org.jooq.Schema;
-import org.jooq.SelectField;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -101,11 +107,11 @@ public class Students extends TableImpl<StudentsRecord> {
     public final TableField<StudentsRecord, Boolean> VISIBLE_FLG = createField(DSL.name("visible_flg"), SQLDataType.BOOLEAN.nullable(false), this, "論理削除フラグ");
 
     private Students(Name alias, Table<StudentsRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private Students(Name alias, Table<StudentsRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private Students(Name alias, Table<StudentsRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -129,8 +135,37 @@ public class Students extends TableImpl<StudentsRecord> {
         this(DSL.name("students"), null);
     }
 
-    public <O extends Record> Students(Table<O> child, ForeignKey<O, StudentsRecord> key) {
-        super(child, key, STUDENTS);
+    public <O extends Record> Students(Table<O> path, ForeignKey<O, StudentsRecord> childPath, InverseForeignKey<O, StudentsRecord> parentPath) {
+        super(path, childPath, parentPath, STUDENTS);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class StudentsPath extends Students implements Path<StudentsRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> StudentsPath(Table<O> path, ForeignKey<O, StudentsRecord> childPath, InverseForeignKey<O, StudentsRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private StudentsPath(Name alias, Table<StudentsRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public StudentsPath as(String alias) {
+            return new StudentsPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public StudentsPath as(Name alias) {
+            return new StudentsPath(alias, this);
+        }
+
+        @Override
+        public StudentsPath as(Table<?> alias) {
+            return new StudentsPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -153,16 +188,28 @@ public class Students extends TableImpl<StudentsRecord> {
         return Arrays.asList(Keys.STUDENTS__STUDENTS_ROLES_ROLED);
     }
 
-    private transient Roles _roles;
+    private transient RolesPath _roles;
 
     /**
      * Get the implicit join path to the <code>public.roles</code> table.
      */
-    public Roles roles() {
+    public RolesPath roles() {
         if (_roles == null)
-            _roles = new Roles(this, Keys.STUDENTS__STUDENTS_ROLES_ROLED);
+            _roles = new RolesPath(this, Keys.STUDENTS__STUDENTS_ROLES_ROLED, null);
 
         return _roles;
+    }
+
+    private transient HymnsPath _hymns;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.hymns</code> table
+     */
+    public HymnsPath hymns() {
+        if (_hymns == null)
+            _hymns = new HymnsPath(this, null, Keys.HYMNS__HYMNS_STUDENTS_UPDATED_HYMNS.getInverseKey());
+
+        return _hymns;
     }
 
     @Override
@@ -204,27 +251,87 @@ public class Students extends TableImpl<StudentsRecord> {
         return new Students(name.getQualifiedName(), null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row9 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
-    public Row9<Long, String, String, String, LocalDate, String, Long, OffsetDateTime, Boolean> fieldsRow() {
-        return (Row9) super.fieldsRow();
+    public Students where(Condition condition) {
+        return new Students(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Function9<? super Long, ? super String, ? super String, ? super String, ? super LocalDate, ? super String, ? super Long, ? super OffsetDateTime, ? super Boolean, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
+    @Override
+    public Students where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function9<? super Long, ? super String, ? super String, ? super String, ? super LocalDate, ? super String, ? super Long, ? super OffsetDateTime, ? super Boolean, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
+    @Override
+    public Students where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Students where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Students where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Students where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Students where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Students where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Students whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Students whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

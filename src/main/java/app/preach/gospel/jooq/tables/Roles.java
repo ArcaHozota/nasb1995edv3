@@ -7,22 +7,29 @@ package app.preach.gospel.jooq.tables;
 import app.preach.gospel.jooq.Indexes;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.Public;
+import app.preach.gospel.jooq.tables.Authorities.AuthoritiesPath;
+import app.preach.gospel.jooq.tables.RoleAuth.RoleAuthPath;
+import app.preach.gospel.jooq.tables.Students.StudentsPath;
 import app.preach.gospel.jooq.tables.records.RolesRecord;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function3;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Records;
-import org.jooq.Row3;
+import org.jooq.SQL;
 import org.jooq.Schema;
-import org.jooq.SelectField;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -69,11 +76,11 @@ public class Roles extends TableImpl<RolesRecord> {
     public final TableField<RolesRecord, Boolean> VISIBLE_FLG = createField(DSL.name("visible_flg"), SQLDataType.BOOLEAN.nullable(false), this, "論理削除フラグ");
 
     private Roles(Name alias, Table<RolesRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private Roles(Name alias, Table<RolesRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private Roles(Name alias, Table<RolesRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -97,8 +104,37 @@ public class Roles extends TableImpl<RolesRecord> {
         this(DSL.name("roles"), null);
     }
 
-    public <O extends Record> Roles(Table<O> child, ForeignKey<O, RolesRecord> key) {
-        super(child, key, ROLES);
+    public <O extends Record> Roles(Table<O> path, ForeignKey<O, RolesRecord> childPath, InverseForeignKey<O, RolesRecord> parentPath) {
+        super(path, childPath, parentPath, ROLES);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class RolesPath extends Roles implements Path<RolesRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> RolesPath(Table<O> path, ForeignKey<O, RolesRecord> childPath, InverseForeignKey<O, RolesRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private RolesPath(Name alias, Table<RolesRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public RolesPath as(String alias) {
+            return new RolesPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public RolesPath as(Name alias) {
+            return new RolesPath(alias, this);
+        }
+
+        @Override
+        public RolesPath as(Table<?> alias) {
+            return new RolesPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -114,6 +150,40 @@ public class Roles extends TableImpl<RolesRecord> {
     @Override
     public UniqueKey<RolesRecord> getPrimaryKey() {
         return Keys.ROLE_PKEY;
+    }
+
+    private transient RoleAuthPath _roleAuth;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.role_auth</code>
+     * table
+     */
+    public RoleAuthPath roleAuth() {
+        if (_roleAuth == null)
+            _roleAuth = new RoleAuthPath(this, null, Keys.ROLE_AUTH__ROLE_AUTH_ROLE_ID.getInverseKey());
+
+        return _roleAuth;
+    }
+
+    private transient StudentsPath _students;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.students</code>
+     * table
+     */
+    public StudentsPath students() {
+        if (_students == null)
+            _students = new StudentsPath(this, null, Keys.STUDENTS__STUDENTS_ROLES_ROLED.getInverseKey());
+
+        return _students;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.authorities</code> table
+     */
+    public AuthoritiesPath authorities() {
+        return roleAuth().authorities();
     }
 
     @Override
@@ -155,27 +225,87 @@ public class Roles extends TableImpl<RolesRecord> {
         return new Roles(name.getQualifiedName(), null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row3 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
-    public Row3<Long, String, Boolean> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Roles where(Condition condition) {
+        return new Roles(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Function3<? super Long, ? super String, ? super Boolean, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
+    @Override
+    public Roles where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function3<? super Long, ? super String, ? super Boolean, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
+    @Override
+    public Roles where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Roles where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Roles where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Roles where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Roles where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Roles where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Roles whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Roles whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

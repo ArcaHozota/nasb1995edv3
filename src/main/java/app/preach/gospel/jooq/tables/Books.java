@@ -6,19 +6,24 @@ package app.preach.gospel.jooq.tables;
 
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.Public;
+import app.preach.gospel.jooq.tables.Chapters.ChaptersPath;
 import app.preach.gospel.jooq.tables.records.BooksRecord;
 
-import java.util.function.Function;
+import java.util.Collection;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function3;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Records;
-import org.jooq.Row3;
+import org.jooq.SQL;
 import org.jooq.Schema;
-import org.jooq.SelectField;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -65,11 +70,11 @@ public class Books extends TableImpl<BooksRecord> {
     public final TableField<BooksRecord, String> NAME_JP = createField(DSL.name("name_jp"), SQLDataType.VARCHAR(33).nullable(false), this, "書別日本語名");
 
     private Books(Name alias, Table<BooksRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private Books(Name alias, Table<BooksRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private Books(Name alias, Table<BooksRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -93,8 +98,37 @@ public class Books extends TableImpl<BooksRecord> {
         this(DSL.name("books"), null);
     }
 
-    public <O extends Record> Books(Table<O> child, ForeignKey<O, BooksRecord> key) {
-        super(child, key, BOOKS);
+    public <O extends Record> Books(Table<O> path, ForeignKey<O, BooksRecord> childPath, InverseForeignKey<O, BooksRecord> parentPath) {
+        super(path, childPath, parentPath, BOOKS);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class BooksPath extends Books implements Path<BooksRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> BooksPath(Table<O> path, ForeignKey<O, BooksRecord> childPath, InverseForeignKey<O, BooksRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private BooksPath(Name alias, Table<BooksRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public BooksPath as(String alias) {
+            return new BooksPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public BooksPath as(Name alias) {
+            return new BooksPath(alias, this);
+        }
+
+        @Override
+        public BooksPath as(Table<?> alias) {
+            return new BooksPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -105,6 +139,19 @@ public class Books extends TableImpl<BooksRecord> {
     @Override
     public UniqueKey<BooksRecord> getPrimaryKey() {
         return Keys.BOOKS_PKEY;
+    }
+
+    private transient ChaptersPath _chapters;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.chapters</code>
+     * table
+     */
+    public ChaptersPath chapters() {
+        if (_chapters == null)
+            _chapters = new ChaptersPath(this, null, Keys.CHAPTERS__CHAPTERS_BOOKS_TO_CHAPTER.getInverseKey());
+
+        return _chapters;
     }
 
     @Override
@@ -146,27 +193,87 @@ public class Books extends TableImpl<BooksRecord> {
         return new Books(name.getQualifiedName(), null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row3 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
-    public Row3<Short, String, String> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Books where(Condition condition) {
+        return new Books(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Function3<? super Short, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
+    @Override
+    public Books where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function3<? super Short, ? super String, ? super String, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
+    @Override
+    public Books where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Books where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Books where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Books where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Books where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Books where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Books whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Books whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

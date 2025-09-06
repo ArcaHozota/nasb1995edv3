@@ -30,7 +30,7 @@
 			<AppenderRef ref="File" />
 		</Root>
 		<!-- jOOQのログ出力設定 -->
-		<Logger name="org.jooq.tools.LoggerListener" level="DEBUG"
+		<Logger name="org.jooq.tools.LoggerListener" level="WARN"
 			additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>

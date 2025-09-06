@@ -7,24 +7,29 @@ package app.preach.gospel.jooq.tables;
 import app.preach.gospel.jooq.Indexes;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.Public;
+import app.preach.gospel.jooq.tables.Hymns.HymnsPath;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function6;
 import org.jooq.Identity;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Records;
-import org.jooq.Row6;
+import org.jooq.SQL;
 import org.jooq.Schema;
-import org.jooq.SelectField;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -86,11 +91,11 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
     public final TableField<HymnsWorkRecord, String> BIKO = createField(DSL.name("biko"), SQLDataType.VARCHAR(15), this, "備考");
 
     private HymnsWork(Name alias, Table<HymnsWorkRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private HymnsWork(Name alias, Table<HymnsWorkRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private HymnsWork(Name alias, Table<HymnsWorkRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -114,8 +119,37 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
         this(DSL.name("hymns_work"), null);
     }
 
-    public <O extends Record> HymnsWork(Table<O> child, ForeignKey<O, HymnsWorkRecord> key) {
-        super(child, key, HYMNS_WORK);
+    public <O extends Record> HymnsWork(Table<O> path, ForeignKey<O, HymnsWorkRecord> childPath, InverseForeignKey<O, HymnsWorkRecord> parentPath) {
+        super(path, childPath, parentPath, HYMNS_WORK);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class HymnsWorkPath extends HymnsWork implements Path<HymnsWorkRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> HymnsWorkPath(Table<O> path, ForeignKey<O, HymnsWorkRecord> childPath, InverseForeignKey<O, HymnsWorkRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private HymnsWorkPath(Name alias, Table<HymnsWorkRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public HymnsWorkPath as(String alias) {
+            return new HymnsWorkPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public HymnsWorkPath as(Name alias) {
+            return new HymnsWorkPath(alias, this);
+        }
+
+        @Override
+        public HymnsWorkPath as(Table<?> alias) {
+            return new HymnsWorkPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -143,14 +177,14 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
         return Arrays.asList(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK);
     }
 
-    private transient Hymns _hymns;
+    private transient HymnsPath _hymns;
 
     /**
      * Get the implicit join path to the <code>public.hymns</code> table.
      */
-    public Hymns hymns() {
+    public HymnsPath hymns() {
         if (_hymns == null)
-            _hymns = new Hymns(this, Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK);
+            _hymns = new HymnsPath(this, Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK, null);
 
         return _hymns;
     }
@@ -194,27 +228,87 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
         return new HymnsWork(name.getQualifiedName(), null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row6 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
-    public Row6<Long, Long, byte[], String, OffsetDateTime, String> fieldsRow() {
-        return (Row6) super.fieldsRow();
+    public HymnsWork where(Condition condition) {
+        return new HymnsWork(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Function6<? super Long, ? super Long, ? super byte[], ? super String, ? super OffsetDateTime, ? super String, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
+    @Override
+    public HymnsWork where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function6<? super Long, ? super Long, ? super byte[], ? super String, ? super OffsetDateTime, ? super String, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
+    @Override
+    public HymnsWork where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public HymnsWork where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public HymnsWork where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public HymnsWork where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public HymnsWork where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public HymnsWork where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public HymnsWork whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public HymnsWork whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }
