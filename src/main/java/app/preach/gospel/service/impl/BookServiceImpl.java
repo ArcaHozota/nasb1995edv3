@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.BookDto;
 import app.preach.gospel.dto.ChapterDto;
 import app.preach.gospel.dto.PhraseDto;
-import app.preach.gospel.jooq.tables.records.BooksRecord;
 import app.preach.gospel.jooq.tables.records.ChaptersRecord;
 import app.preach.gospel.jooq.tables.records.PhrasesRecord;
 import app.preach.gospel.service.IBookService;
@@ -39,42 +39,33 @@ public final class BookServiceImpl implements IBookService {
 	 */
 	private final DSLContext dslContext;
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<List<BookDto>, DataAccessException> getBooks() {
 		try {
-			final List<BooksRecord> booksRecords = this.dslContext.selectFrom(BOOKS).orderBy(BOOKS.ID.asc())
-					.fetchInto(BooksRecord.class);
-			final List<BookDto> bookDtos = booksRecords.stream()
-					.map(booksRecord -> new BookDto(booksRecord.getId().toString(), booksRecord.getName(),
-							booksRecord.getNameJp()))
-					.toList();
+			final List<BookDto> bookDtos = this.dslContext.selectFrom(BOOKS).orderBy(BOOKS.ID.asc())
+					.fetch(r -> new BookDto(r.get(BOOKS.ID).toString(), r.get(BOOKS.NAME), r.get(BOOKS.NAME_JP)));
 			return CoResult.ok(bookDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		}
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final String id) {
 		try {
 			if (CoProjectUtils.isDigital(id)) {
-				final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
+				final List<ChapterDto> chapterDtos = this.dslContext.selectFrom(CHAPTERS)
 						.where(CHAPTERS.BOOK_ID.eq(Short.valueOf(id))).orderBy(CHAPTERS.ID.asc())
-						.fetchInto(ChaptersRecord.class);
-				final List<ChapterDto> chapterDtos = chaptersRecords.stream()
-						.map(chaptersRecord -> new ChapterDto(chaptersRecord.getId().toString(),
-								chaptersRecord.getName(), chaptersRecord.getNameJp(),
-								chaptersRecord.getBookId().toString()))
-						.toList();
+						.fetch(r -> new ChapterDto(r.get(CHAPTERS.ID).toString(), r.get(CHAPTERS.NAME),
+								r.get(CHAPTERS.NAME_JP), r.get(CHAPTERS.BOOK_ID).toString()));
 				return CoResult.ok(chapterDtos);
 			}
-			final List<ChaptersRecord> chaptersRecords = this.dslContext.selectFrom(CHAPTERS)
+			final List<ChapterDto> chapterDtos = this.dslContext.selectFrom(CHAPTERS)
 					.where(CHAPTERS.BOOK_ID.eq(Short.valueOf("1"))).orderBy(CHAPTERS.ID.asc())
-					.fetchInto(ChaptersRecord.class);
-			final List<ChapterDto> chapterDtos = chaptersRecords.stream()
-					.map(chaptersRecord -> new ChapterDto(chaptersRecord.getId().toString(), chaptersRecord.getName(),
-							chaptersRecord.getNameJp(), chaptersRecord.getBookId().toString()))
-					.toList();
+					.fetch(r -> new ChapterDto(r.get(CHAPTERS.ID).toString(), r.get(CHAPTERS.NAME),
+							r.get(CHAPTERS.NAME_JP), r.get(CHAPTERS.BOOK_ID).toString()));
 			return CoResult.ok(chapterDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);

@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.StudentDto;
@@ -56,6 +57,7 @@ public final class StudentServiceImpl implements IStudentService {
 	 */
 	private final DSLContext dslContext;
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String loginAccount) {
 		try {
@@ -73,6 +75,7 @@ public final class StudentServiceImpl implements IStudentService {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<StudentDto, DataAccessException> getStudentInfoById(final Long id) {
 		try {
