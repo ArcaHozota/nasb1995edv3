@@ -33,6 +33,7 @@ import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.github.benmanes.caffeine.cache.Cache;
 
@@ -154,6 +155,7 @@ public final class HymnServiceImpl implements IHymnService {
 	 */
 	private final DSLContext dslContext;
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String nameJp) {
 		try {
@@ -171,6 +173,7 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated2(final String id, final String nameKr) {
 		try {
@@ -234,6 +237,7 @@ public final class HymnServiceImpl implements IHymnService {
 		return maxHeap.stream().limit(3).map(Entry::getKey).toList();
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<HymnDto, DataAccessException> getHymnInfoById(final Long id) {
 		try {
@@ -255,6 +259,7 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<Pagination<HymnDto>, DataAccessException> getHymnsByKeyword(final Integer pageNum,
 			final String keyword) {
@@ -276,6 +281,7 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<List<HymnDto>, DataAccessException> getHymnsRandomFive(final String keyword) {
 		try {
@@ -353,7 +359,7 @@ public final class HymnServiceImpl implements IHymnService {
 	}
 
 	// 2) IDF キャッシュ（コーパススナップショットで）
-	public Map<String, Double> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
+	private Map<String, Double> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
 		final var key = new IdfKey(corpusVersion);
 		@SuppressWarnings("unchecked")
 		final var cached = (Map<String, Double>) this.cache.getIfPresent(key);
@@ -372,6 +378,7 @@ public final class HymnServiceImpl implements IHymnService {
 		return idf;
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<List<HymnDto>, DataAccessException> getKanumiList(final Long id) {
 		try {
@@ -391,6 +398,7 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public CoResult<Long, DataAccessException> getTotalCounts() {
 		try {
@@ -402,7 +410,13 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
-	public String hash(final String text) {
+	/**
+	 * ハッシュ化する
+	 *
+	 * @param text テキスト
+	 * @return String
+	 */
+	private String hash(final String text) {
 		final var b = SHA256.get().digest(text.getBytes(CoProjectUtils.CHARSET_UTF8));
 		final var sb = new StringBuilder();
 		for (final byte x : b) {
@@ -411,6 +425,12 @@ public final class HymnServiceImpl implements IHymnService {
 		return sb.toString();
 	}
 
+	/**
+	 * インデクスを取得する
+	 *
+	 * @param terms リスト
+	 * @return Map<String, Integer>
+	 */
 	private Map<String, Integer> indexOf(final Collection<String> terms) {
 		final var map = new HashMap<String, Integer>(terms.size() * 2);
 		int i = 0;
