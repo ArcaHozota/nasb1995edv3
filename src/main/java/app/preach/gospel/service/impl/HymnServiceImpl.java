@@ -4,6 +4,8 @@ import static app.preach.gospel.jooq.Tables.HYMNS;
 import static app.preach.gospel.jooq.Tables.HYMNS_WORK;
 import static app.preach.gospel.jooq.Tables.STUDENTS;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -11,8 +13,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,6 +23,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Condition;
@@ -27,10 +31,16 @@ import org.jooq.DSLContext;
 import org.jooq.exception.ConfigurationException;
 import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import com.github.benmanes.caffeine.cache.Cache;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
+import app.preach.gospel.dto.IdfKey;
+import app.preach.gospel.dto.TokKey;
+import app.preach.gospel.dto.VecKey;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.tables.records.HymnsRecord;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
@@ -43,7 +53,6 @@ import app.preach.gospel.utils.Pagination;
 import app.preach.gospel.utils.SnowflakeUtils;
 import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
-import kr.co.shineware.nlp.komoran.model.Token;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -75,9 +84,25 @@ public final class HymnServiceImpl implements IHymnService {
 	private static final Komoran KOMORAN = new Komoran(DEFAULT_MODEL.FULL);
 
 	/**
+	 * Korean
+	 */
+	private static final String KR = "Korean";
+
+	/**
 	 * ランドム選択
 	 */
 	private static final Random RANDOM = new Random();
+
+	/**
+	 * ダイジェストメソッド
+	 */
+	private static final ThreadLocal<MessageDigest> SHA256 = ThreadLocal.withInitial(() -> {
+		try {
+			return MessageDigest.getInstance("SHA-256");
+		} catch (final NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	});
 
 	/**
 	 * 怪しいキーワードリスト
@@ -119,24 +144,15 @@ public final class HymnServiceImpl implements IHymnService {
 	}
 
 	/**
-	 * コーパスサイズ
+	 * キャシュー
 	 */
-	private int corpusSize;
-
-	/**
-	 * 計算マップ2
-	 */
-	private final Map<String, Integer> docFreq = new LinkedHashMap<>();
+	@Qualifier("nlpCache")
+	private final Cache<Object, Object> cache;
 
 	/**
 	 * 共通リポジトリ
 	 */
 	private final DSLContext dslContext;
-
-	/**
-	 * 計算マップ1
-	 */
-	private final Map<String, Integer> termToIndex = new LinkedHashMap<>();
 
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String nameJp) {
@@ -172,29 +188,27 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
-	/**
-	 * TF-IDFベクターを計算する
-	 *
-	 * @param originalText 生のストリング
-	 * @return double[]
-	 */
-	private double[] computeTFIDFVector(final String originalText) {
-		final Map<String, Integer> termFreq = this.tokenizeKoreanTextWithFrequency(originalText);
-		final int totalTerms = termFreq.values().stream().mapToInt(Integer::intValue).sum();
-		final double[] vector = new double[this.termToIndex.size()];
-		Arrays.fill(vector, 0.00);
-		termFreq.forEach((term, count) -> {
-			if (this.termToIndex.containsKey(term)) {
-				final int index = this.termToIndex.get(term);
-				// 计算TF
-				final double tf = (double) count / totalTerms;
-				// 计算IDF
-				final int df = this.docFreq.getOrDefault(term, 0);
-				final double idf = Math.log((double) this.corpusSize / (df + 1));
-				vector[index] = tf * idf;
+	// 3) TF-IDF ベクトルキャッシュ
+	private double[] computeTfIdfVector(final String lang, final String hymnVersion, final long hymnId,
+			final String text, final Map<String, Double> idf) {
+		final var key = new VecKey(lang, hymnVersion, hymnId, this.hash(text));
+		final var cached = (double[]) this.cache.getIfPresent(key);
+		if (cached != null) {
+			return cached;
+		}
+		final var tokens = this.tokenize(lang, "KOMORAN", text);
+		final var tf = new HashMap<String, Integer>();
+		tokens.forEach(t -> tf.merge(t, 1, Integer::sum));
+		final var vec = new double[idf.size()];
+		final var termIndex = this.indexOf(idf.keySet()); // term -> position の固定順序マップを作る
+		tf.forEach((term, cnt) -> {
+			final var i = termIndex.get(term);
+			if (i != null) {
+				vec[i] = cnt * idf.getOrDefault(term, 0.0);
 			}
 		});
-		return vector;
+		this.cache.put(key, vec);
+		return vec;
 	}
 
 	/**
@@ -204,12 +218,13 @@ public final class HymnServiceImpl implements IHymnService {
 	 * @param elements 賛美歌リスト
 	 * @return List<HymnsRecord>
 	 */
-	private List<HymnsRecord> findTopTwoMatches(final String target, final List<HymnsRecord> elements) {
-		final List<String> texts = elements.stream().map(HymnsRecord::getSerif).toList();
-		this.preprocessCorpus(texts);
-		final double[] targetVector = this.computeTFIDFVector(target);
-		final List<double[]> elementVectors = elements.stream().map(item -> this.computeTFIDFVector(item.getSerif()))
-				.toList();
+	private List<HymnsRecord> findTopThreeMatches(final HymnsRecord target, final List<HymnsRecord> elements) {
+		final Stream<List<String>> hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.getSerif()));
+		final Map<String, Double> idf = this.getIdf(target.getUpdatedTime().toString(), hymnsStream);
+		final double[] targetVector = this.computeTfIdfVector(KR, target.getUpdatedTime().toString(), target.getId(),
+				target.getSerif(), idf);
+		final List<double[]> elementVectors = elements.stream().map(item -> this.computeTfIdfVector(KR,
+				item.getUpdatedTime().toString(), item.getId(), item.getSerif(), idf)).toList();
 		final PriorityQueue<Entry<HymnsRecord, Double>> maxHeap = new PriorityQueue<>(
 				Comparator.comparing(Entry<HymnsRecord, Double>::getValue).reversed());
 		for (int i = 0; i < elements.size(); i++) {
@@ -337,6 +352,26 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
+	// 2) IDF キャッシュ（コーパススナップショットで）
+	public Map<String, Double> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
+		final var key = new IdfKey(corpusVersion);
+		@SuppressWarnings("unchecked")
+		final var cached = (Map<String, Double>) this.cache.getIfPresent(key);
+		if (cached != null) {
+			return cached;
+		}
+		final Map<String, Integer> df = new HashMap<>();
+		final List<List<String>> list = allDocs.toList();
+		for (final var doc : list) {
+			doc.stream().distinct().forEach(term -> df.merge(term, 1, Integer::sum));
+		}
+		final long totalDocs = list.size();
+		final var idf = df.entrySet().stream().collect(
+				Collectors.toMap(Map.Entry::getKey, e -> Math.log((totalDocs + 1.0) / (e.getValue() + 1.0)) + 1.0));
+		this.cache.put(key, idf);
+		return idf;
+	}
+
 	@Override
 	public CoResult<List<HymnDto>, DataAccessException> getKanumiList(final Long id) {
 		try {
@@ -347,7 +382,7 @@ public final class HymnServiceImpl implements IHymnService {
 					hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null, null, LineNumber.BURGUNDY));
 			final List<HymnsRecord> hymnsRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.ID.ne(id)).fetchInto(HymnsRecord.class);
-			final List<HymnsRecord> topTwoMatches = this.findTopTwoMatches(hymnsRecord.getSerif(), hymnsRecords);
+			final List<HymnsRecord> topTwoMatches = this.findTopThreeMatches(hymnsRecord, hymnsRecords);
 			final List<HymnDto> list = this.mapToDtos(topTwoMatches, LineNumber.NAPLES);
 			hymnDtos.addAll(list);
 			return CoResult.ok(hymnDtos);
@@ -365,6 +400,24 @@ public final class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		}
+	}
+
+	public String hash(final String text) {
+		final var b = SHA256.get().digest(text.getBytes(CoProjectUtils.CHARSET_UTF8));
+		final var sb = new StringBuilder();
+		for (final byte x : b) {
+			sb.append(String.format("%02x", x));
+		}
+		return sb.toString();
+	}
+
+	private Map<String, Integer> indexOf(final Collection<String> terms) {
+		final var map = new HashMap<String, Integer>(terms.size() * 2);
+		int i = 0;
+		for (final var t : terms) {
+			map.put(t, i++);
+		}
+		return map;
 	}
 
 	@Override
@@ -461,27 +514,6 @@ public final class HymnServiceImpl implements IHymnService {
 	}
 
 	/**
-	 * コーパスを取得する
-	 *
-	 * @param originalTexts
-	 */
-	private void preprocessCorpus(final List<String> originalTexts) {
-		this.termToIndex.clear();
-		this.docFreq.clear();
-		this.corpusSize = originalTexts.size();
-		int index = 0;
-		// 第一遍：建立文档频率
-		for (final String doc : originalTexts) {
-			final Map<String, Integer> termFreq = this.tokenizeKoreanTextWithFrequency(doc);
-			termFreq.keySet().forEach(term -> this.docFreq.put(term, this.docFreq.getOrDefault(term, 0) + 1));
-		}
-		// 第二遍：建立词汇表索引
-		for (final String term : this.docFreq.keySet()) {
-			this.termToIndex.put(term, index++);
-		}
-	}
-
-	/**
 	 * ランドム選択ループ1
 	 *
 	 * @param hymnsRecords 選択したレコード
@@ -545,30 +577,30 @@ public final class HymnServiceImpl implements IHymnService {
 		}
 	}
 
-	/**
-	 * テキストによって韓国語単語を取得する
-	 *
-	 * @param originalText テキスト
-	 * @return Map<String, Integer>
-	 */
-	private Map<String, Integer> tokenizeKoreanTextWithFrequency(final @NotNull String originalText) {
+	// 1) 形態素解析キャッシュ
+	private List<String> tokenize(final String lang, final String tokenizer, final String text) {
 		final String regex = "\\p{IsHangul}";
 		final StringBuilder builder = new StringBuilder();
-		for (final char ch : originalText.toCharArray()) {
+		for (final char ch : text.toCharArray()) {
 			if (Pattern.matches(regex, String.valueOf(ch))) {
 				builder.append(ch);
 			}
 		}
 		final String koreanText = builder.toString();
-		if (CoProjectUtils.isEmpty(koreanText)) {
-			return new LinkedHashMap<>();
+		final var key = new TokKey(lang, tokenizer, this.hash(koreanText));
+		@SuppressWarnings("unchecked")
+		final var cached = (List<String>) this.cache.getIfPresent(key);
+		if (cached != null) {
+			return cached;
 		}
-		final List<Token> tokenList = KOMORAN.analyze(koreanText).getTokenList();
-		return tokenList.stream().collect(Collectors.toMap(Token::getMorph, t -> 1, Integer::sum));
+		final var tokens = KOMORAN.analyze(koreanText).getTokenList().stream().map(t -> t.getMorph()) // 正規化前
+				.toList();
+		this.cache.put(key, tokens);
+		return tokens;
 	}
 
 	/**
-	 * セリフの全半角スペースを削除する
+	 * セリフの全角スペースを削除する
 	 *
 	 * @param serif セリフ
 	 * @return トリムドのセリフ
@@ -576,8 +608,7 @@ public final class HymnServiceImpl implements IHymnService {
 	private @NotNull String trimSerif(final @NotNull String serif) {
 		final String zenkakuSpace = "\u3000";
 		final String replace = serif.replace(zenkakuSpace, CoProjectUtils.EMPTY_STRING);
-		final String hankakuSpace = "\u0020";
-		return replace.replace(hankakuSpace, CoProjectUtils.EMPTY_STRING);
+		return replace.trim();
 	}
 
 }
