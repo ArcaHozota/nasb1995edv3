@@ -67,7 +67,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class HymnServiceImpl implements IHymnService {
+public class HymnServiceImpl implements IHymnService {
 
 	/**
 	 * 共通検索条件

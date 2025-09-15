@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class StudentServiceImpl implements IStudentService {
+public class StudentServiceImpl implements IStudentService {
 
 	/**
 	 * 共通検索条件

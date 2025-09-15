@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class BookServiceImpl implements IBookService {
+public class BookServiceImpl implements IBookService {
 
 	/**
 	 * 共通リポジトリ
