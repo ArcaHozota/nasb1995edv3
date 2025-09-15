@@ -86,7 +86,7 @@ public class HymnServiceImpl implements IHymnService {
 	private static final Komoran KOMORAN = new Komoran(DEFAULT_MODEL.FULL);
 
 	/**
-	 * Korean
+	 * Korean Language
 	 */
 	private static final String KR = "Korean";
 
@@ -204,7 +204,7 @@ public class HymnServiceImpl implements IHymnService {
 		final var tf = new HashMap<String, Integer>();
 		tokens.forEach(t -> tf.merge(t, 1, Integer::sum));
 		final var vec = new double[idf.size()];
-		final var termIndex = this.indexOf(idf.keySet()); // term -> position の固定順序マップを作る
+		final Map<String, Integer> termIndex = this.indexOf(idf.keySet()); // term -> position の固定順序マップを作る
 		tf.forEach((term, cnt) -> {
 			final var i = termIndex.get(term);
 			if (i != null) {
@@ -223,13 +223,13 @@ public class HymnServiceImpl implements IHymnService {
 	 * @return List<HymnsRecord>
 	 */
 	private List<HymnsRecord> findTopThreeMatches(final HymnsRecord target, final List<HymnsRecord> elements) {
+		final String corpusVersion = this.getCorpusVersion();
 		final Stream<List<String>> hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.getSerif()));
 		final Map<String, Double> idf = this.getIdf(target.getUpdatedTime().toString(), hymnsStream);
-		final double[] targetVector = this.computeTfIdfVector(KR, this.getCorpusVersion(), target.getId(),
-				target.getSerif(), idf);
+		final double[] targetVector = this.computeTfIdfVector(KR, corpusVersion, target.getId(), target.getSerif(),
+				idf);
 		final List<double[]> elementVectors = elements.stream()
-				.map(item -> this.computeTfIdfVector(KR, this.getCorpusVersion(), item.getId(), item.getSerif(), idf))
-				.toList();
+				.map(item -> this.computeTfIdfVector(KR, corpusVersion, item.getId(), item.getSerif(), idf)).toList();
 		final PriorityQueue<Entry<HymnsRecord, Double>> maxHeap = new PriorityQueue<>(
 				Comparator.comparing(Entry<HymnsRecord, Double>::getValue).reversed());
 		for (int i = 0; i < elements.size(); i++) {
@@ -240,13 +240,13 @@ public class HymnServiceImpl implements IHymnService {
 	}
 
 	@Transactional(readOnly = true)
-	public String getCorpusVersion() {
+	private String getCorpusVersion() {
 		// 1. MAX(updated_at) を取得
-		OffsetDateTime maxUpdatedAt = this.dslContext.select(DSL.max(HYMNS.UPDATED_TIME)).from(HYMNS).fetchOne(0,
+		final OffsetDateTime maxUpdatedAt = this.dslContext.select(DSL.max(HYMNS.UPDATED_TIME)).from(HYMNS).fetchOne(0,
 				OffsetDateTime.class);
 		// 2. null の場合（レコードなし）は現在時刻を代替
 		if (maxUpdatedAt == null) {
-			maxUpdatedAt = OffsetDateTime.now();
+			return OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		}
 		// 3. ISO 文字列に変換
 		return maxUpdatedAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -264,7 +264,7 @@ public class HymnServiceImpl implements IHymnService {
 					.where(StudentServiceImpl.COMMON_CONDITION).and(STUDENTS.ID.eq(hymnsRecord.getUpdatedUser()))
 					.fetchSingle();
 			final ZonedDateTime zonedDateTime = hymnsRecord.getUpdatedTime().atZoneSameInstant(ZoneOffset.ofHours(9));
-			final HymnDto hymnDto = new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
+			final var hymnDto = new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
 					hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), hymnsWorkRecord.getScore(),
 					hymnsWorkRecord.getBiko(), studentsRecord.getUsername(),
 					FORMATTER.format(zonedDateTime.toLocalDateTime()), null);
@@ -375,16 +375,16 @@ public class HymnServiceImpl implements IHymnService {
 
 	// 2) IDF キャッシュ（コーパススナップショットで）
 	private Map<String, Double> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
-		final var key = new IdfKey(corpusVersion);
+		final IdfKey key = new IdfKey(corpusVersion);
 		@SuppressWarnings("unchecked")
-		final var cached = (Map<String, Double>) this.cache.getIfPresent(key);
+		final Map<String, Double> cached = (Map<String, Double>) this.cache.getIfPresent(key);
 		if (cached != null) {
 			return cached;
 		}
 		final Map<String, Integer> df = new HashMap<>();
 		final List<List<String>> list = allDocs.toList();
-		for (final var doc : list) {
-			doc.stream().distinct().forEach(term -> df.merge(term, 1, Integer::sum));
+		for (final List<String> docs : list) {
+			docs.stream().distinct().forEach(term -> df.merge(term, 1, Integer::sum));
 		}
 		final long totalDocs = list.size();
 		final var idf = df.entrySet().stream().collect(
@@ -557,18 +557,18 @@ public class HymnServiceImpl implements IHymnService {
 	 */
 	private @NotNull List<HymnDto> randomFiveLoop(final @NotNull List<HymnDto> hymnsRecords,
 			final @NotNull List<HymnDto> totalRecords) {
-		final List<String> ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
-		final List<HymnDto> filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
-		final List<HymnDto> concernList1 = new ArrayList<>(hymnsRecords);
+		final var ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
+		final var filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
+		final var concernList1 = new ArrayList<>(hymnsRecords);
 		if (hymnsRecords.size() < ProjectConstants.DEFAULT_PAGE_SIZE) {
 			final int sagaku = ProjectConstants.DEFAULT_PAGE_SIZE - hymnsRecords.size();
 			for (int i = 1; i <= sagaku; i++) {
 				final int indexOf = RANDOM.nextInt(filteredRecords.size());
-				final HymnDto hymnsRecord = filteredRecords.get(indexOf);
+				final var hymnsRecord = filteredRecords.get(indexOf);
 				concernList1.add(hymnsRecord);
 			}
 		}
-		final List<HymnDto> concernList2 = concernList1.stream().distinct().toList();
+		final var concernList2 = concernList1.stream().distinct().toList();
 		if (concernList2.size() == ProjectConstants.DEFAULT_PAGE_SIZE) {
 			return concernList2;
 		}
@@ -585,7 +585,7 @@ public class HymnServiceImpl implements IHymnService {
 		final List<HymnDto> concernList1 = new ArrayList<>();
 		for (int i = 1; i <= ProjectConstants.DEFAULT_PAGE_SIZE; i++) {
 			final int indexOf = RANDOM.nextInt(hymnsRecords.size());
-			final HymnDto hymnsRecord = hymnsRecords.get(indexOf);
+			final var hymnsRecord = hymnsRecords.get(indexOf);
 			concernList1.add(hymnsRecord);
 		}
 		final List<HymnDto> concernList2 = concernList1.stream().distinct().toList();
@@ -614,14 +614,14 @@ public class HymnServiceImpl implements IHymnService {
 
 	// 1) 形態素解析キャッシュ
 	private List<String> tokenize(final String lang, final String tokenizer, final String text) {
-		final String regex = "\\p{IsHangul}";
-		final StringBuilder builder = new StringBuilder();
-		for (final char ch : text.toCharArray()) {
+		final var regex = "\\p{IsHangul}";
+		final var builder = new StringBuilder();
+		for (final var ch : text.toCharArray()) {
 			if (Pattern.matches(regex, String.valueOf(ch))) {
 				builder.append(ch);
 			}
 		}
-		final String koreanText = builder.toString();
+		final var koreanText = builder.toString();
 		if (CoProjectUtils.isEmpty(koreanText)) {
 			return new ArrayList<>();
 		}
@@ -644,8 +644,8 @@ public class HymnServiceImpl implements IHymnService {
 	 * @return トリムドのセリフ
 	 */
 	private @NotNull String trimSerif(final @NotNull String serif) {
-		final String zenkakuSpace = "\u3000";
-		final String replace = serif.replace(zenkakuSpace, CoProjectUtils.EMPTY_STRING);
+		final var zenkakuSpace = "\u3000";
+		final var replace = serif.replace(zenkakuSpace, CoProjectUtils.EMPTY_STRING);
 		return replace.trim();
 	}
 
