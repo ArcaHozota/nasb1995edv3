@@ -607,6 +607,9 @@ public class HymnServiceImpl implements IHymnService {
 			}
 		}
 		final String koreanText = builder.toString();
+		if (CoProjectUtils.isEmpty(koreanText)) {
+			return new ArrayList<>();
+		}
 		final var key = new TokKey(lang, tokenizer, this.hash(koreanText));
 		@SuppressWarnings("unchecked")
 		final var cached = (List<String>) this.cache.getIfPresent(key);
