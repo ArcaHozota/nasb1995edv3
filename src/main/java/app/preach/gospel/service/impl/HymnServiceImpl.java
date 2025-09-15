@@ -31,6 +31,7 @@ import org.jooq.DSLContext;
 import org.jooq.exception.ConfigurationException;
 import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -224,10 +225,11 @@ public class HymnServiceImpl implements IHymnService {
 	private List<HymnsRecord> findTopThreeMatches(final HymnsRecord target, final List<HymnsRecord> elements) {
 		final Stream<List<String>> hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.getSerif()));
 		final Map<String, Double> idf = this.getIdf(target.getUpdatedTime().toString(), hymnsStream);
-		final double[] targetVector = this.computeTfIdfVector(KR, target.getUpdatedTime().toString(), target.getId(),
+		final double[] targetVector = this.computeTfIdfVector(KR, this.getCorpusVersion(), target.getId(),
 				target.getSerif(), idf);
-		final List<double[]> elementVectors = elements.stream().map(item -> this.computeTfIdfVector(KR,
-				item.getUpdatedTime().toString(), item.getId(), item.getSerif(), idf)).toList();
+		final List<double[]> elementVectors = elements.stream()
+				.map(item -> this.computeTfIdfVector(KR, this.getCorpusVersion(), item.getId(), item.getSerif(), idf))
+				.toList();
 		final PriorityQueue<Entry<HymnsRecord, Double>> maxHeap = new PriorityQueue<>(
 				Comparator.comparing(Entry<HymnsRecord, Double>::getValue).reversed());
 		for (int i = 0; i < elements.size(); i++) {
@@ -235,6 +237,19 @@ public class HymnServiceImpl implements IHymnService {
 			maxHeap.add(new AbstractMap.SimpleEntry<>(elements.get(i), similarity));
 		}
 		return maxHeap.stream().limit(3).map(Entry::getKey).toList();
+	}
+
+	@Transactional(readOnly = true)
+	public String getCorpusVersion() {
+		// 1. MAX(updated_at) を取得
+		OffsetDateTime maxUpdatedAt = this.dslContext.select(DSL.max(HYMNS.UPDATED_TIME)).from(HYMNS).fetchOne(0,
+				OffsetDateTime.class);
+		// 2. null の場合（レコードなし）は現在時刻を代替
+		if (maxUpdatedAt == null) {
+			maxUpdatedAt = OffsetDateTime.now();
+		}
+		// 3. ISO 文字列に変換
+		return maxUpdatedAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 	}
 
 	@Transactional(readOnly = true)
