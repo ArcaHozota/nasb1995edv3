@@ -1,45 +1,46 @@
 server:
-  compression:
-    enabled: true
-    min-response-size: 1024
-  http2:
-    enabled: false          # 前段が対応なら有効化
-  tomcat:
-    max-keep-alive-requests: 1000
-    keep-alive-timeout: 30s
-    threads:
-      max: 128
-    accept-count: 1000
+   compression:
+      enabled: true
+      min-response-size: 1024
+   http2:
+      enabled: true # 前段が対応なら有効化
+   tomcat:
+      max-keep-alive-requests: 1000
+      keep-alive-timeout: 30s
+      threads:
+         max: 128
+      accept-count: 1000
 spring:
-  application:
-    name: nasb1995edv3
-  servlet:
-    multipart:
-      max-file-size: 2MB
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://database-1.cdd6uaafebcj.ap-northeast-1.rds.amazonaws.com:5432/nasb1995?reWriteBatchedInserts=true
-    username: postgres
-    password: postgres
-    hikari:
-      maximum-pool-size: 40
-      minimum-idle: 10
-      connection-timeout: 30000
-      max-lifetime: 1200000
-      leak-detection-threshold: 20000
-  web:
-    resource:
-      cache:
-        cachecontrol:
-          max-age: 31536000
-          cache-public: true
-  freemarker:
-    charset: UTF-8
-    allow-request-override: true
-    allow-session-override: true
-    template-loader-path: classpath:/templates/
-    suffix: .ftlh
-    settings:
-      {datetimeFormat: yyyy-MM-dd HH:mm:ss, templateUpdateDelay: 0ms}
-  profiles:
-    active: prod
+   application:
+      name: nasb1995edv3
+   servlet:
+      multipart:
+         max-file-size: 2MB
+   datasource:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://database-1.cdd6uaafebcj.ap-northeast-1.rds.amazonaws.com:5432/nasb1995?reWriteBatchedInserts=true
+      username: postgres
+      password: postgres
+      hikari:
+         maximum-pool-size: 40
+         minimum-idle: 10
+         connection-timeout: 30000
+         max-lifetime: 1200000
+         leak-detection-threshold: 20000
+   web:
+      resource:
+         cache:
+            cachecontrol:
+               max-age: 31536000
+               cache-public: true
+   freemarker:
+      charset: UTF-8
+      allow-request-override: true
+      allow-session-override: true
+      template-loader-path: classpath:/templates/
+      suffix: .ftlh
+      settings:
+         datetimeFormat: yyyy-MM-dd HH:mm:ss
+         templateUpdateDelay: 0ms
+   profiles:
+      active: prod
