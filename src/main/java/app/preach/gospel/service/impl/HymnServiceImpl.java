@@ -66,7 +66,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Service
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class HymnServiceImpl implements IHymnService {
 
 	/**

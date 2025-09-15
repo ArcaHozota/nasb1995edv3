@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
  * @since 1.00beta
  */
 @Service
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookServiceImpl implements IBookService {
 
 	/**
