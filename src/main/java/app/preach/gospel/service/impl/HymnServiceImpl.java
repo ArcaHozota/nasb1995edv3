@@ -557,22 +557,18 @@ public class HymnServiceImpl implements IHymnService {
 	 */
 	private @NotNull List<HymnDto> randomFiveLoop(final @NotNull List<HymnDto> hymnsRecords,
 			final @NotNull List<HymnDto> totalRecords) {
-		final var ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
-		final var filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
-		final var concernList1 = new ArrayList<>(hymnsRecords);
-		if (hymnsRecords.size() < ProjectConstants.DEFAULT_PAGE_SIZE) {
-			final int sagaku = ProjectConstants.DEFAULT_PAGE_SIZE - hymnsRecords.size();
-			for (int i = 1; i <= sagaku; i++) {
-				final int indexOf = RANDOM.nextInt(filteredRecords.size());
-				final var hymnsRecord = filteredRecords.get(indexOf);
-				concernList1.add(hymnsRecord);
-			}
+		final List<String> ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
+		// 既に含まれていないレコード候補
+		final List<HymnDto> filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
+		// 結果リストを初期化
+		final List<HymnDto> result = new ArrayList<>(hymnsRecords);
+		// 足りない分をランダム補充
+		while (result.stream().distinct().count() < ProjectConstants.DEFAULT_PAGE_SIZE && !filteredRecords.isEmpty()) {
+			final int indexOf = RANDOM.nextInt(filteredRecords.size());
+			result.add(filteredRecords.get(indexOf));
 		}
-		final var concernList2 = concernList1.stream().distinct().toList();
-		if (concernList2.size() == ProjectConstants.DEFAULT_PAGE_SIZE) {
-			return concernList2;
-		}
-		return this.randomFiveLoop(concernList2, filteredRecords);
+		// 最終的に distinct して返す
+		return result.stream().distinct().toList();
 	}
 
 	/**
