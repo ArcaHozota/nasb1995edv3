@@ -16,8 +16,6 @@ import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.BookDto;
 import app.preach.gospel.dto.ChapterDto;
 import app.preach.gospel.dto.PhraseDto;
-import app.preach.gospel.jooq.tables.records.ChaptersRecord;
-import app.preach.gospel.jooq.tables.records.PhrasesRecord;
 import app.preach.gospel.service.IBookService;
 import app.preach.gospel.utils.CoProjectUtils;
 import app.preach.gospel.utils.CoResult;
@@ -43,7 +41,7 @@ public class BookServiceImpl implements IBookService {
 	@Override
 	public CoResult<List<BookDto>, DataAccessException> getBooks() {
 		try {
-			final List<BookDto> bookDtos = this.dslContext.selectFrom(BOOKS).orderBy(BOOKS.ID.asc())
+			final var bookDtos = this.dslContext.selectFrom(BOOKS).orderBy(BOOKS.ID.asc())
 					.fetch(r -> new BookDto(r.get(BOOKS.ID).toString(), r.get(BOOKS.NAME), r.get(BOOKS.NAME_JP)));
 			return CoResult.ok(bookDtos);
 		} catch (final DataAccessException e) {
@@ -56,16 +54,15 @@ public class BookServiceImpl implements IBookService {
 	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final String id) {
 		try {
 			if (CoProjectUtils.isDigital(id)) {
-				final List<ChapterDto> chapterDtos = this.dslContext.selectFrom(CHAPTERS)
+				final var chapterDtos = this.dslContext.selectFrom(CHAPTERS)
 						.where(CHAPTERS.BOOK_ID.eq(Short.valueOf(id))).orderBy(CHAPTERS.ID.asc())
 						.fetch(r -> new ChapterDto(r.get(CHAPTERS.ID).toString(), r.get(CHAPTERS.NAME),
 								r.get(CHAPTERS.NAME_JP), r.get(CHAPTERS.BOOK_ID).toString()));
 				return CoResult.ok(chapterDtos);
 			}
-			final List<ChapterDto> chapterDtos = this.dslContext.selectFrom(CHAPTERS)
-					.where(CHAPTERS.BOOK_ID.eq(Short.valueOf("1"))).orderBy(CHAPTERS.ID.asc())
-					.fetch(r -> new ChapterDto(r.get(CHAPTERS.ID).toString(), r.get(CHAPTERS.NAME),
-							r.get(CHAPTERS.NAME_JP), r.get(CHAPTERS.BOOK_ID).toString()));
+			final var chapterDtos = this.dslContext.selectFrom(CHAPTERS).where(CHAPTERS.BOOK_ID.eq(Short.valueOf("1")))
+					.orderBy(CHAPTERS.ID.asc()).fetch(r -> new ChapterDto(r.get(CHAPTERS.ID).toString(),
+							r.get(CHAPTERS.NAME), r.get(CHAPTERS.NAME_JP), r.get(CHAPTERS.BOOK_ID).toString()));
 			return CoResult.ok(chapterDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -74,20 +71,20 @@ public class BookServiceImpl implements IBookService {
 
 	@Override
 	public CoResult<String, DataAccessException> infoStorage(final @NotNull PhraseDto phraseDto) {
-		final Long id = Long.valueOf(phraseDto.id());
-		final Integer chapterId = Integer.valueOf(phraseDto.chapterId());
+		final var id = Long.valueOf(phraseDto.id());
+		final var chapterId = Integer.valueOf(phraseDto.chapterId());
 		try {
-			final ChaptersRecord chaptersRecord = this.dslContext.selectFrom(CHAPTERS).where(CHAPTERS.ID.eq(chapterId))
+			final var chaptersRecord = this.dslContext.selectFrom(CHAPTERS).where(CHAPTERS.ID.eq(chapterId))
 					.fetchSingle();
-			final PhrasesRecord phrasesRecord = this.dslContext.newRecord(PHRASES);
+			final var phrasesRecord = this.dslContext.newRecord(PHRASES);
 			phrasesRecord.setId((chapterId * 1000) + id);
-			final PhrasesRecord fetchOne = this.dslContext.selectFrom(PHRASES)
-					.where(PHRASES.ID.eq(phrasesRecord.getId())).fetchOne();
+			final var fetchOne = this.dslContext.selectFrom(PHRASES).where(PHRASES.ID.eq(phrasesRecord.getId()))
+					.fetchOne();
 			if (fetchOne != null) {
 				fetchOne.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
 				fetchOne.setTextJp(phraseDto.textJp());
 				fetchOne.setChapterId(chapterId);
-				final String textEn = phraseDto.textEn();
+				final var textEn = phraseDto.textEn();
 				if (textEn.endsWith("#")) {
 					fetchOne.setTextEn(textEn.replace("#", CoProjectUtils.EMPTY_STRING));
 					fetchOne.setChangeLine(Boolean.TRUE);
@@ -101,7 +98,7 @@ public class BookServiceImpl implements IBookService {
 			phrasesRecord.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
 			phrasesRecord.setTextJp(phraseDto.textJp());
 			phrasesRecord.setChapterId(chapterId);
-			final String textEn = phraseDto.textEn();
+			final var textEn = phraseDto.textEn();
 			if (textEn.endsWith("#")) {
 				phrasesRecord.setTextEn(textEn.replace("#", CoProjectUtils.EMPTY_STRING));
 				phrasesRecord.setChangeLine(Boolean.TRUE);

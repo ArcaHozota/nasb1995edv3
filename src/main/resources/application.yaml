@@ -3,8 +3,6 @@ server:
    compression:
       enabled: true
       min-response-size: 1024
-   # http2:
-      # enabled: true # 前段が対応なら有効化
    tomcat:
       max-keep-alive-requests: 1000
       keep-alive-timeout: 30s
@@ -28,12 +26,6 @@ spring:
          connection-timeout: 30000
          max-lifetime: 1200000
          leak-detection-threshold: 20000
-   web:
-      resource:
-         cache:
-            cachecontrol:
-               max-age: 31536000
-               cache-public: true
    freemarker:
       charset: UTF-8
       allow-request-override: true

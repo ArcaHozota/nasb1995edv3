@@ -8,7 +8,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -45,8 +43,6 @@ import app.preach.gospel.dto.TokKey;
 import app.preach.gospel.dto.VecKey;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.tables.records.HymnsRecord;
-import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
-import app.preach.gospel.jooq.tables.records.StudentsRecord;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoProjectUtils;
 import app.preach.gospel.utils.CoResult;
@@ -146,27 +142,27 @@ public class HymnServiceImpl implements IHymnService {
 	}
 
 	/**
-	 * キャシュー
-	 */
-	@Qualifier("nlpCache")
-	private final Cache<Object, Object> cache;
-
-	/**
 	 * 共通リポジトリ
 	 */
 	private final DSLContext dslContext;
+
+	/**
+	 * キャシュー
+	 */
+	@Qualifier("nlpCache")
+	private final Cache<Object, Object> nlpCache;
 
 	@Transactional(readOnly = true)
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String nameJp) {
 		try {
 			if (CoProjectUtils.isDigital(id)) {
-				final Integer checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
+				final var checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 						.and(HYMNS.ID.ne(Long.parseLong(id))).and(HYMNS.NAME_JP.eq(nameJp)).fetchSingle()
 						.into(Integer.class);
 				return CoResult.ok(checkDuplicated);
 			}
-			final Integer checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
+			final var checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.eq(nameJp)).fetchSingle().into(Integer.class);
 			return CoResult.ok(checkDuplicated);
 		} catch (final DataAccessException e) {
@@ -179,12 +175,12 @@ public class HymnServiceImpl implements IHymnService {
 	public CoResult<Integer, DataAccessException> checkDuplicated2(final String id, final String nameKr) {
 		try {
 			if (CoProjectUtils.isDigital(id)) {
-				final Integer checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
+				final var checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 						.and(HYMNS.ID.ne(Long.parseLong(id))).and(HYMNS.NAME_KR.eq(nameKr)).fetchSingle()
 						.into(Integer.class);
 				return CoResult.ok(checkDuplicated);
 			}
-			final Integer checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
+			final var checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_KR.eq(nameKr)).fetchSingle().into(Integer.class);
 			return CoResult.ok(checkDuplicated);
 		} catch (final DataAccessException e) {
@@ -196,7 +192,7 @@ public class HymnServiceImpl implements IHymnService {
 	private double[] computeTfIdfVector(final String lang, final String hymnVersion, final long hymnId,
 			final String text, final Map<String, Double> idf) {
 		final var key = new VecKey(lang, hymnVersion, hymnId, this.hash(text));
-		final var cached = (double[]) this.cache.getIfPresent(key);
+		final var cached = (double[]) this.nlpCache.getIfPresent(key);
 		if (cached != null) {
 			return cached;
 		}
@@ -211,7 +207,7 @@ public class HymnServiceImpl implements IHymnService {
 				vec[i] = cnt * idf.getOrDefault(term, 0.0);
 			}
 		});
-		this.cache.put(key, vec);
+		this.nlpCache.put(key, vec);
 		return vec;
 	}
 
@@ -222,27 +218,28 @@ public class HymnServiceImpl implements IHymnService {
 	 * @param elements 賛美歌リスト
 	 * @return List<HymnsRecord>
 	 */
-	private List<HymnsRecord> findTopThreeMatches(final HymnsRecord target, final List<HymnsRecord> elements) {
+	private List<HymnDto> findTopThreeMatches(final HymnDto target, final List<HymnDto> elements) {
 		final String corpusVersion = this.getCorpusVersion();
-		final Stream<List<String>> hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.getSerif()));
-		final Map<String, Double> idf = this.getIdf(target.getUpdatedTime().toString(), hymnsStream);
-		final double[] targetVector = this.computeTfIdfVector(KR, corpusVersion, target.getId(), target.getSerif(),
-				idf);
+		final Stream<List<String>> hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.serif()));
+		final Map<String, Double> idf = this.getIdf(target.updatedTime().toString(), hymnsStream);
+		final double[] targetVector = this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(target.id()),
+				target.serif(), idf);
 		final List<double[]> elementVectors = elements.stream()
-				.map(item -> this.computeTfIdfVector(KR, corpusVersion, item.getId(), item.getSerif(), idf)).toList();
-		final PriorityQueue<Entry<HymnsRecord, Double>> maxHeap = new PriorityQueue<>(
-				Comparator.comparing(Entry<HymnsRecord, Double>::getValue).reversed());
+				.map(item -> this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(item.id()), item.serif(), idf))
+				.toList();
+		final PriorityQueue<Map.Entry<HymnDto, Double>> maxHeap = new PriorityQueue<>(
+				Comparator.comparing(Map.Entry<HymnDto, Double>::getValue).reversed());
 		for (int i = 0; i < elements.size(); i++) {
 			final double similarity = HymnServiceImpl.cosineSimilarity(targetVector, elementVectors.get(i));
 			maxHeap.add(new AbstractMap.SimpleEntry<>(elements.get(i), similarity));
 		}
-		return maxHeap.stream().limit(3).map(Entry::getKey).toList();
+		return maxHeap.stream().limit(3).map(Map.Entry::getKey).toList();
 	}
 
 	@Transactional(readOnly = true)
 	private String getCorpusVersion() {
 		// 1. MAX(updated_at) を取得
-		final OffsetDateTime maxUpdatedAt = this.dslContext.select(DSL.max(HYMNS.UPDATED_TIME)).from(HYMNS).fetchOne(0,
+		final var maxUpdatedAt = this.dslContext.select(DSL.max(HYMNS.UPDATED_TIME)).from(HYMNS).fetchOne(0,
 				OffsetDateTime.class);
 		// 2. null の場合（レコードなし）は現在時刻を代替
 		if (maxUpdatedAt == null) {
@@ -256,14 +253,13 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<HymnDto, DataAccessException> getHymnInfoById(final Long id) {
 		try {
-			final HymnsRecord hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-					.and(HYMNS.ID.eq(id)).fetchSingle();
-			final HymnsWorkRecord hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK)
-					.where(HYMNS_WORK.WORK_ID.eq(id)).fetchSingle();
-			final StudentsRecord studentsRecord = this.dslContext.selectFrom(STUDENTS)
-					.where(StudentServiceImpl.COMMON_CONDITION).and(STUDENTS.ID.eq(hymnsRecord.getUpdatedUser()))
+			final var hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).and(HYMNS.ID.eq(id))
 					.fetchSingle();
-			final ZonedDateTime zonedDateTime = hymnsRecord.getUpdatedTime().atZoneSameInstant(ZoneOffset.ofHours(9));
+			final var hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id))
+					.fetchSingle();
+			final var studentsRecord = this.dslContext.selectFrom(STUDENTS).where(StudentServiceImpl.COMMON_CONDITION)
+					.and(STUDENTS.ID.eq(hymnsRecord.getUpdatedUser())).fetchSingle();
+			final var zonedDateTime = hymnsRecord.getUpdatedTime().atZoneSameInstant(ZoneOffset.ofHours(9));
 			final var hymnDto = new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
 					hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), hymnsWorkRecord.getScore(),
 					hymnsWorkRecord.getBiko(), studentsRecord.getUsername(),
@@ -280,14 +276,16 @@ public class HymnServiceImpl implements IHymnService {
 			final String keyword) {
 		try {
 			final String searchStr = getHymnSpecification(keyword);
-			final Long totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
+			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr))).fetchSingle()
 					.into(Long.class);
 			final int offset = (pageNum - 1) * ProjectConstants.DEFAULT_PAGE_SIZE;
-			final List<HymnsRecord> hymnsRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+			final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr))).orderBy(HYMNS.ID.asc())
-					.limit(ProjectConstants.DEFAULT_PAGE_SIZE).offset(offset).fetchInto(HymnsRecord.class);
-			final List<HymnDto> hymnDtos = this.mapToDtos(hymnsRecords, LineNumber.SNOWY);
+					.limit(ProjectConstants.DEFAULT_PAGE_SIZE).offset(offset)
+					.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+							rd.getLink(), null, null, rd.getUpdatedUser().toString(), rd.getUpdatedTime().toString(),
+							LineNumber.SNOWY));
 			final Pagination<HymnDto> pagination = Pagination.of(hymnDtos, totalRecords, pageNum,
 					ProjectConstants.DEFAULT_PAGE_SIZE);
 			return CoResult.ok(pagination);
@@ -302,57 +300,71 @@ public class HymnServiceImpl implements IHymnService {
 		try {
 			for (final String starngement : STRANGE_ARRAY) {
 				if (keyword.toLowerCase().contains(starngement) || keyword.length() >= 100) {
-					final List<HymnDto> hymnDtos = this.mapToDtos(
-							this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
-									.limit(ProjectConstants.DEFAULT_PAGE_SIZE).fetchInto(HymnsRecord.class),
-							LineNumber.SNOWY);
+					final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+							.orderBy(HYMNS.ID.asc()).limit(ProjectConstants.DEFAULT_PAGE_SIZE)
+							.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(),
+									rd.getSerif(), rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+									rd.getUpdatedTime().toString(), LineNumber.SNOWY));
 					log.error("怪しいキーワード： " + keyword);
 					return CoResult.ok(hymnDtos);
 				}
 			}
 			if (CoProjectUtils.isEmpty(keyword)) {
-				final List<HymnDto> totalRecords = this.mapToDtos(
-						this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).fetchInto(HymnsRecord.class),
-						LineNumber.SNOWY);
+				final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+								rd.getUpdatedTime().toString(), LineNumber.SNOWY));
 				final List<HymnDto> hymnDtos1 = this.randomFiveLoop2(totalRecords);
 				return CoResult.ok(hymnDtos1);
 			}
-			final List<HymnDto> withName = this.mapToDtos(this.dslContext.select(HYMNS.fields()).from(HYMNS)
-					.innerJoin(HYMNS_WORK).onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))
 							.or(HYMNS_WORK.NAME_JP_RATIONAL.like("%[".concat(keyword).concat("]%"))))
-					.fetchInto(HymnsRecord.class), LineNumber.CADMIUM);
+					.fetch(r -> {
+						final var rd = (HymnsRecord) r;
+						return new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+								rd.getUpdatedTime().toString(), LineNumber.CADMIUM);
+					});
 			final List<HymnDto> hymnDtos = new ArrayList<>(withName);
-			final List<String> withNameIds = withName.stream().map(HymnDto::id).toList();
-			final String specification = getHymnSpecification(keyword);
-			final List<HymnDto> withNameLike = this.mapToDtos(
-					this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-							.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-							.and(HYMNS.NAME_JP.like(specification).or(HYMNS.NAME_KR.like(specification))
-									.or(HYMNS_WORK.NAME_JP_RATIONAL.like(specification)))
-							.fetchInto(HymnsRecord.class).stream()
-							.filter(a -> !withNameIds.contains(a.getId().toString())).toList(),
-					LineNumber.BURGUNDY);
+			final var withNameIds = withName.stream().map(HymnDto::id).toList();
+			final var specification = getHymnSpecification(keyword);
+			final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.and(HYMNS.NAME_JP.like(specification).or(HYMNS.NAME_KR.like(specification))
+							.or(HYMNS_WORK.NAME_JP_RATIONAL.like(specification)))
+					.fetch(r -> {
+						final var rd = (HymnsRecord) r;
+						if (withNameIds.contains(rd.getId().toString())) {
+							return null;
+						}
+						return new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+								rd.getUpdatedTime().toString(), LineNumber.BURGUNDY);
+					});
 			hymnDtos.addAll(withNameLike);
-			final List<String> withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
+			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
 				final List<HymnDto> randomFiveLoop = this.randomFiveLoop(withName, withNameLike);
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
-			final List<HymnDto> withRandomFive = this
-					.mapToDtos(
-							this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-									.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-									.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
-											.or(HYMNS_WORK.NAME_JP_RATIONAL.like(detailKeyword)
-													.or(HYMNS.SERIF.like(detailKeyword))))
-									.fetchInto(HymnsRecord.class).stream()
-									.filter(a -> !withNameIds.contains(a.getId().toString())
-											&& !withNameLikeIds.contains(a.getId().toString()))
-									.toList(),
-							LineNumber.NAPLES);
+			final List<HymnDto> withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS)
+					.innerJoin(HYMNS_WORK).onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
+							.or(HYMNS_WORK.NAME_JP_RATIONAL.like(detailKeyword).or(HYMNS.SERIF.like(detailKeyword))))
+					.fetch(r -> {
+						final var rd = (HymnsRecord) r;
+						if (withNameIds.contains(rd.getId().toString())
+								|| withNameLikeIds.contains(rd.getId().toString())) {
+							return null;
+						}
+						return new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+								rd.getUpdatedTime().toString(), LineNumber.NAPLES);
+					});
 			hymnDtos.addAll(withRandomFive);
 			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
 				final List<HymnDto> hymnDtos2 = new ArrayList<>();
@@ -362,9 +374,10 @@ public class HymnServiceImpl implements IHymnService {
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
-			final List<HymnDto> totalRecords = this.mapToDtos(
-					this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).fetchInto(HymnsRecord.class),
-					LineNumber.SNOWY);
+			final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+					.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+							rd.getLink(), null, null, rd.getUpdatedUser().toString(), rd.getUpdatedTime().toString(),
+							LineNumber.SNOWY));
 			final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos, totalRecords);
 			return CoResult.ok(randomFiveLoop.stream()
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
@@ -377,19 +390,19 @@ public class HymnServiceImpl implements IHymnService {
 	private Map<String, Double> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
 		final IdfKey key = new IdfKey(corpusVersion);
 		@SuppressWarnings("unchecked")
-		final Map<String, Double> cached = (Map<String, Double>) this.cache.getIfPresent(key);
+		final var cached = (Map<String, Double>) this.nlpCache.getIfPresent(key);
 		if (cached != null) {
 			return cached;
 		}
 		final Map<String, Integer> df = new HashMap<>();
-		final List<List<String>> list = allDocs.toList();
-		for (final List<String> docs : list) {
+		final var list = allDocs.toList();
+		for (final var docs : list) {
 			docs.stream().distinct().forEach(term -> df.merge(term, 1, Integer::sum));
 		}
 		final long totalDocs = list.size();
 		final var idf = df.entrySet().stream().collect(
 				Collectors.toMap(Map.Entry::getKey, e -> Math.log((totalDocs + 1.0) / (e.getValue() + 1.0)) + 1.0));
-		this.cache.put(key, idf);
+		this.nlpCache.put(key, idf);
 		return idf;
 	}
 
@@ -397,16 +410,17 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<List<HymnDto>, DataAccessException> getKanumiList(final Long id) {
 		try {
-			final HymnsRecord hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-					.and(HYMNS.ID.eq(id)).fetchSingle();
+			final var hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).and(HYMNS.ID.eq(id))
+					.fetchSingle();
 			final List<HymnDto> hymnDtos = new ArrayList<>();
 			hymnDtos.add(new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(), hymnsRecord.getNameKr(),
 					hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null, null, LineNumber.BURGUNDY));
-			final List<HymnsRecord> hymnsRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-					.and(HYMNS.ID.ne(id)).fetchInto(HymnsRecord.class);
-			final List<HymnsRecord> topTwoMatches = this.findTopThreeMatches(hymnsRecord, hymnsRecords);
-			final List<HymnDto> list = this.mapToDtos(topTwoMatches, LineNumber.NAPLES);
-			hymnDtos.addAll(list);
+			final var list = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).and(HYMNS.ID.ne(id))
+					.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
+							rd.getLink(), null, null, rd.getUpdatedUser().toString(), rd.getUpdatedTime().toString(),
+							LineNumber.NAPLES));
+			final var topThreeMatches = this.findTopThreeMatches(hymnDtos.get(0), list);
+			hymnDtos.addAll(topThreeMatches);
 			return CoResult.ok(hymnDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -417,7 +431,7 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<Long, DataAccessException> getTotalCounts() {
 		try {
-			final Long totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
+			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
 			return CoResult.ok(totalRecords);
 		} catch (final DataAccessException e) {
@@ -458,8 +472,8 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<String, DataAccessException> infoDeletion(final Long id) {
 		try {
-			final HymnsRecord hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-					.and(HYMNS.ID.eq(id)).fetchSingle();
+			final var hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).and(HYMNS.ID.eq(id))
+					.fetchSingle();
 			hymnsRecord.setVisibleFlg(Boolean.FALSE);
 			this.dslContext.deleteFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id)).execute();
 			hymnsRecord.update();
@@ -472,8 +486,8 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<Integer, DataAccessException> infoStorage(final @NotNull HymnDto hymnDto) {
 		try {
-			final HymnsRecord hymnsRecord = this.dslContext.newRecord(HYMNS);
-			final String trimedSerif = this.trimSerif(hymnDto.serif());
+			final var hymnsRecord = this.dslContext.newRecord(HYMNS);
+			final var trimedSerif = this.trimSerif(hymnDto.serif());
 			hymnsRecord.setId(SnowflakeUtils.snowflakeId());
 			hymnsRecord.setNameJp(hymnDto.nameJp());
 			hymnsRecord.setNameKr(hymnDto.nameKr());
@@ -483,11 +497,11 @@ public class HymnServiceImpl implements IHymnService {
 			hymnsRecord.setUpdatedUser(Long.parseLong(hymnDto.updatedUser()));
 			hymnsRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsRecord.insert();
-			final HymnsWorkRecord hymnsWorkRecord = this.dslContext.newRecord(HYMNS_WORK);
+			final var hymnsWorkRecord = this.dslContext.newRecord(HYMNS_WORK);
 			hymnsWorkRecord.setWorkId(hymnsRecord.getId());
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsWorkRecord.insert();
-			final Long totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
+			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
 			final int discernLargestPage = CoProjectUtils.discernLargestPage(totalRecords);
 			return CoResult.ok(discernLargestPage);
@@ -499,17 +513,17 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<String, DataAccessException> infoUpdation(final @NotNull HymnDto hymnDto) {
 		try {
-			final HymnsRecord hymnsRecord = this.dslContext.newRecord(HYMNS);
+			final var hymnsRecord = this.dslContext.newRecord(HYMNS);
 			hymnsRecord.setId(Long.valueOf(hymnDto.id()));
 			hymnsRecord.setNameJp(hymnDto.nameJp());
 			hymnsRecord.setNameKr(hymnDto.nameKr());
 			hymnsRecord.setLink(hymnDto.link());
 			hymnsRecord.setSerif(hymnDto.serif());
 			hymnsRecord.setVisibleFlg(Boolean.TRUE);
-			final HymnsRecord hymnsRecord2 = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+			final var hymnsRecord2 = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 					.and(HYMNS.ID.eq(hymnsRecord.getId())).fetchSingle();
-			final String updatedTime1 = hymnDto.updatedTime();
-			final String updatedTime2 = FORMATTER
+			final var updatedTime1 = hymnDto.updatedTime();
+			final var updatedTime2 = FORMATTER
 					.format(hymnsRecord2.getUpdatedTime().atZoneSameInstant(ZoneOffset.ofHours(9)).toLocalDateTime());
 			hymnsRecord2.setUpdatedTime(null);
 			hymnsRecord2.setUpdatedUser(null);
@@ -519,7 +533,7 @@ public class HymnServiceImpl implements IHymnService {
 			if (CoProjectUtils.isNotEqual(updatedTime1, updatedTime2)) {
 				return CoResult.err(new DataChangedException(ProjectConstants.MESSAGE_OPTIMISTIC_ERROR));
 			}
-			final String trimedSerif = this.trimSerif(hymnsRecord.getSerif());
+			final var trimedSerif = this.trimSerif(hymnsRecord.getSerif());
 			hymnsRecord2.setNameJp(hymnsRecord.getNameJp());
 			hymnsRecord2.setNameKr(hymnsRecord.getNameKr());
 			hymnsRecord2.setLink(hymnsRecord.getLink());
@@ -534,21 +548,6 @@ public class HymnServiceImpl implements IHymnService {
 	}
 
 	/**
-	 * DTOへ変換する
-	 *
-	 * @param hymns      賛美歌リスト
-	 * @param lineNumber 行番号
-	 * @return List<HymnDto>
-	 */
-	private List<HymnDto> mapToDtos(final @NotNull List<HymnsRecord> hymns, final LineNumber lineNumber) {
-		return hymns.stream()
-				.map(hymnsRecord -> new HymnDto(hymnsRecord.getId().toString(), hymnsRecord.getNameJp(),
-						hymnsRecord.getNameKr(), hymnsRecord.getSerif(), hymnsRecord.getLink(), null, null, null, null,
-						lineNumber))
-				.toList();
-	}
-
-	/**
 	 * ランドム選択ループ1
 	 *
 	 * @param hymnsRecords 選択したレコード
@@ -557,11 +556,11 @@ public class HymnServiceImpl implements IHymnService {
 	 */
 	private @NotNull List<HymnDto> randomFiveLoop(final @NotNull List<HymnDto> hymnsRecords,
 			final @NotNull List<HymnDto> totalRecords) {
-		final List<String> ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
+		final var ids = hymnsRecords.stream().map(HymnDto::id).distinct().toList();
 		// 既に含まれていないレコード候補
-		final List<HymnDto> filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
+		final var filteredRecords = totalRecords.stream().filter(item -> !ids.contains(item.id())).toList();
 		// 結果リストを初期化
-		final List<HymnDto> result = new ArrayList<>(hymnsRecords);
+		final var result = new ArrayList<>(hymnsRecords);
 		// 足りない分をランダム補充
 		while (result.stream().distinct().count() < ProjectConstants.DEFAULT_PAGE_SIZE && !filteredRecords.isEmpty()) {
 			final int indexOf = RANDOM.nextInt(filteredRecords.size());
@@ -584,7 +583,7 @@ public class HymnServiceImpl implements IHymnService {
 			final var hymnsRecord = hymnsRecords.get(indexOf);
 			concernList1.add(hymnsRecord);
 		}
-		final List<HymnDto> concernList2 = concernList1.stream().distinct().toList();
+		final var concernList2 = concernList1.stream().distinct().toList();
 		if (concernList2.size() == ProjectConstants.DEFAULT_PAGE_SIZE) {
 			return concernList2;
 		}
@@ -594,8 +593,8 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<String, DataAccessException> scoreStorage(final @NotNull byte[] file, final Long id) {
 		try {
-			final HymnsWorkRecord hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK)
-					.where(HYMNS_WORK.WORK_ID.eq(id)).fetchSingle();
+			final var hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id))
+					.fetchSingle();
 			if (Arrays.equals(hymnsWorkRecord.getScore(), file)) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
@@ -623,13 +622,13 @@ public class HymnServiceImpl implements IHymnService {
 		}
 		final var key = new TokKey(lang, tokenizer, this.hash(koreanText));
 		@SuppressWarnings("unchecked")
-		final var cached = (List<String>) this.cache.getIfPresent(key);
+		final var cached = (List<String>) this.nlpCache.getIfPresent(key);
 		if (cached != null) {
 			return cached;
 		}
 		final var tokens = KOMORAN.analyze(koreanText).getTokenList().stream().map(t -> t.getMorph()) // 正規化前
 				.toList();
-		this.cache.put(key, tokens);
+		this.nlpCache.put(key, tokens);
 		return tokens;
 	}
 

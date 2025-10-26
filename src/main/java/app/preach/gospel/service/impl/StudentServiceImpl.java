@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.StudentDto;
-import app.preach.gospel.jooq.tables.records.StudentsRecord;
 import app.preach.gospel.service.IStudentService;
 import app.preach.gospel.utils.CoBeanUtils;
 import app.preach.gospel.utils.CoProjectUtils;
@@ -62,12 +61,12 @@ public class StudentServiceImpl implements IStudentService {
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String loginAccount) {
 		try {
 			if (CoProjectUtils.isDigital(id)) {
-				final Integer checkDuplicated = this.dslContext.selectCount().from(STUDENTS).where(COMMON_CONDITION)
+				final var checkDuplicated = this.dslContext.selectCount().from(STUDENTS).where(COMMON_CONDITION)
 						.and(STUDENTS.ID.ne(Long.parseLong(id))).and(STUDENTS.LOGIN_ACCOUNT.eq(loginAccount))
 						.fetchSingle().into(Integer.class);
 				return CoResult.ok(checkDuplicated);
 			}
-			final Integer checkDuplicated = this.dslContext.selectCount().from(STUDENTS).where(COMMON_CONDITION)
+			final var checkDuplicated = this.dslContext.selectCount().from(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.LOGIN_ACCOUNT.eq(loginAccount)).fetchSingle().into(Integer.class);
 			return CoResult.ok(checkDuplicated);
 		} catch (final DataAccessException e) {
@@ -79,11 +78,11 @@ public class StudentServiceImpl implements IStudentService {
 	@Override
 	public CoResult<StudentDto, DataAccessException> getStudentInfoById(final Long id) {
 		try {
-			final StudentsRecord studentsRecord = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
+			final var studentsRecord = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.ID.eq(id)).fetchSingle();
-			final StudentDto studentDto = new StudentDto(studentsRecord.getId().toString(),
-					studentsRecord.getLoginAccount(), studentsRecord.getUsername(), studentsRecord.getPassword(),
-					studentsRecord.getEmail(), FORMATTER.format(studentsRecord.getDateOfBirth()), null);
+			final var studentDto = new StudentDto(studentsRecord.getId().toString(), studentsRecord.getLoginAccount(),
+					studentsRecord.getUsername(), studentsRecord.getPassword(), studentsRecord.getEmail(),
+					FORMATTER.format(studentsRecord.getDateOfBirth()), null);
 			return CoResult.ok(studentDto);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -93,17 +92,17 @@ public class StudentServiceImpl implements IStudentService {
 	@Override
 	public CoResult<String, DataAccessException> infoUpdation(final @NotNull StudentDto studentDto) {
 		try {
-			final StudentsRecord studentsRecord = this.dslContext.newRecord(STUDENTS);
+			final var studentsRecord = this.dslContext.newRecord(STUDENTS);
 			studentsRecord.setId(Long.valueOf(studentDto.id()));
 			studentsRecord.setLoginAccount(studentDto.loginAccount());
 			studentsRecord.setUsername(studentDto.username());
 			studentsRecord.setDateOfBirth(LocalDate.parse(studentDto.dateOfBirth(), FORMATTER));
 			studentsRecord.setEmail(studentDto.email());
 			studentsRecord.setVisibleFlg(Boolean.TRUE);
-			final StudentsRecord studentsRecord2 = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
+			final var studentsRecord2 = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.ID.eq(studentsRecord.getId())).fetchSingle();
-			final String password = studentsRecord2.getPassword();
-			final OffsetDateTime updatedTime = studentsRecord2.getUpdatedTime();
+			final var password = studentsRecord2.getPassword();
+			final var updatedTime = studentsRecord2.getUpdatedTime();
 			studentsRecord2.setPassword(null);
 			studentsRecord2.setUpdatedTime(null);
 			boolean passwordDiscernment;
@@ -130,9 +129,9 @@ public class StudentServiceImpl implements IStudentService {
 	}
 
 	@Override
-	public CoResult<String, DataAccessException> preLoginUpdation(final String loginAccount, final String password) {
+	public CoResult<String, DataAccessException> preLoginUpdate(final String loginAccount, final String password) {
 		try {
-			final StudentsRecord studentsRecord = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
+			final var studentsRecord = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.LOGIN_ACCOUNT.eq(loginAccount).or(STUDENTS.EMAIL.eq(loginAccount))).fetchOne();
 			if (studentsRecord == null) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_SPRINGSECURITY_LOGINERROR1));

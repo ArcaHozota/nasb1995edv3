@@ -157,7 +157,7 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 	 * @return String
 	 */
 	public String preLogin() {
-		final CoResult<String, DataAccessException> preLoginUpdation = this.iStudentService.preLoginUpdation(
+		final CoResult<String, DataAccessException> preLoginUpdation = this.iStudentService.preLoginUpdate(
 				this.getServletRequest().getParameter("loginAccount"),
 				this.getServletRequest().getParameter("password"));
 		if (!preLoginUpdation.isOk()) {
