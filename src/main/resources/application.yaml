@@ -3,8 +3,8 @@ server:
    compression:
       enabled: true
       min-response-size: 1024
-   http2:
-      enabled: true # 前段が対応なら有効化
+   # http2:
+      # enabled: true # 前段が対応なら有効化
    tomcat:
       max-keep-alive-requests: 1000
       keep-alive-timeout: 30s

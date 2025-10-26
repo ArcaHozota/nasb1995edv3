@@ -129,8 +129,8 @@
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
-		<action name="info-updation"
-			class="app.preach.gospel.handler.HymnsHandler" method="infoUpdation">
+		<action name="info-update"
+			class="app.preach.gospel.handler.HymnsHandler" method="infoUpdate">
 			<interceptor-ref name="json" />
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>

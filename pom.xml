@@ -14,7 +14,7 @@
 	<version>1</version>
 	<name>nasb1995edv3</name>
 	<properties>
-		<struts.version>7.0.3</struts.version>
+		<struts.version>7.1.1</struts.version>
 		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
