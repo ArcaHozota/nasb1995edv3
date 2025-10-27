@@ -42,7 +42,6 @@ import app.preach.gospel.dto.IdfKey;
 import app.preach.gospel.dto.TokKey;
 import app.preach.gospel.dto.VecKey;
 import app.preach.gospel.jooq.Keys;
-import app.preach.gospel.jooq.tables.records.HymnsRecord;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoProjectUtils;
 import app.preach.gospel.utils.CoResult;
@@ -220,14 +219,14 @@ public class HymnServiceImpl implements IHymnService {
 	 */
 	private List<HymnDto> findTopThreeMatches(final HymnDto target, final List<HymnDto> elements) {
 		final String corpusVersion = this.getCorpusVersion();
-		final Stream<List<String>> hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.serif()));
+		final var hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.serif()));
 		final Map<String, Double> idf = this.getIdf(target.updatedTime().toString(), hymnsStream);
 		final double[] targetVector = this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(target.id()),
 				target.serif(), idf);
-		final List<double[]> elementVectors = elements.stream()
+		final var elementVectors = elements.stream()
 				.map(item -> this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(item.id()), item.serif(), idf))
 				.toList();
-		final PriorityQueue<Map.Entry<HymnDto, Double>> maxHeap = new PriorityQueue<>(
+		final var maxHeap = new PriorityQueue<Map.Entry<HymnDto, Double>>(
 				Comparator.comparing(Map.Entry<HymnDto, Double>::getValue).reversed());
 		for (int i = 0; i < elements.size(); i++) {
 			final double similarity = HymnServiceImpl.cosineSimilarity(targetVector, elementVectors.get(i));
@@ -286,8 +285,7 @@ public class HymnServiceImpl implements IHymnService {
 					.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
 							rd.getLink(), null, null, rd.getUpdatedUser().toString(), rd.getUpdatedTime().toString(),
 							LineNumber.SNOWY));
-			final Pagination<HymnDto> pagination = Pagination.of(hymnDtos, totalRecords, pageNum,
-					ProjectConstants.DEFAULT_PAGE_SIZE);
+			final var pagination = Pagination.of(hymnDtos, totalRecords, pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
 			return CoResult.ok(pagination);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -305,7 +303,7 @@ public class HymnServiceImpl implements IHymnService {
 							.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(),
 									rd.getSerif(), rd.getLink(), null, null, rd.getUpdatedUser().toString(),
 									rd.getUpdatedTime().toString(), LineNumber.SNOWY));
-					log.error("怪しいキーワード： " + keyword);
+					log.warn("怪しいキーワード： " + keyword);
 					return CoResult.ok(hymnDtos);
 				}
 			}
@@ -314,60 +312,56 @@ public class HymnServiceImpl implements IHymnService {
 						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
 								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
 								rd.getUpdatedTime().toString(), LineNumber.SNOWY));
-				final List<HymnDto> hymnDtos1 = this.randomFiveLoop2(totalRecords);
-				return CoResult.ok(hymnDtos1);
+				final List<HymnDto> hymnDtos = this.randomFiveLoop2(totalRecords);
+				return CoResult.ok(hymnDtos);
 			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))
 							.or(HYMNS_WORK.NAME_JP_RATIONAL.like("%[".concat(keyword).concat("]%"))))
-					.fetch(r -> {
-						final var rd = (HymnsRecord) r;
-						return new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
-								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-								rd.getUpdatedTime().toString(), LineNumber.CADMIUM);
-					});
-			final List<HymnDto> hymnDtos = new ArrayList<>(withName);
+					.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
+							rd.get(HYMNS.SERIF), rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+							rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.CADMIUM));
+			final var hymnDtos = new ArrayList<HymnDto>(withName);
 			final var withNameIds = withName.stream().map(HymnDto::id).toList();
 			final var specification = getHymnSpecification(keyword);
 			final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.like(specification).or(HYMNS.NAME_KR.like(specification))
 							.or(HYMNS_WORK.NAME_JP_RATIONAL.like(specification)))
-					.fetch(r -> {
-						final var rd = (HymnsRecord) r;
-						if (withNameIds.contains(rd.getId().toString())) {
+					.fetch(rd -> {
+						final String hymnId = rd.get(HYMNS.ID).toString();
+						if (withNameIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
-								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-								rd.getUpdatedTime().toString(), LineNumber.BURGUNDY);
+						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.SERIF),
+								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
 			hymnDtos.addAll(withNameLike);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
-			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
+			if (hymnDtos.size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
 				final List<HymnDto> randomFiveLoop = this.randomFiveLoop(withName, withNameLike);
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
-			final List<HymnDto> withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS)
-					.innerJoin(HYMNS_WORK).onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
 							.or(HYMNS_WORK.NAME_JP_RATIONAL.like(detailKeyword).or(HYMNS.SERIF.like(detailKeyword))))
-					.fetch(r -> {
-						final var rd = (HymnsRecord) r;
-						if (withNameIds.contains(rd.getId().toString())
-								|| withNameLikeIds.contains(rd.getId().toString())) {
+					.fetch(rd -> {
+						final String hymnId = rd.get(HYMNS.ID).toString();
+						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
-								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-								rd.getUpdatedTime().toString(), LineNumber.NAPLES);
+						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.SERIF),
+								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 					});
 			hymnDtos.addAll(withRandomFive);
-			if (hymnDtos.stream().distinct().toList().size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
-				final List<HymnDto> hymnDtos2 = new ArrayList<>();
+			if (hymnDtos.size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
+				final var hymnDtos2 = new ArrayList<HymnDto>();
 				hymnDtos2.addAll(withName);
 				hymnDtos2.addAll(withNameLike);
 				final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos2, withRandomFive);
