@@ -62,7 +62,7 @@
 		<action name="to-system-error"
 			class="app.preach.gospel.handler.HomepageHandler"
 			method="toSystemError">
-			<result name="success" type="freemarker">/templates/error.ftlh</result>
+			<result name="error" type="freemarker">/templates/error.ftlh</result>
 		</action>
 	</package>
 </struts>

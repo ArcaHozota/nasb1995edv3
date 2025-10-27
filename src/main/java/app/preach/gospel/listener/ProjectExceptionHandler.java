@@ -29,7 +29,8 @@ public final class ProjectExceptionHandler extends DefaultDispatcherErrorHandler
 			final int code, final Exception exception) {
 		try {
 			// エラーメッセージ
-			final String errorMessage = exception.getMessage();
+			final var errorMessage = CoProjectUtils.isNotEmpty(exception.getMessage()) ? exception.getMessage()
+					: ProjectConstants.MESSAGE_STRING_FATAL_ERROR;
 			log.error("Exception occurred during processing request: {}", errorMessage);
 			// WW-1977: Only put errors in the request when code is a 500 error
 			if (exception instanceof AccessDeniedException) {
@@ -47,7 +48,8 @@ public final class ProjectExceptionHandler extends DefaultDispatcherErrorHandler
 			} else {
 				response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 				response.sendRedirect(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-						.concat(ProjectURLConstants.URL_TO_ERROR).concat("?exception=").concat(errorMessage));
+						.concat(ProjectURLConstants.URL_TO_ERROR).concat("?")
+						.concat(ProjectConstants.ATTRNAME_EXCEPTION).concat("=").concat(errorMessage));
 			}
 		} catch (final Exception e) {
 			// Log illegal state instead of passing unrecoverable exception to calling

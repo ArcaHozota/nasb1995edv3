@@ -338,6 +338,7 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
+			withNameLike.removeIf(a -> a == null);
 			hymnDtos.addAll(withNameLike);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			if (hymnDtos.size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
@@ -359,6 +360,7 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 					});
+			withRandomFive.removeIf(a -> a == null);
 			hymnDtos.addAll(withRandomFive);
 			if (hymnDtos.size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
 				final var hymnDtos2 = new ArrayList<HymnDto>();
