@@ -19,15 +19,15 @@ import lombok.extern.log4j.Log4j2;
 @Configuration
 public class SpringWebMvcConfiguration implements WebMvcConfigurer {
 
-    /**
-     * 静的なリソースのマッピングを設定する
-     *
-     * @param registry レジストリ
-     */
-    @Override
-    public void addResourceHandlers(final @NonNull ResourceHandlerRegistry registry) {
-        log.info(ProjectConstants.MESSAGE_SPRING_MAPPER);
-        registry.addResourceHandler(ProjectURLConstants.URL_STATIC_RESOURCE).addResourceLocations("classpath:/static/");
-    }
+	/**
+	 * 静的なリソースのマッピングを設定する
+	 *
+	 * @param registry レジストリ
+	 */
+	@Override
+	public void addResourceHandlers(final @NonNull ResourceHandlerRegistry registry) {
+		log.info(ProjectConstants.MESSAGE_SPRING_MAPPER);
+		registry.addResourceHandler(ProjectURLConstants.URL_STATIC_RESOURCE).addResourceLocations("classpath:/static/");
+	}
 
 }

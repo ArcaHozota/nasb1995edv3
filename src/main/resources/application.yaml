@@ -1,14 +1,25 @@
 server:
    port: 8277
+   servlet:
+      session:
+         timeout: 20m
+         cookie:
+            http-only: true
+            secure: true
    compression:
       enabled: true
       min-response-size: 1024
-   tomcat:
-      max-keep-alive-requests: 1000
-      keep-alive-timeout: 30s
+# Tomcat => Jetty へ切り替え
+   jetty:
       threads:
-         max: 128
-      accept-count: 1000
+         min: 2 # Tomcat の min-spare 相当
+         max: 20 # Tomcat の max  相当
+      idle-timeout: 15s
+      accesslog:
+         enabled: true
+         directory: logs
+         custom-format: '%h %l %u %t "%r" %s %b'
+         filename: jetty-access.log
 spring:
    application:
       name: nasb1995edv3

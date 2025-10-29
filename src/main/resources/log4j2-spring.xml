@@ -1,36 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+	<!-- ==== Directory settings ==== -->
+	<Properties>
+		<!-- Prefer HOME so it also works when USER isn't set -->
+		<Property name="LOG_DIR">${env:HOME}/prod/logs</Property>
+		<!-- If you insist on USER instead: <Property name="LOG_DIR">/home/${env:USER}/prod/logs</Property> -->
+	</Properties>
+
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout
 				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
 		</Console>
-		<RollingFile name="File" fileName="logs/app.log"
-			filePattern="/home/$USER/prod/logs/app-%d{yyyy-MM-dd}.log">
+
+		<!-- Roll daily and when file exceeds 15MB; keep 30 days -->
+		<RollingFile name="File" fileName="${LOG_DIR}/app.log"
+			filePattern="${LOG_DIR}/app-%d{yyyy-MM-dd}-%i.log.gz">
 			<PatternLayout
 				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
 			<Policies>
-				<TimeBasedTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="15MB" />
+				<!-- roll at midnight; modulate avoids mid-day boundaries after restarts -->
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+				<SizeBasedTriggeringPolicy size="33MB" />
 			</Policies>
-			<!-- 古いログを削除する設定 -->
 			<DefaultRolloverStrategy max="30"
-				delete="true">
-				<Delete basePath="logs">
-					<IfFileName glob="*.*" />
+				fileIndex="min">
+				<!-- Delete older than 30 days from the same directory -->
+				<Delete basePath="${LOG_DIR}">
+					<IfFileName glob="app-*.log.gz" />
 					<IfLastModified age="30d" />
 				</Delete>
 			</DefaultRolloverStrategy>
 		</RollingFile>
 	</Appenders>
+
 	<Loggers>
-		<!-- プロジェクト共通ログ設定 -->
 		<Root level="INFO">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="File" />
 		</Root>
-		<!-- jOOQのログ出力設定 -->
-		<Logger name="org.jooq.tools.LoggerListener" level="WARN"
+
+		<!-- jOOQ SQL listener -->
+		<Logger name="org.jooq.tools.LoggerListener" level="DEBUG"
 			additivity="false">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="File" />
