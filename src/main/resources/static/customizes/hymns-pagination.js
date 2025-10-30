@@ -137,6 +137,20 @@ function buildTableBody(response) {
 		tr.appendChild(scoreTd);
 		tr.appendChild(btnTd);
 
+		switch (item.lineNumber) {
+			case 'BURGUNDY':
+				tr.className = "table-danger";
+				break;
+			case 'NAPLES':
+				tr.className = "table-warning";
+				break;
+			case 'CADMIUM':
+				tr.className = "table-success";
+				break;
+			default:
+				tr.className = "table-light";
+		}
+
 		tableBody.appendChild(tr);
 	});
 }

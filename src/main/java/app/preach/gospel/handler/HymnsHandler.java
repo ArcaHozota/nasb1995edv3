@@ -147,7 +147,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	public String commonRetrieve() {
 		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
 		final CoResult<List<HymnDto>, DataAccessException> hymnsRandomFive = this.iHymnService
-				.getHymnsRandomFive(keyword);
+				.getHymnsByRandom(keyword);
 		if (!hymnsRandomFive.isOk()) {
 			throw hymnsRandomFive.getErr();
 		}
@@ -255,23 +255,23 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	 * @return String
 	 * @throws DataAccessException 例外
 	 */
-	public String kanumiRetrieve() {
-		final String hymnId = this.getServletRequest().getParameter("hymnId");
-		final CoResult<List<HymnDto>, DataAccessException> kanumiList = this.iHymnService
-				.getKanumiList(Long.valueOf(hymnId));
-		if (!kanumiList.isOk()) {
-			throw kanumiList.getErr();
-		}
-		try {
-			Thread.sleep(90000);
-		} catch (final InterruptedException e) {
-			this.setResponseError(e.getMessage());
-			return ERROR;
-		}
-		final List<HymnDto> hymnDtos = kanumiList.getData();
-		this.setResponseJsonData(JSON.toJSON(hymnDtos));
-		return NONE;
-	}
+//	public String kanumiRetrieve() {
+//		final String hymnId = this.getServletRequest().getParameter("hymnId");
+//		final CoResult<List<HymnDto>, DataAccessException> kanumiList = this.iHymnService
+//				.getKanumiList(Long.valueOf(hymnId));
+//		if (!kanumiList.isOk()) {
+//			throw kanumiList.getErr();
+//		}
+//		try {
+//			Thread.sleep(90000);
+//		} catch (final InterruptedException e) {
+//			this.setResponseError(e.getMessage());
+//			return ERROR;
+//		}
+//		final List<HymnDto> hymnDtos = kanumiList.getData();
+//		this.setResponseJsonData(JSON.toJSON(hymnDtos));
+//		return NONE;
+//	}
 
 	/**
 	 * 情報一覧画面初期表示する
@@ -282,7 +282,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
 		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
 		final CoResult<Pagination<HymnDto>, DataAccessException> hymnsByKeyword = this.iHymnService
-				.getHymnsByKeyword(Integer.valueOf(pageNum), keyword);
+				.getHymnsByPagination(Integer.valueOf(pageNum), keyword);
 		if (!hymnsByKeyword.isOk()) {
 			throw hymnsByKeyword.getErr();
 		}
