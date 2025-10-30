@@ -280,9 +280,9 @@ public class HymnServiceImpl implements IHymnService {
 			@SuppressWarnings("unchecked")
 			final var nlpedHymnDtos = (List<HymnDto>) this.nlpCache.getIfPresent(keyword);
 			if (nlpedHymnDtos != null) {
-				final var pagination = Pagination.of(
-						nlpedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords,
-						pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
+				final var subList = nlpedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE);
+				final var pagination = Pagination.of(subList, totalRecords, pageNum,
+						ProjectConstants.DEFAULT_PAGE_SIZE);
 				return CoResult.ok(pagination);
 			}
 			if (CoProjectUtils.isEmpty(keyword)) {
@@ -290,8 +290,10 @@ public class HymnServiceImpl implements IHymnService {
 						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getSerif(),
 								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
 								rd.getUpdatedTime().toString(), LineNumber.SNOWY));
-				final var pagination = Pagination.of(hymnDtos, totalRecords, pageNum,
+				final var pagination = Pagination.of(
+						hymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
 						ProjectConstants.DEFAULT_PAGE_SIZE);
+				this.nlpCache.put(keyword, hymnDtos);
 				return CoResult.ok(pagination);
 			}
 			for (final String starngement : STRANGE_ARRAY) {
@@ -302,8 +304,10 @@ public class HymnServiceImpl implements IHymnService {
 							.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(),
 									rd.getSerif(), rd.getLink(), null, null, rd.getUpdatedUser().toString(),
 									rd.getUpdatedTime().toString(), LineNumber.SNOWY));
-					final var pagination = Pagination.of(hymnDtos, totalRecords, pageNum,
-							ProjectConstants.DEFAULT_PAGE_SIZE);
+					final var pagination = Pagination.of(
+							hymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords,
+							pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
+					this.nlpCache.put(keyword, hymnDtos);
 					return CoResult.ok(pagination);
 				}
 			}
