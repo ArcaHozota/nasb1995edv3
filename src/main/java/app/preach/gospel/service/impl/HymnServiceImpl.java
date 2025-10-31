@@ -336,6 +336,7 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
+			withNameLike.removeIf(a -> a == null);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
@@ -351,6 +352,7 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 					});
+			withRandomFive.removeIf(a -> a == null);
 			final var withRandomFiveIds = withRandomFive.stream().map(HymnDto::id).toList();
 			final var otherHymns = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
 					.fetch(rd -> {
@@ -363,10 +365,11 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.SNOWY);
 					});
+			otherHymns.removeIf(a -> a == null);
 			hymnDtos.addAll(withNameLike);
 			hymnDtos.addAll(withRandomFive);
 			hymnDtos.addAll(otherHymns);
-			final var sortedHymnDtos = hymnDtos.stream().filter(a -> a != null)
+			final var sortedHymnDtos = hymnDtos.stream()
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList();
 			final var pagination = Pagination.of(
 					sortedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
