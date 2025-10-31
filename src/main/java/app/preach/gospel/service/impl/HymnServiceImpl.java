@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import app.preach.gospel.common.ProjectConstants;
+import app.preach.gospel.dto.DocKey;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.dto.IdfKey;
 import app.preach.gospel.dto.TokKey;
@@ -271,14 +272,15 @@ public class HymnServiceImpl implements IHymnService {
 
 	@Transactional(readOnly = true)
 	@Override
-	public CoResult<Pagination<HymnDto>, DataAccessException> getHymnsByPagination(final Integer pageNum,
+	public CoResult<Pagination<HymnDto>, DataAccessException> getHymnsInfoByPagination(final Integer pageNum,
 			final String keyword) {
 		try {
 			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
 			final int offset = (pageNum - 1) * ProjectConstants.DEFAULT_PAGE_SIZE;
+			final var docKey = new DocKey(keyword, this.getCorpusVersion());
 			@SuppressWarnings("unchecked")
-			final var nlpedHymnDtos = (List<HymnDto>) this.nlpCache.getIfPresent(keyword);
+			final var nlpedHymnDtos = (List<HymnDto>) this.nlpCache.getIfPresent(docKey);
 			if (nlpedHymnDtos != null) {
 				final var subList = nlpedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE);
 				final var pagination = Pagination.of(subList, totalRecords, pageNum,
@@ -293,7 +295,7 @@ public class HymnServiceImpl implements IHymnService {
 				final var pagination = Pagination.of(
 						hymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
 						ProjectConstants.DEFAULT_PAGE_SIZE);
-				this.nlpCache.put(keyword, hymnDtos);
+				this.nlpCache.put(docKey, hymnDtos);
 				return CoResult.ok(pagination);
 			}
 			for (final String starngement : STRANGE_ARRAY) {
@@ -307,7 +309,7 @@ public class HymnServiceImpl implements IHymnService {
 					final var pagination = Pagination.of(
 							hymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords,
 							pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
-					this.nlpCache.put(keyword, hymnDtos);
+					this.nlpCache.put(docKey, hymnDtos);
 					return CoResult.ok(pagination);
 				}
 			}
@@ -334,7 +336,6 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
-			withNameLike.removeIf(a -> a == null);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
@@ -350,7 +351,6 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 					});
-			withRandomFive.removeIf(a -> a == null);
 			final var withRandomFiveIds = withRandomFive.stream().map(HymnDto::id).toList();
 			final var otherHymns = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
 					.fetch(rd -> {
@@ -366,12 +366,12 @@ public class HymnServiceImpl implements IHymnService {
 			hymnDtos.addAll(withNameLike);
 			hymnDtos.addAll(withRandomFive);
 			hymnDtos.addAll(otherHymns);
-			final var sortedList = hymnDtos.stream()
+			final var sortedHymnDtos = hymnDtos.stream().filter(a -> a != null)
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList();
-			this.nlpCache.put(keyword, sortedList);
 			final var pagination = Pagination.of(
-					sortedList.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
+					sortedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
 					ProjectConstants.DEFAULT_PAGE_SIZE);
+			this.nlpCache.put(docKey, sortedHymnDtos);
 			return CoResult.ok(pagination);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -380,7 +380,7 @@ public class HymnServiceImpl implements IHymnService {
 
 	@Transactional(readOnly = true)
 	@Override
-	public CoResult<List<HymnDto>, DataAccessException> getHymnsByRandom(final String keyword) {
+	public CoResult<List<HymnDto>, DataAccessException> getHymnsInfoByRandom(final String keyword) {
 		try {
 			for (final String starngement : STRANGE_ARRAY) {
 				if (keyword.toLowerCase().contains(starngement) || keyword.length() >= 100) {
@@ -593,7 +593,7 @@ public class HymnServiceImpl implements IHymnService {
 	}
 
 	@Override
-	public CoResult<String, DataAccessException> infoUpdation(final @NotNull HymnDto hymnDto) {
+	public CoResult<String, DataAccessException> infoUpdate(final @NotNull HymnDto hymnDto) {
 		try {
 			final var hymnsRecord = this.dslContext.newRecord(HYMNS);
 			hymnsRecord.setId(Long.valueOf(hymnDto.id()));

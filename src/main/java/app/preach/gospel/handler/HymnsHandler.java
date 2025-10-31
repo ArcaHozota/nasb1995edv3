@@ -147,7 +147,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	public String commonRetrieve() {
 		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
 		final CoResult<List<HymnDto>, DataAccessException> hymnsRandomFive = this.iHymnService
-				.getHymnsByRandom(keyword);
+				.getHymnsInfoByRandom(keyword);
 		if (!hymnsRandomFive.isOk()) {
 			throw hymnsRandomFive.getErr();
 		}
@@ -241,7 +241,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	 * @return String
 	 */
 	public String infoUpdate() {
-		final CoResult<String, DataAccessException> infoUpdation = this.iHymnService.infoUpdation(this.getHymnDto());
+		final CoResult<String, DataAccessException> infoUpdation = this.iHymnService.infoUpdate(this.getHymnDto());
 		if (!infoUpdation.isOk()) {
 			throw infoUpdation.getErr();
 		}
@@ -282,7 +282,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
 		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
 		final CoResult<Pagination<HymnDto>, DataAccessException> hymnsByKeyword = this.iHymnService
-				.getHymnsByPagination(Integer.valueOf(pageNum), keyword);
+				.getHymnsInfoByPagination(Integer.valueOf(pageNum), keyword);
 		if (!hymnsByKeyword.isOk()) {
 			throw hymnsByKeyword.getErr();
 		}

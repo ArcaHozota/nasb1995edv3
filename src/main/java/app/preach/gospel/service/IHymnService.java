@@ -49,7 +49,7 @@ public interface IHymnService {
 	 * @param keyword キーワード
 	 * @return CoResult<Pagination<HymnDto>, DataAccessException>
 	 */
-	CoResult<Pagination<HymnDto>, DataAccessException> getHymnsByPagination(Integer pageNum, String keyword);
+	CoResult<Pagination<HymnDto>, DataAccessException> getHymnsInfoByPagination(Integer pageNum, String keyword);
 
 	/**
 	 * ランドム選択の五つの賛美歌情報を取得する
@@ -57,7 +57,7 @@ public interface IHymnService {
 	 * @param keyword キーワード
 	 * @return CoResult<List<HymnDto>, DataAccessException>
 	 */
-	CoResult<List<HymnDto>, DataAccessException> getHymnsByRandom(String keyword);
+	CoResult<List<HymnDto>, DataAccessException> getHymnsInfoByRandom(String keyword);
 
 	/**
 	 * 金海氏の検索によって賛美歌情報を取得する
@@ -96,7 +96,7 @@ public interface IHymnService {
 	 * @param hymnDto 賛美情報転送クラス
 	 * @return CoResult<String, DataAccessException>
 	 */
-	CoResult<String, DataAccessException> infoUpdation(HymnDto hymnDto);
+	CoResult<String, DataAccessException> infoUpdate(HymnDto hymnDto);
 
 	/**
 	 * 賛美歌楽譜の情報を保存する
