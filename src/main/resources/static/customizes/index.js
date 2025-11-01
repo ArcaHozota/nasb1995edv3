@@ -25,7 +25,7 @@ randomSearchBtn.addEventListener("click", () => {
 	tableBody.style.display = "table-row-group";
 	randomSearchBtn.disabled = true;
 	const keyword = document.getElementById("keywordInput")?.value;
-	commonRetrieve(keyword);
+	randomRetrieve(keyword);
 	setTimeout(() => {
 		loadingContainer.style.display = "none";
 		loadingBackground.style.display = "none";
@@ -41,22 +41,7 @@ tableBody.addEventListener("click", (e) => {
 	}
 });
 
-toIchiranHyoBtn.addEventListener("click", () => {
-	Swal.fire({
-		title: 'メッセージ',
-		text: '賛美歌一覧表画面へ移動してよろしいでしょうか。',
-		icon: 'question',
-		showCloseButton: true,
-		confirmButtonText: 'はい',
-		confirmButtonColor: '#7F0020'
-	}).then((result) => {
-		if (result.isConfirmed) {
-			window.location.href = '/home/to-list';
-		}
-	});
-});
-
-function commonRetrieve(keyword) {
+function randomRetrieve(keyword) {
 	fetch('/hymns/random-retrieve?keyword=' + encodeURIComponent(keyword))
 		.then(async response => {
 			if (!response.ok) {
@@ -80,7 +65,7 @@ function toSelectedPg(pageNum, keyword) {
 			buildPageNavi(response);
 		})
 		.catch(async (xhr) => {
-			const message = trimQuote(await xhr.text);
+			const message = trimQuote(await xhr.text());
 			layer.msg(message);
 		});
 }

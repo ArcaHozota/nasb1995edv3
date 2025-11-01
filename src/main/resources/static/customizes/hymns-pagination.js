@@ -66,7 +66,7 @@ function toSelectedPg(pageNum, keyword) {
 			buildPageNavi(response);
 		})
 		.catch(async (xhr) => {
-			const message = trimQuote(await xhr.text);
+			const message = trimQuote(await xhr.text());
 			layer.msg(message);
 		});
 }
