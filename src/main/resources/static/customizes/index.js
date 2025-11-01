@@ -7,7 +7,7 @@ let keyword;
 
 document.addEventListener("DOMContentLoaded", () => {
 	adjustWidth();
-	// keyword = document.getElementById("keywordInput")?.value;
+	keyword = document.getElementById("keywordInput")?.value;
 	if (keyword === undefined) {
 		keyword = emptyString;
 	}

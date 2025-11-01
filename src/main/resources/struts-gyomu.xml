@@ -35,16 +35,10 @@
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
-		<!-- <action name="kanumi-retrieve"
-			class="app.preach.gospel.handler.HymnsHandler"
-			method="kanumiRetrieve">
-			<result name="error" type="json">
-				<param name="root">responseError</param>
-			</result>
-			<result name="none" type="json">
-				<param name="root">responseJsonData</param>
-			</result>
-		</action> -->
+		<!-- <action name="kanumi-retrieve" class="app.preach.gospel.handler.HymnsHandler" 
+			method="kanumiRetrieve"> <result name="error" type="json"> <param name="root">responseError</param> 
+			</result> <result name="none" type="json"> <param name="root">responseJsonData</param> 
+			</result> </action> -->
 		<action name="get-info-id"
 			class="app.preach.gospel.handler.HymnsHandler" method="getInfoById">
 			<result name="none" type="json">
