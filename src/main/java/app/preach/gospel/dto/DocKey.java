@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Docキー
  */
-public record DocKey(String keyword, String corpusVersion) implements Serializable {
+public record DocKey(String keyword, String corpusVersion, Long suryo) implements Serializable {
 }

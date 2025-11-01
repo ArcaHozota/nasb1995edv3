@@ -167,6 +167,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(checkDuplicated);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -185,6 +187,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(checkDuplicated);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -278,7 +282,7 @@ public class HymnServiceImpl implements IHymnService {
 			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
 			final int offset = (pageNum - 1) * ProjectConstants.DEFAULT_PAGE_SIZE;
-			final var docKey = new DocKey(keyword, this.getCorpusVersion());
+			final var docKey = new DocKey(keyword, this.getCorpusVersion(), totalRecords);
 			@SuppressWarnings("unchecked")
 			final var nlpedHymnDtos = (List<HymnDto>) this.nlpCache.getIfPresent(docKey);
 			if (nlpedHymnDtos != null) {
@@ -378,6 +382,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(pagination);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -468,6 +474,8 @@ public class HymnServiceImpl implements IHymnService {
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -509,6 +517,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(hymnDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -521,6 +531,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(totalRecords);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -565,6 +577,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_DELETED);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -592,6 +606,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(discernLargestPage);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -629,6 +645,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -689,6 +707,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 

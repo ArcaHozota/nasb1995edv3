@@ -9,7 +9,6 @@ import org.springframework.security.access.AccessDeniedException;
 import com.alibaba.fastjson2.JSON;
 
 import app.preach.gospel.common.ProjectConstants;
-import app.preach.gospel.common.ProjectURLConstants;
 import app.preach.gospel.utils.CoProjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,10 +45,11 @@ public final class ProjectExceptionHandler extends DefaultDispatcherErrorHandler
 				response.getWriter().print(JSON.toJSON(errorMessage));
 				response.getWriter().close();
 			} else {
-				response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-				response.sendRedirect(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-						.concat(ProjectURLConstants.URL_TO_ERROR).concat("?")
-						.concat(ProjectConstants.ATTRNAME_EXCEPTION).concat("=").concat(errorMessage));
+				response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+				response.setCharacterEncoding(CoProjectUtils.CHARSET_UTF8.name());
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getWriter().print(JSON.toJSON(errorMessage));
+				response.getWriter().close();
 			}
 		} catch (final Exception e) {
 			// Log illegal state instead of passing unrecoverable exception to calling

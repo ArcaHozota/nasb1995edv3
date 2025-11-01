@@ -71,6 +71,8 @@ public class StudentServiceImpl implements IStudentService {
 			return CoResult.ok(checkDuplicated);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -86,6 +88,8 @@ public class StudentServiceImpl implements IStudentService {
 			return CoResult.ok(studentDto);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -125,6 +129,8 @@ public class StudentServiceImpl implements IStudentService {
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -145,6 +151,8 @@ public class StudentServiceImpl implements IStudentService {
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_LOGIN_SUCCESS);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 

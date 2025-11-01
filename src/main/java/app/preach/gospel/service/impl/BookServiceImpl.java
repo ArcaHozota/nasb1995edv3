@@ -46,6 +46,8 @@ public class BookServiceImpl implements IBookService {
 			return CoResult.ok(bookDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -66,6 +68,8 @@ public class BookServiceImpl implements IBookService {
 			return CoResult.ok(chapterDtos);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -110,6 +114,8 @@ public class BookServiceImpl implements IBookService {
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_INSERTED);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
