@@ -35,84 +35,84 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class SpringSecurityConfiguration {
 
-    /**
-     * 除外するパス
-     */
-    private static final String[] IGNORANCE_PATHS = {"/index.action", "/home/**", "/static/**",
-        "/category/login-with-error", "/category/to-system-error", "/students/pre-login", "/hymns/pagination",
-        "/hymns/get-info-id", "/hymns/get-records", "/hymns/kanumi-retrieve", "/hymns/common-retrieve",
-        "/hymns/score-download"};
+	/**
+	 * 除外するパス
+	 */
+	private static final String[] IGNORANCE_PATHS = { "/index.action", "/home/**", "/static/**",
+			"/category/login-with-error", "/category/to-system-error", "/students/pre-login", "/hymns/pagination",
+			"/hymns/get-info-id", "/hymns/get-records", "/hymns/kanumi-retrieve", "/hymns/random-retrieve",
+			"/hymns/score-download" };
 
-    /**
-     * ログインサービス
-     */
-    private final ProjectUserDetailsService projectUserDetailsService;
+	/**
+	 * ログインエラー処理
+	 */
+	private final ProjectAuthenticationEntryPoint projectAuthenticationEntryPoint;
 
-    /**
-     * ログインエラー処理
-     */
-    private final ProjectAuthenticationEntryPoint projectAuthenticationEntryPoint;
+	/**
+	 * ログインサービス
+	 */
+	private final ProjectUserDetailsService projectUserDetailsService;
 
-    @Bean
-    @Order(1)
-    protected AuthenticationManager authenticationManager(final @NonNull AuthenticationManagerBuilder authBuilder) {
-        return authBuilder.authenticationProvider(this.daoAuthenticationProvider()).getObject();
-    }
+	@Bean
+	@Order(1)
+	protected AuthenticationManager authenticationManager(final @NonNull AuthenticationManagerBuilder authBuilder) {
+		return authBuilder.authenticationProvider(this.daoAuthenticationProvider()).getObject();
+	}
 
-    @Bean
-    @Order(0)
-    protected DaoAuthenticationProvider daoAuthenticationProvider() {
-        final ProjectDaoAuthenticationProvider provider = new ProjectDaoAuthenticationProvider();
-        provider.setUserDetailsService(this.projectUserDetailsService);
-        provider.setPasswordEncoder(new BCryptPasswordEncoder(BCryptVersion.$2A, 7));
-        return provider;
-    }
+	@Bean
+	@Order(0)
+	protected DaoAuthenticationProvider daoAuthenticationProvider() {
+		final ProjectDaoAuthenticationProvider provider = new ProjectDaoAuthenticationProvider();
+		provider.setUserDetailsService(this.projectUserDetailsService);
+		provider.setPasswordEncoder(new BCryptPasswordEncoder(BCryptVersion.$2A, 7));
+		return provider;
+	}
 
-    @Bean
-    @Order(2)
-    protected SecurityFilterChain filterChain(final @NonNull HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(IGNORANCE_PATHS).permitAll()
-                                .requestMatchers(ProjectURLConstants.URL_HYMNS_NAMESPACE
-                                        .concat("/").concat(ProjectURLConstants.URL_TO_EDITION))
-                                .hasAuthority("hymns%edition")
-                                .requestMatchers(ProjectURLConstants.URL_HYMNS_NAMESPACE
-                                        .concat("/").concat(ProjectURLConstants.URL_CHECK_DELETE))
-                                .hasAuthority("hymns%deletion")
-                                .requestMatchers(ProjectURLConstants.URL_STUDENTS_NAMESPACE.concat(CoProjectUtils.SLASH)
-                                        .concat(ProjectURLConstants.URL_TO_EDITION))
-                                .hasAuthority("students%retrievEdition").anyRequest().authenticated())
-                .csrf(csrf -> csrf
-                .ignoringRequestMatchers(ProjectURLConstants.URL_STATIC_RESOURCE,
-                        ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                                .concat(ProjectURLConstants.URL_LOGIN),
-                        ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                                .concat(ProjectURLConstants.URL_LOGOUT))
-                .csrfTokenRepository(new CookieCsrfTokenRepository()))
-                .exceptionHandling(handling -> {
-                    handling.authenticationEntryPoint(this.projectAuthenticationEntryPoint);
-                    handling.accessDeniedHandler((request, response, accessDeniedException) -> {
-                        response.sendError(HttpStatus.FORBIDDEN.value(),
-                                ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH);
-                        log.warn(ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH);
-                    });
-                })
-                .formLogin(formLogin -> formLogin
-                .loginPage(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                        .concat(ProjectURLConstants.URL_TO_LOGIN))
-                .loginProcessingUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                        .concat(ProjectURLConstants.URL_LOGIN))
-                .defaultSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                        .concat(ProjectURLConstants.URL_TO_MAINMENU_WITH_LOGIN))
-                .permitAll().usernameParameter("loginAcct").passwordParameter("userPswd"))
-                .logout(logout -> logout
-                .logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                        .concat(ProjectURLConstants.URL_LOGOUT))
-                .logoutSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
-                        .concat(ProjectURLConstants.URL_TO_LOGIN)));
-        log.info(ProjectConstants.MESSAGE_SPRING_SECURITY);
-        return httpSecurity.build();
-    }
+	@Bean
+	@Order(2)
+	protected SecurityFilterChain filterChain(final @NonNull HttpSecurity httpSecurity) throws Exception {
+		httpSecurity
+				.authorizeHttpRequests(
+						authorize -> authorize.requestMatchers(IGNORANCE_PATHS).permitAll()
+								.requestMatchers(ProjectURLConstants.URL_HYMNS_NAMESPACE
+										.concat("/").concat(ProjectURLConstants.URL_TO_EDITION))
+								.hasAuthority("hymns%edition")
+								.requestMatchers(ProjectURLConstants.URL_HYMNS_NAMESPACE
+										.concat("/").concat(ProjectURLConstants.URL_CHECK_DELETE))
+								.hasAuthority("hymns%deletion")
+								.requestMatchers(ProjectURLConstants.URL_STUDENTS_NAMESPACE.concat(CoProjectUtils.SLASH)
+										.concat(ProjectURLConstants.URL_TO_EDITION))
+								.hasAuthority("students%retrievEdition").anyRequest().authenticated())
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers(ProjectURLConstants.URL_STATIC_RESOURCE,
+								ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+										.concat(ProjectURLConstants.URL_LOGIN),
+								ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+										.concat(ProjectURLConstants.URL_LOGOUT))
+						.csrfTokenRepository(new CookieCsrfTokenRepository()))
+				.exceptionHandling(handling -> {
+					handling.authenticationEntryPoint(this.projectAuthenticationEntryPoint);
+					handling.accessDeniedHandler((request, response, accessDeniedException) -> {
+						response.sendError(HttpStatus.FORBIDDEN.value(),
+								ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH);
+						log.warn(ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH);
+					});
+				})
+				.formLogin(formLogin -> formLogin
+						.loginPage(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+								.concat(ProjectURLConstants.URL_TO_LOGIN))
+						.loginProcessingUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+								.concat(ProjectURLConstants.URL_LOGIN))
+						.defaultSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+								.concat(ProjectURLConstants.URL_TO_MAINMENU_WITH_LOGIN))
+						.permitAll().usernameParameter("loginAcct").passwordParameter("userPswd"))
+				.logout(logout -> logout
+						.logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+								.concat(ProjectURLConstants.URL_LOGOUT))
+						.logoutSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+								.concat(ProjectURLConstants.URL_TO_LOGIN)));
+		log.info(ProjectConstants.MESSAGE_SPRING_SECURITY);
+		return httpSecurity.build();
+	}
 
 }

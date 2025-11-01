@@ -50,7 +50,7 @@ function randomRetrieve(keyword) {
 			}
 			return response.json();
 		})
-		.then(buildTableBody2)
+		.then(buildTableBody1)
 		.catch(result => {
 			layer.msg(result.message);
 		});
@@ -68,6 +68,50 @@ function toSelectedPg(pageNum, keyword) {
 			const message = trimQuote(await xhr.text());
 			layer.msg(message);
 		});
+}
+
+function buildTableBody1(response) {
+	tableBody.innerHTML = emptyString;
+	response.forEach(item => {
+		const tr = document.createElement("tr");
+		const td = document.createElement("td");
+		td.className = "text-center";
+		td.style.verticalAlign = "middle";
+		const nameTd = document.createElement("td");
+		nameTd.className = "text-left";
+		nameTd.style.cssText = "width: 70%; vertical-align: middle;";
+		const link = document.createElement("a");
+		link.href = "#";
+		link.className = "link-btn";
+		link.setAttribute("data-transfer-val", item.link);
+		link.textContent = item.nameJp + delimiter + item.nameKr;
+		nameTd.appendChild(link);
+		tr.appendChild(nameTd);
+		const scoreTd = document.createElement("td");
+		scoreTd.className = "text-center";
+		scoreTd.style.cssText = "width: 30%; vertical-align: middle;";
+		const scoreLink = document.createElement("a");
+		scoreLink.href = "#";
+		scoreLink.className = "score-download-btn";
+		scoreLink.setAttribute("data-score-id", item.id);
+		scoreLink.innerHTML = "&#x1D11E;";
+		scoreTd.appendChild(scoreLink);
+		tr.appendChild(scoreTd);
+		switch (item.lineNumber) {
+			case 'BURGUNDY':
+				tr.className = "table-danger";
+				break;
+			case 'NAPLES':
+				tr.className = "table-warning";
+				break;
+			case 'CADMIUM':
+				tr.className = "table-success";
+				break;
+			default:
+				tr.className = "table-light";
+		}
+		tableBody.appendChild(tr);
+	});
 }
 
 function buildTableBody2(response) {
