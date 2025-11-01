@@ -72,7 +72,7 @@ function toSelectedPg(pageNum, keyword) {
 
 function buildTableBody2(response) {
 	tableBody.innerHTML = emptyString;
-	response.forEach(item => {
+	response.records.forEach(item => {
 		const tr = document.createElement("tr");
 		const td = document.createElement("td");
 		td.className = "text-center";
