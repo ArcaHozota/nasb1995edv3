@@ -140,23 +140,6 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	}
 
 	/**
-	 * ランダム五つを検索する
-	 *
-	 * @return String
-	 */
-	public String commonRetrieve() {
-		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
-		final CoResult<List<HymnDto>, DataAccessException> hymnsRandomFive = this.iHymnService
-				.getHymnsInfoByRandom(keyword);
-		if (!hymnsRandomFive.isOk()) {
-			throw hymnsRandomFive.getErr();
-		}
-		final List<HymnDto> hymnDtos = hymnsRandomFive.getData();
-		this.setResponseJsonData(JSON.toJSON(hymnDtos));
-		return NONE;
-	}
-
-	/**
 	 * 削除権限チェック
 	 *
 	 * @return String
@@ -250,6 +233,24 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	}
 
 	/**
+	 * 情報一覧画面初期表示する
+	 *
+	 * @return String
+	 */
+	public String pagination() {
+		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
+		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
+		final CoResult<Pagination<HymnDto>, DataAccessException> hymnsByKeyword = this.iHymnService
+				.getHymnsInfoByPagination(Integer.valueOf(pageNum), keyword);
+		if (!hymnsByKeyword.isOk()) {
+			throw hymnsByKeyword.getErr();
+		}
+		final Pagination<HymnDto> pagination = hymnsByKeyword.getData();
+		this.setResponseJsonData(JSON.toJSON(pagination));
+		return NONE;
+	}
+
+	/**
 	 * 金海氏の検索を行う
 	 *
 	 * @return String
@@ -274,20 +275,19 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 //	}
 
 	/**
-	 * 情報一覧画面初期表示する
+	 * ランダム五つを検索する
 	 *
 	 * @return String
 	 */
-	public String pagination() {
-		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
+	public String randomRetrieve() {
 		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
-		final CoResult<Pagination<HymnDto>, DataAccessException> hymnsByKeyword = this.iHymnService
-				.getHymnsInfoByPagination(Integer.valueOf(pageNum), keyword);
-		if (!hymnsByKeyword.isOk()) {
-			throw hymnsByKeyword.getErr();
+		final CoResult<List<HymnDto>, DataAccessException> hymnsRandomFive = this.iHymnService
+				.getHymnsInfoByRandom(keyword);
+		if (!hymnsRandomFive.isOk()) {
+			throw hymnsRandomFive.getErr();
 		}
-		final Pagination<HymnDto> pagination = hymnsByKeyword.getData();
-		this.setResponseJsonData(JSON.toJSON(pagination));
+		final List<HymnDto> hymnDtos = hymnsRandomFive.getData();
+		this.setResponseJsonData(JSON.toJSON(hymnDtos));
 		return NONE;
 	}
 

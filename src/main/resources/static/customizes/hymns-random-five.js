@@ -23,7 +23,7 @@ tableBody?.addEventListener("click", (e) => {
 });
 
 function retrieveRandomFive(keyword) {
-	fetch(`/hymns/random-five-retrieve?keyword=${encodeURIComponent(keyword)}`)
+	fetch(`/hymns/random-retrieve?keyword=${encodeURIComponent(keyword)}`)
 		.then(res => res.json())
 		.then(response => buildTableBody(response))
 		.catch(err => {
@@ -37,15 +37,12 @@ function buildTableBody(response) {
 		const td = document.createElement("td");
 		td.className = "text-center";
 		td.style.verticalAlign = "middle";
-
 		const a = document.createElement("a");
 		a.href = "#";
 		a.className = "link-btn";
 		a.setAttribute("data-transfer-val", item.link);
 		a.textContent = `${item.nameJp}${delimiter}${item.nameKr}`;
-
 		td.appendChild(a);
-
 		const tr = document.createElement("tr");
 		tr.appendChild(td);
 		tableBody.appendChild(tr);

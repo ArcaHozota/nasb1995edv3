@@ -70,13 +70,13 @@
 					<form class="form-inline col-md-6 offset-md-3" role="form" style="padding-right: 0px;">
 						<div class="input-group col-md-6">
 							<input id="keywordInput" class="form-control" type="text" placeholder="キーワードを入力してください">
-							<button id="randomSearchBtn" class="btn btn-danger my-2 my-sm-0" type="button">
-								<i class="fa-solid fa-magnifying-glass"></i> ランドム選択
+							<button id="hymnSearchBtn" class="btn btn-danger my-2 my-sm-0" type="button">
+								<i class="fa-solid fa-magnifying-glass"></i> 検索
 							</button>
 						</div>
 					</form>
 					<div class="col-md-3" style="padding-left: 0px;">
-						<button type="button" class="btn btn-primary me-2" id="toIchiranHyoBtn">
+						<button type="button" class="btn btn-primary me-2" id="randomSearchBtn">
 							<i class="fa-solid fa-circle-info"></i>
 						</button>
 					</div>
@@ -96,27 +96,16 @@
 				<table class="table table-sm table-hover" id="indexTable">
 					<thead id="indexTablehead">
 						<tr class="table-success">
-							<th scope="col" class="text-center">名称</th>
+							<th scope="col" class="text-center" style="width: 70%;">名称</th>
+							<th scope="col" class="text-center" style="width: 30%;">楽譜</th>
 						</tr>
 					</thead>
-					<tbody id="tableBody" class="table-group-divider">
-						<tr>
-							<td>1</td>
-						</tr>
-						<tr>
-							<td>2</td>
-						</tr>
-						<tr>
-							<td>3</td>
-						</tr>
-						<tr>
-							<td>4</td>
-						</tr>
-						<tr>
-							<td>5</td>
-						</tr>
-					</tbody>
+					<tbody id="tableBody" class="table-group-divider"></tbody>
 				</table>
+				<div class="row">
+					<div id="pageInfos" class="col-md-5" style="font-size: 12px;"></div>
+					<div id="pageNavi" class="col-md-7 d-flex justify-content-end"></div>
+				</div>
 				<p class="d-flex justify-content-end" style="font-size: 10px;color: #353542;">賛美歌${totalRecords}曲レコード済み</p>
 			</div>
 		</div>

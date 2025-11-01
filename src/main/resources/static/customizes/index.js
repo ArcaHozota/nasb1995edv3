@@ -2,12 +2,16 @@ const tableBody = document.getElementById("tableBody");
 const randomSearchBtn = document.getElementById("randomSearchBtn");
 const loadingContainer = document.getElementById("loadingContainer");
 const loadingBackground = document.getElementById("loadingBackground");
-const toIchiranHyoBtn = document.getElementById("toIchiranHyoBtn");
+const hymnSearchBtn = document.getElementById("hymnSearchBtn");
+let keyword;
 
 document.addEventListener("DOMContentLoaded", () => {
 	adjustWidth();
-	tableBody.style.display = "none";
-
+	// keyword = document.getElementById("keywordInput")?.value;
+	if (keyword === undefined) {
+		keyword = emptyString;
+	}
+	toSelectedPg(1, keyword);
 	const message2 = document.getElementById("torokuMsgContainer")?.value;
 	if (message2 !== emptyString && message2 !== null && message2 !== undefined) {
 		layer.msg(message2);
@@ -20,10 +24,8 @@ randomSearchBtn.addEventListener("click", () => {
 	loadingContainer.style.display = "block";
 	tableBody.style.display = "table-row-group";
 	randomSearchBtn.disabled = true;
-
 	const keyword = document.getElementById("keywordInput")?.value;
 	commonRetrieve(keyword);
-
 	setTimeout(() => {
 		loadingContainer.style.display = "none";
 		loadingBackground.style.display = "none";
@@ -55,37 +57,61 @@ toIchiranHyoBtn.addEventListener("click", () => {
 });
 
 function commonRetrieve(keyword) {
-	fetch('/hymns/common-retrieve?keyword=' + encodeURIComponent(keyword))
-		.then(response => {
+	fetch('/hymns/random-retrieve?keyword=' + encodeURIComponent(keyword))
+		.then(async response => {
 			if (!response.ok) {
-				return response.json().then(err => { throw err; });
+				const err = await response.json();
+				throw err;
 			}
 			return response.json();
 		})
-		.then(buildTableBody)
+		.then(buildTableBody2)
 		.catch(result => {
 			layer.msg(result.message);
 		});
 }
 
-function buildTableBody(response) {
-	tableBody.innerHTML = emptyString;
+function toSelectedPg(pageNum, keyword) {
+	fetch(`/hymns/pagination?pageNum=${encodeURIComponent(pageNum)}&keyword=${encodeURIComponent(keyword)}`)
+		.then(res => res.json())
+		.then(response => {
+			buildTableBody2(response);
+			buildPageInfos(response);
+			buildPageNavi(response);
+		})
+		.catch(async (xhr) => {
+			const message = trimQuote(await xhr.text);
+			layer.msg(message);
+		});
+}
 
+function buildTableBody2(response) {
+	tableBody.innerHTML = emptyString;
 	response.forEach(item => {
 		const tr = document.createElement("tr");
 		const td = document.createElement("td");
 		td.className = "text-center";
 		td.style.verticalAlign = "middle";
-
-		const a = document.createElement("a");
-		a.href = "#";
-		a.className = "link-btn";
-		a.setAttribute("data-transfer-val", item.link);
-		a.textContent = `${item.nameJp}/${item.nameKr}`;
-
-		td.appendChild(a);
-		tr.appendChild(td);
-
+		const nameTd = document.createElement("td");
+		nameTd.className = "text-left";
+		nameTd.style.cssText = "width: 70%; vertical-align: middle;";
+		const link = document.createElement("a");
+		link.href = "#";
+		link.className = "link-btn";
+		link.setAttribute("data-transfer-val", item.link);
+		link.textContent = item.nameJp + delimiter + item.nameKr;
+		nameTd.appendChild(link);
+		tr.appendChild(nameTd);
+		const scoreTd = document.createElement("td");
+		scoreTd.className = "text-center";
+		scoreTd.style.cssText = "width: 30%; vertical-align: middle;";
+		const scoreLink = document.createElement("a");
+		scoreLink.href = "#";
+		scoreLink.className = "score-download-btn";
+		scoreLink.setAttribute("data-score-id", item.id);
+		scoreLink.innerHTML = "&#x1D11E;";
+		scoreTd.appendChild(scoreLink);
+		tr.appendChild(scoreTd);
 		switch (item.lineNumber) {
 			case 'BURGUNDY':
 				tr.className = "table-danger";
@@ -99,7 +125,6 @@ function buildTableBody(response) {
 			default:
 				tr.className = "table-light";
 		}
-
 		tableBody.appendChild(tr);
 	});
 }

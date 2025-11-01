@@ -28,9 +28,9 @@
 	<!-- 賛美歌管理ハンドラ -->
 	<package name="hymnsHandler" extends="projectPackage"
 		namespace="/hymns">
-		<action name="common-retrieve"
+		<action name="random-retrieve"
 			class="app.preach.gospel.handler.HymnsHandler"
-			method="commonRetrieve">
+			method="randomRetrieve">
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
@@ -59,13 +59,6 @@
 		</action>
 		<action name="pagination"
 			class="app.preach.gospel.handler.HymnsHandler" method="pagination">
-			<result name="none" type="json">
-				<param name="root">responseJsonData</param>
-			</result>
-		</action>
-		<action name="random-five-retrieve"
-			class="app.preach.gospel.handler.HymnsHandler"
-			method="commonRetrieve">
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
