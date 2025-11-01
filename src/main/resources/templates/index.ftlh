@@ -109,9 +109,6 @@
 				<p class="d-flex justify-content-end" style="font-size: 10px;color: #353542;">賛美歌${totalRecords}曲レコード済み</p>
 			</div>
 		</div>
-		<div class="row" id="hintDiv">
-			<p style="font-size: 11px;color: #FFF;">※赤色：アキュレイトクエリの結果、黄色：ファジークエリの結果。五つに満たされなかった場合にシステムが補充されます。</p>
-		</div>
 	</div>
 	<script type="text/javascript" src="/static/customizes/index.js"></script>
 </body>
