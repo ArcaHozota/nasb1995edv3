@@ -1,5 +1,5 @@
 const tableBody = document.getElementById("tableBody");
-const randomSearchBtn = document.getElementById("randomSearchBtn");
+// const randomSearchBtn = document.getElementById("randomSearchBtn");
 const loadingContainer = document.getElementById("loadingContainer");
 const loadingBackground = document.getElementById("loadingBackground");
 const hymnSearchBtn = document.getElementById("hymnSearchBtn");
@@ -18,14 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 });
 
-randomSearchBtn.addEventListener("click", () => {
+hymnSearchBtn.addEventListener("click", () => {
 	adjustWidth();
 	loadingBackground.style.display = "block";
 	loadingContainer.style.display = "block";
 	tableBody.style.display = "table-row-group";
 	randomSearchBtn.disabled = true;
-	const keyword = document.getElementById("keywordInput")?.value;
-	randomRetrieve(keyword);
+	keyword = document.getElementById("keywordInput")?.value;
+	toSelectedPg(1, keyword);
 	setTimeout(() => {
 		loadingContainer.style.display = "none";
 		loadingBackground.style.display = "none";

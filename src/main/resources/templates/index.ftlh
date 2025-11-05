@@ -75,11 +75,11 @@
 							</button>
 						</div>
 					</form>
-					<div class="col-md-3" style="padding-left: 0px;">
+					<#-- <div class="col-md-3" style="padding-left: 0px;">
 						<button type="button" class="btn btn-primary me-2" id="randomSearchBtn">
 							<i class="fa-solid fa-circle-info"></i>
 						</button>
-					</div>
+					</div> -->
 				</div>
 				<div class="background" id="loadingBackground" style="display: none;">
 					<div class="circle" id="loadingContainer" style="display: none;">

@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
-import app.preach.gospel.utils.LineNumber;
 import org.jetbrains.annotations.NotNull;
+
+import app.preach.gospel.utils.LineNumber;
 
 /**
  * 賛美情報転送クラス
@@ -31,9 +32,9 @@ public record HymnDto(
 		String nameKr,
 
 		/*
-		 * セリフ
+		 * 歌詞
 		 */
-		String serif,
+		String lyric,
 
 		/*
 		 * ビデオリンク
@@ -71,7 +72,7 @@ public record HymnDto(
 		int result = 1;
 		result = (prime * result) + Arrays.hashCode(this.score);
 		return (prime * result) + Objects.hash(this.biko, this.id, this.lineNumber, this.link, this.nameJp, this.nameKr,
-				this.serif, this.updatedTime, this.updatedUser);
+				this.lyric, this.updatedTime, this.updatedUser);
 	}
 
 	@Override
@@ -79,13 +80,13 @@ public record HymnDto(
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof HymnDto other)) {
+		if (!(obj instanceof final HymnDto other)) {
 			return false;
 		}
-        return Objects.equals(this.biko, other.biko) && Objects.equals(this.id, other.id)
+		return Objects.equals(this.biko, other.biko) && Objects.equals(this.id, other.id)
 				&& (this.lineNumber == other.lineNumber) && Objects.equals(this.link, other.link)
 				&& Objects.equals(this.nameJp, other.nameJp) && Objects.equals(this.nameKr, other.nameKr)
-				&& Arrays.equals(this.score, other.score) && Objects.equals(this.serif, other.serif)
+				&& Arrays.equals(this.score, other.score) && Objects.equals(this.lyric, other.lyric)
 				&& Objects.equals(this.updatedTime, other.updatedTime)
 				&& Objects.equals(this.updatedUser, other.updatedUser);
 	}
@@ -93,7 +94,7 @@ public record HymnDto(
 	@Override
 	public @NotNull String toString() {
 		return "HymnDto [id=" + this.id + ", nameJp=" + this.nameJp + ", nameKr=" + this.nameKr + ", serif="
-				+ this.serif + ", link=" + this.link + ", score=" + Arrays.toString(this.score) + ", biko=" + this.biko
+				+ this.lyric + ", link=" + this.link + ", score=" + Arrays.toString(this.score) + ", biko=" + this.biko
 				+ ", updatedUser=" + this.updatedUser + ", updatedTime=" + this.updatedTime + ", lineNumber="
 				+ this.lineNumber + "]";
 	}
