@@ -1,8 +1,10 @@
 package app.preach.gospel.service.impl;
 
+import static app.preach.gospel.jooq.Routines.similarity;
 import static app.preach.gospel.jooq.Tables.HYMNS;
 import static app.preach.gospel.jooq.Tables.HYMNS_WORK;
 import static app.preach.gospel.jooq.Tables.STUDENTS;
+import static org.jooq.impl.DSL.val;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +28,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.exception.ConfigurationException;
 import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
@@ -319,8 +322,7 @@ public class HymnServiceImpl implements IHymnService {
 			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))
-							.or(HYMNS_WORK.FURIGANA.like("%[".concat(keyword).concat("]%"))))
+					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword)))
 					.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
 							rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 							rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.CADMIUM));
@@ -340,13 +342,12 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
 			withNameLike.removeIf(a -> a == null);
+			final Field<Float> smlField1 = similarity(HYMNS.LYRIC, val(keyword));
+			final Field<Float> smlField2 = similarity(HYMNS_WORK.FURIGANA, val(keyword));
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
-			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
-							.or(HYMNS_WORK.FURIGANA.like(detailKeyword).or(HYMNS.LYRIC.like(detailKeyword))))
-					.fetch(rd -> {
+					.and(smlField1.gt(0.3f).or(smlField2.gt(0.3f))).fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
