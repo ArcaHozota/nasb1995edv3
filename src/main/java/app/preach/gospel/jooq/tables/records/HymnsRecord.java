@@ -105,16 +105,16 @@ public class HymnsRecord extends UpdatableRecordImpl<HymnsRecord> {
     }
 
     /**
-     * Setter for <code>public.hymns.serif</code>. 歌詞
+     * Setter for <code>public.hymns.lyric</code>. 歌詞
      */
-    public void setSerif(String value) {
+    public void setLyric(String value) {
         set(6, value);
     }
 
     /**
-     * Getter for <code>public.hymns.serif</code>. 歌詞
+     * Getter for <code>public.hymns.lyric</code>. 歌詞
      */
-    public String getSerif() {
+    public String getLyric() {
         return (String) get(6);
     }
 
@@ -155,7 +155,7 @@ public class HymnsRecord extends UpdatableRecordImpl<HymnsRecord> {
     /**
      * Create a detached, initialised HymnsRecord
      */
-    public HymnsRecord(Long id, String nameJp, String nameKr, String link, OffsetDateTime updatedTime, Long updatedUser, String serif, Boolean visibleFlg) {
+    public HymnsRecord(Long id, String nameJp, String nameKr, String link, OffsetDateTime updatedTime, Long updatedUser, String lyric, Boolean visibleFlg) {
         super(Hymns.HYMNS);
 
         setId(id);
@@ -164,7 +164,7 @@ public class HymnsRecord extends UpdatableRecordImpl<HymnsRecord> {
         setLink(link);
         setUpdatedTime(updatedTime);
         setUpdatedUser(updatedUser);
-        setSerif(serif);
+        setLyric(lyric);
         setVisibleFlg(visibleFlg);
         resetChangedOnNotNull();
     }

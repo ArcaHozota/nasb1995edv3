@@ -91,9 +91,9 @@ public class Hymns extends TableImpl<HymnsRecord> {
     public final TableField<HymnsRecord, Long> UPDATED_USER = createField(DSL.name("updated_user"), SQLDataType.BIGINT.nullable(false), this, "更新者ID");
 
     /**
-     * The column <code>public.hymns.serif</code>. 歌詞
+     * The column <code>public.hymns.lyric</code>. 歌詞
      */
-    public final TableField<HymnsRecord, String> SERIF = createField(DSL.name("serif"), SQLDataType.CLOB, this, "歌詞");
+    public final TableField<HymnsRecord, String> LYRIC = createField(DSL.name("lyric"), SQLDataType.CLOB, this, "歌詞");
 
     /**
      * The column <code>public.hymns.visible_flg</code>. 論理削除フラグ
@@ -169,7 +169,7 @@ public class Hymns extends TableImpl<HymnsRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.HYMN_LINK, Indexes.HYMN_NAME_JP, Indexes.HYMN_NAME_KR);
+        return Arrays.asList(Indexes.HYMN_LINK, Indexes.HYMN_NAME_JP, Indexes.HYMN_NAME_KR, Indexes.IDX_HYMNS_LYRIC_TRGM);
     }
 
     @Override

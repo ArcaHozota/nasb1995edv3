@@ -18,7 +18,6 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
@@ -63,7 +62,7 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
     /**
      * The column <code>public.hymns_work.id</code>. ID
      */
-    public final TableField<HymnsWorkRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "ID");
+    public final TableField<HymnsWorkRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false), this, "ID");
 
     /**
      * The column <code>public.hymns_work.work_id</code>. ワークID
@@ -76,9 +75,9 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
     public final TableField<HymnsWorkRecord, byte[]> SCORE = createField(DSL.name("score"), SQLDataType.BLOB, this, "楽譜");
 
     /**
-     * The column <code>public.hymns_work.name_jp_rational</code>. 日本語名称
+     * The column <code>public.hymns_work.furigana</code>. 振り仮名
      */
-    public final TableField<HymnsWorkRecord, String> NAME_JP_RATIONAL = createField(DSL.name("name_jp_rational"), SQLDataType.VARCHAR(120), this, "日本語名称");
+    public final TableField<HymnsWorkRecord, String> FURIGANA = createField(DSL.name("furigana"), SQLDataType.CLOB, this, "振り仮名");
 
     /**
      * The column <code>public.hymns_work.updated_time</code>. 更新時間
@@ -159,12 +158,7 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.HYMNS_WORK_WORK_ID_KEY);
-    }
-
-    @Override
-    public Identity<HymnsWorkRecord, Long> getIdentity() {
-        return (Identity<HymnsWorkRecord, Long>) super.getIdentity();
+        return Arrays.asList(Indexes.HYMNS_WORK_WORK_ID_KEY, Indexes.IDX_HYMNS_FURIGANA_TRGM);
     }
 
     @Override

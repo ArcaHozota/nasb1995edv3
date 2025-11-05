@@ -63,16 +63,16 @@ public class HymnsWorkRecord extends UpdatableRecordImpl<HymnsWorkRecord> {
     }
 
     /**
-     * Setter for <code>public.hymns_work.name_jp_rational</code>. 日本語名称
+     * Setter for <code>public.hymns_work.furigana</code>. 振り仮名
      */
-    public void setNameJpRational(String value) {
+    public void setFurigana(String value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>public.hymns_work.name_jp_rational</code>. 日本語名称
+     * Getter for <code>public.hymns_work.furigana</code>. 振り仮名
      */
-    public String getNameJpRational() {
+    public String getFurigana() {
         return (String) get(3);
     }
 
@@ -127,13 +127,13 @@ public class HymnsWorkRecord extends UpdatableRecordImpl<HymnsWorkRecord> {
     /**
      * Create a detached, initialised HymnsWorkRecord
      */
-    public HymnsWorkRecord(Long id, Long workId, byte[] score, String nameJpRational, OffsetDateTime updatedTime, String biko) {
+    public HymnsWorkRecord(Long id, Long workId, byte[] score, String furigana, OffsetDateTime updatedTime, String biko) {
         super(HymnsWork.HYMNS_WORK);
 
         setId(id);
         setWorkId(workId);
         setScore(score);
-        setNameJpRational(nameJpRational);
+        setFurigana(furigana);
         setUpdatedTime(updatedTime);
         setBiko(biko);
         resetChangedOnNotNull();
