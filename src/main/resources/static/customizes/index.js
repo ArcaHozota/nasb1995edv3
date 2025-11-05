@@ -18,12 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 });
 
-hymnSearchBtn.addEventListener("click", () => {
+hymnSearchBtn.addEventListener("click", (e) => {
 	adjustWidth();
 	loadingBackground.style.display = "block";
 	loadingContainer.style.display = "block";
 	tableBody.style.display = "table-row-group";
-	randomSearchBtn.disabled = true;
+	e.currentTarget.disabled = true;
 	keyword = document.getElementById("keywordInput")?.value;
 	toSelectedPg(1, keyword);
 	setTimeout(() => {
