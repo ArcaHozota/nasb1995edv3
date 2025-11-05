@@ -29,7 +29,7 @@ hymnSearchBtn.addEventListener("click", (e) => {
 	setTimeout(() => {
 		loadingContainer.style.display = "none";
 		loadingBackground.style.display = "none";
-		randomSearchBtn.disabled = false;
+		e.currentTarget.disabled = false;
 	}, 3300);
 });
 
