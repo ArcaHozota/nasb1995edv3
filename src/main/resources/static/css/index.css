@@ -20,6 +20,7 @@ body {
 	position: absolute;
 	height: 60%;
 	background: #f8f9fa;
+	z-index: 2;
 }
 
 .circle {

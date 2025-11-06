@@ -18,11 +18,15 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Niconne&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap">
 	<style>
 		#indexTablehead,
-		#randomSearchBtn,
 		#tableBody, 
 		#hintDiv {
 			font-family: "Noto Serif JP", serif;
 			font-weight: 600;
+		}
+		
+		#indexTable,
+		#pageNavies {
+		 	z-index: 1;
 		}
 		
 		a.effect-shine {
@@ -102,7 +106,7 @@
 					</thead>
 					<tbody id="tableBody" class="table-group-divider"></tbody>
 				</table>
-				<div class="row">
+				<div class="row" id="pageNavies">
 					<div id="pageInfos" class="col-md-5" style="font-size: 12px;"></div>
 					<div id="pageNavi" class="col-md-7 d-flex justify-content-end"></div>
 				</div>
