@@ -26,7 +26,7 @@ hymnSearchBtn.addEventListener("click", (e) => {
 	e.currentTarget.disabled = true;
 	keyword = document.getElementById("keywordInput")?.value;
 	toSelectedPg(1, keyword);
-	setTimeout(() => {
+	setTimeout((e) => {
 		loadingContainer.style.display = "none";
 		loadingBackground.style.display = "none";
 		e.currentTarget.disabled = false;
