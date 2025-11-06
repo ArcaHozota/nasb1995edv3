@@ -26,10 +26,10 @@ hymnSearchBtn.addEventListener("click", (e) => {
 	e.currentTarget.disabled = true;
 	keyword = document.getElementById("keywordInput")?.value;
 	toSelectedPg(1, keyword);
-	setTimeout((e) => {
+	setTimeout(() => {
 		loadingContainer.style.display = "none";
 		loadingBackground.style.display = "none";
-		e.currentTarget.disabled = false;
+		hymnSearchBtn.disabled = false;
 	}, 3300);
 });
 

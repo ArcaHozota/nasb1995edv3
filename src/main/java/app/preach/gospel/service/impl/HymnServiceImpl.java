@@ -347,7 +347,7 @@ public class HymnServiceImpl implements IHymnService {
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(smlField1.gt(0.3f).or(smlField2.gt(0.3f))).fetch(rd -> {
+					.and(smlField1.gt(0.22f).or(smlField2.gt(0.22f))).fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
