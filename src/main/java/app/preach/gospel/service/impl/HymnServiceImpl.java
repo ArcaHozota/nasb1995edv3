@@ -329,9 +329,12 @@ public class HymnServiceImpl implements IHymnService {
 			final var hymnDtos = new ArrayList<HymnDto>(withName);
 			final var withNameIds = withName.stream().map(HymnDto::id).toList();
 			final String searchStr = getHymnSpecification(keyword);
+			final Field<Float> smlField1 = similarity(HYMNS.NAME_JP, val(keyword));
+			final Field<Float> smlField2 = similarity(HYMNS.NAME_KR, val(keyword));
 			final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION).and(HYMNS.NAME_JP
-							.like(searchStr).or(HYMNS.NAME_KR.like(searchStr)).or(HYMNS_WORK.FURIGANA.like(searchStr)))
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr)).or(smlField1.gt(0.33f))
+							.or(smlField2.gt(0.33f)))
 					.fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId)) {
@@ -342,12 +345,11 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
 			withNameLike.removeIf(a -> a == null);
-			final Field<Float> smlField1 = similarity(HYMNS.LYRIC, val(keyword));
-			final Field<Float> smlField2 = similarity(HYMNS_WORK.FURIGANA, val(keyword));
+			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(smlField1.gt(0.22f).or(smlField2.gt(0.22f))).fetch(rd -> {
+					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(detailKeyword))).fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
