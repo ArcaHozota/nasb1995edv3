@@ -627,7 +627,14 @@ public class HymnServiceImpl implements IHymnService {
 			hymnsRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsRecord.insert();
 			final var hymnsWorkRecord = this.dslContext.newRecord(HYMNS_WORK);
+			final var tokenizer = new Tokenizer();
+			final var sBuilder = new StringBuilder();
+			final List<Token> tokens = tokenizer.tokenize(trimedSerif);
+			tokens.forEach(ab -> {
+				sBuilder.append(ab.getAllFeatures());
+			});
 			hymnsWorkRecord.setWorkId(hymnsRecord.getId());
+			hymnsWorkRecord.setFurigana(sBuilder.toString());
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsWorkRecord.insert();
 			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
@@ -665,8 +672,8 @@ public class HymnServiceImpl implements IHymnService {
 				return CoResult.err(new DataChangedException(ProjectConstants.MESSAGE_OPTIMISTIC_ERROR));
 			}
 			final var trimedSerif = trimSerif(hymnsRecord.getLyric());
-			final Tokenizer tokenizer = new Tokenizer();
-			final StringBuilder sBuilder = new StringBuilder();
+			final var tokenizer = new Tokenizer();
+			final var sBuilder = new StringBuilder();
 			final List<Token> tokens = tokenizer.tokenize(trimedSerif);
 			tokens.forEach(ab -> {
 				sBuilder.append(ab.getAllFeatures());
