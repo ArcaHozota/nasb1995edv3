@@ -37,6 +37,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.atilika.kuromoji.ipadic.Token;
+import com.atilika.kuromoji.ipadic.Tokenizer;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import app.preach.gospel.common.ProjectConstants;
@@ -46,6 +48,7 @@ import app.preach.gospel.dto.IdfKey;
 import app.preach.gospel.dto.TokKey;
 import app.preach.gospel.dto.VecKey;
 import app.preach.gospel.jooq.Keys;
+import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoProjectUtils;
 import app.preach.gospel.utils.CoResult;
@@ -142,6 +145,18 @@ public class HymnServiceImpl implements IHymnService {
 	private static @NotNull String getHymnSpecification(final String keyword) {
 		return CoProjectUtils.isEmpty(keyword) ? CoProjectUtils.HANKAKU_PERCENTSIGN
 				: CoProjectUtils.HANKAKU_PERCENTSIGN.concat(keyword).concat(CoProjectUtils.HANKAKU_PERCENTSIGN);
+	}
+
+	/**
+	 * セリフの全角スペースを削除する
+	 *
+	 * @param serif セリフ
+	 * @return トリムドのセリフ
+	 */
+	private static @NotNull String trimSerif(final @NotNull String serif) {
+		final var zenkakuSpace = "\u3000";
+		final var replace = serif.replace(zenkakuSpace, CoProjectUtils.EMPTY_STRING);
+		return replace.trim();
 	}
 
 	/**
@@ -345,11 +360,18 @@ public class HymnServiceImpl implements IHymnService {
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
 			withNameLike.removeIf(a -> a == null);
-			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
+			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
+			final var tokenizer = new Tokenizer();
+			final var sBuilder = new StringBuilder();
+			final List<Token> tokens = tokenizer.tokenize(detailKeyword);
+			tokens.forEach(ab -> {
+				sBuilder.append(ab.getPronunciation());
+			});
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(detailKeyword))).fetch(rd -> {
+					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(sBuilder.toString())))
+					.fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
@@ -414,17 +436,19 @@ public class HymnServiceImpl implements IHymnService {
 			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))
-							.or(HYMNS_WORK.FURIGANA.like("%[".concat(keyword).concat("]%"))))
+					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword)))
 					.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
 							rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 							rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.CADMIUM));
 			final var hymnDtos = new ArrayList<HymnDto>(withName);
 			final var withNameIds = withName.stream().map(HymnDto::id).toList();
-			final var searchStr = getHymnSpecification(keyword);
+			final String searchStr = getHymnSpecification(keyword);
+			final Field<Float> smlField1 = similarity(HYMNS.NAME_JP, val(keyword));
+			final Field<Float> smlField2 = similarity(HYMNS.NAME_KR, val(keyword));
 			final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION).and(HYMNS.NAME_JP
-							.like(searchStr).or(HYMNS.NAME_KR.like(searchStr)).or(HYMNS_WORK.FURIGANA.like(searchStr)))
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr)).or(smlField1.gt(0.33f))
+							.or(smlField2.gt(0.33f)))
 					.fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId)) {
@@ -443,10 +467,15 @@ public class HymnServiceImpl implements IHymnService {
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
+			final var tokenizer = new Tokenizer();
+			final var sBuilder = new StringBuilder();
+			final List<Token> tokens = tokenizer.tokenize(detailKeyword);
+			tokens.forEach(ab -> {
+				sBuilder.append(ab.getPronunciation());
+			});
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.like(detailKeyword).or(HYMNS.NAME_KR.like(detailKeyword))
-							.or(HYMNS_WORK.FURIGANA.like(detailKeyword).or(HYMNS.LYRIC.like(detailKeyword))))
+					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(sBuilder.toString())))
 					.fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
@@ -587,7 +616,7 @@ public class HymnServiceImpl implements IHymnService {
 	public CoResult<Integer, DataAccessException> infoStorage(final @NotNull HymnDto hymnDto) {
 		try {
 			final var hymnsRecord = this.dslContext.newRecord(HYMNS);
-			final var trimedSerif = this.trimSerif(hymnDto.lyric());
+			final var trimedSerif = HymnServiceImpl.trimSerif(hymnDto.lyric());
 			hymnsRecord.setId(SnowflakeUtils.snowflakeId());
 			hymnsRecord.setNameJp(hymnDto.nameJp());
 			hymnsRecord.setNameKr(hymnDto.nameKr());
@@ -635,13 +664,23 @@ public class HymnServiceImpl implements IHymnService {
 			if (CoProjectUtils.isNotEqual(updatedTime1, updatedTime2)) {
 				return CoResult.err(new DataChangedException(ProjectConstants.MESSAGE_OPTIMISTIC_ERROR));
 			}
-			final var trimedSerif = this.trimSerif(hymnsRecord.getLyric());
+			final var trimedSerif = trimSerif(hymnsRecord.getLyric());
+			final Tokenizer tokenizer = new Tokenizer();
+			final StringBuilder sBuilder = new StringBuilder();
+			final List<Token> tokens = tokenizer.tokenize(trimedSerif);
+			tokens.forEach(ab -> {
+				sBuilder.append(ab.getAllFeatures());
+			});
+			final HymnsWorkRecord hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK)
+					.where(HYMNS_WORK.WORK_ID.eq(hymnsRecord2.getId())).fetchSingle();
+			hymnsWorkRecord.setFurigana(sBuilder.toString());
 			hymnsRecord2.setNameJp(hymnsRecord.getNameJp());
 			hymnsRecord2.setNameKr(hymnsRecord.getNameKr());
 			hymnsRecord2.setLink(hymnsRecord.getLink());
 			hymnsRecord2.setLyric(trimedSerif);
 			hymnsRecord2.setUpdatedUser(Long.parseLong(hymnDto.updatedUser()));
 			hymnsRecord2.setUpdatedTime(OffsetDateTime.now());
+			hymnsWorkRecord.update();
 			hymnsRecord2.update();
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
 		} catch (final DataAccessException e) {
@@ -736,18 +775,6 @@ public class HymnServiceImpl implements IHymnService {
 				.toList();
 		this.nlpCache.put(key, tokens);
 		return tokens;
-	}
-
-	/**
-	 * セリフの全角スペースを削除する
-	 *
-	 * @param serif セリフ
-	 * @return トリムドのセリフ
-	 */
-	private @NotNull String trimSerif(final @NotNull String serif) {
-		final var zenkakuSpace = "\u3000";
-		final var replace = serif.replace(zenkakuSpace, CoProjectUtils.EMPTY_STRING);
-		return replace.trim();
 	}
 
 }
