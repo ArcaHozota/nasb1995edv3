@@ -364,14 +364,14 @@ public class HymnServiceImpl implements IHymnService {
 			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
 			final var tokenizer = new Tokenizer();
 			final var sBuilder = new StringBuilder();
-			final List<Token> tokens = tokenizer.tokenize(detailKeyword);
+			final List<Token> tokens = tokenizer.tokenize(keyword);
 			tokens.forEach(ab -> {
 				sBuilder.append(ab.getPronunciation());
 			});
+			final String detailKeyword2 = CoProjectUtils.getDetailKeyword(sBuilder.toString());
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(sBuilder.toString())))
-					.fetch(rd -> {
+					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(detailKeyword2))).fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
