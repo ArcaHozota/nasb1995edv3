@@ -9,7 +9,6 @@ public final class FastSorts {
 	// =========================
 	// 1. 非负整数基数排序 (LSD, 基数=256)
 	// =========================
-
 	// 对某一字节做稳定的计数排序
 	private static void countingPass(final int[] src, final int[] dst, final int[] cnt, final int shift) {
 		Arrays.fill(cnt, 0);
@@ -44,7 +43,6 @@ public final class FastSorts {
 	// =========================
 	// 2. 稳定归并排序
 	// =========================
-
 	// 稳定合并 [lo, mid) 和 [mid, hi)
 	private static void mergeAsc(final int[] a, final int lo, final int mid, final int hi, final int[] tmp) {
 		// 把要合并的区间复制到 tmp 同位置
@@ -68,6 +66,7 @@ public final class FastSorts {
 		}
 	}
 
+	// 稳定合并 [lo, mid) 和 [mid, hi) => 降序
 	private static void mergeDesc(final int[] a, final int lo, final int mid, final int hi, final int[] tmp) {
 		System.arraycopy(a, lo, tmp, lo, hi - lo);
 		int i = lo, j = mid, k = lo;
@@ -124,7 +123,7 @@ public final class FastSorts {
 		mergeAsc(a, lo, mid, hi, tmp);
 	}
 
-	// [lo, hi) 区间归并排序
+	// [lo, hi) 区间归并排序 => 降序
 	private static void mergeSortRecursiveDesc(final int[] a, final int lo, final int hi, final int[] tmp) {
 		final int size = hi - lo;
 		if (size <= 1) {
@@ -189,6 +188,11 @@ public final class FastSorts {
 		reverse(a); // 最快最稳
 	}
 
+	/**
+	 * スライスに対して順序を逆転する
+	 *
+	 * @param arr スライス
+	 */
 	public static void reverse(final int[] arr) {
 		for (int i = 0, j = arr.length - 1; i < j; i++, j--) {
 			final int tmp = arr[i];
@@ -200,7 +204,6 @@ public final class FastSorts {
 	// =========================
 	// 3. smartSort：自动选择算法
 	// =========================
-
 	/**
 	 * 根据数组长度和元素范围自动选择排序算法： - n <= 32：直接插入排序 - 所有元素 >= 0 且 n 较大：使用
 	 * radixSortNonNegative - 否则：使用稳定归并排序
