@@ -6,6 +6,8 @@ import static app.preach.gospel.jooq.Tables.HYMNS_WORK;
 import static app.preach.gospel.jooq.Tables.STUDENTS;
 import static org.jooq.impl.DSL.val;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
@@ -25,6 +27,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.tika.Tika;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -231,6 +239,46 @@ public class HymnServiceImpl implements IHymnService {
 		});
 		this.nlpCache.put(key, vec);
 		return vec;
+	}
+
+	/**
+	 * イメージからPDFへ変換する
+	 *
+	 * @param img イメージ
+	 * @return byte[]
+	 */
+	private byte[] convertCenteredImage(final byte[] img) {
+		final var doc = new PDDocument();
+		try {
+			final var page = new PDPage(PDRectangle.A4);
+			doc.addPage(page);
+			final PDImageXObject image = PDImageXObject.createFromByteArray(doc, img, "image");
+			final PDRectangle mediaBox = page.getMediaBox();
+			final float pageWidth = mediaBox.getWidth();
+			final float pageHeight = mediaBox.getHeight();
+			final int imageWidth = image.getWidth();
+			final int imageHeight = image.getHeight();
+			final float x = (pageWidth - imageWidth) / 2F;
+			final float y = (pageHeight - imageHeight) / 2F;
+			final var content = new PDPageContentStream(doc, page);
+			try {
+				content.drawImage(image, x, y);
+			} finally {
+				content.close();
+			}
+			final var out = new ByteArrayOutputStream();
+			doc.save(out);
+			return out.toByteArray();
+		} catch (final IOException e) {
+			e.printStackTrace();
+			return new byte[0];
+		} finally {
+			try {
+				doc.close();
+			} catch (final IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -748,7 +796,11 @@ public class HymnServiceImpl implements IHymnService {
 			if (Arrays.equals(hymnsWorkRecord.getScore(), file)) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
-			hymnsWorkRecord.setScore(file);
+			final var tika = new Tika();
+			final String pdfDiscernment = tika.detect(file);
+			hymnsWorkRecord.setBiko(pdfDiscernment);
+			final byte[] centeredImage = this.convertCenteredImage(file);
+			hymnsWorkRecord.setScore(centeredImage);
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsWorkRecord.update();
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
