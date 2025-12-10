@@ -1,24 +1,16 @@
 server:
    port: 8277
-   servlet:
-      session:
-         timeout: 20m
-         cookie:
-            http-only: true
-            secure: true
    compression:
       enabled: true
       min-response-size: 1024
-   jetty:
+   # http2:
+      # enabled: true # 前段が対応なら有効化
+   tomcat:
+      max-keep-alive-requests: 1000
+      keep-alive-timeout: 30s
       threads:
-         min: 2
-         max: 20
-      idle-timeout: 15s
-      accesslog:
-         enabled: true
-         directory: logs
-         filename: jetty-access.log
-         format: NCSA # <- let Jetty supply a valid NCSA string
+         max: 128
+      accept-count: 1000
 spring:
    application:
       name: nasb1995edv3

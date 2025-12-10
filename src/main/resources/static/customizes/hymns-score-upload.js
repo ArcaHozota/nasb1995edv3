@@ -38,6 +38,8 @@ document.getElementById("scoreUploadBtn")?.addEventListener("click", () => {
 	const fileInput = document.getElementById("scoreEdit");
 	const file = fileInput?.files[0];
 	if (!file) return;
+	const header = document.querySelector("meta[name=_csrf_header]")?.content;
+	const token = document.querySelector("meta[name=_csrf_token]")?.content;
 
 	const reader = new FileReader();
 	reader.onload = (e) => {
@@ -50,7 +52,8 @@ document.getElementById("scoreUploadBtn")?.addEventListener("click", () => {
 		fetch('/hymns/score-upload', {
 			method: POST,
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json;charset=UTF-8',
+				...(header && token ? { [header]: token } : {})
 			},
 			body: jsonData
 		})
