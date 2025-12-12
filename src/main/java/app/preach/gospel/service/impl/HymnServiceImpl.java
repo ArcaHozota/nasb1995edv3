@@ -248,23 +248,35 @@ public class HymnServiceImpl implements IHymnService {
 	 * @return byte[]
 	 */
 	private byte[] convertCenteredImage(final byte[] img) {
-		final var doc = new PDDocument();
-		try {
+		try (var doc = new PDDocument()) {
 			final var page = new PDPage(PDRectangle.A4);
 			doc.addPage(page);
+			// 画像オブジェクト作成
 			final PDImageXObject image = PDImageXObject.createFromByteArray(doc, img, "image");
-			final PDRectangle mediaBox = page.getMediaBox();
-			final float pageWidth = mediaBox.getWidth();
-			final float pageHeight = mediaBox.getHeight();
-			final int imageWidth = image.getWidth();
-			final int imageHeight = image.getHeight();
-			final float x = (pageWidth - imageWidth) / 2F;
-			final float y = (pageHeight - imageHeight) / 2F;
-			final var content = new PDPageContentStream(doc, page);
-			try {
-				content.drawImage(image, x, y);
-			} finally {
-				content.close();
+			// A4 の幅・高さ（ポイント: 1pt = 1/72 inch）
+			final float pageWidth = page.getMediaBox().getWidth();
+			final float pageHeight = page.getMediaBox().getHeight();
+			// 画像の元サイズ（ピクセル）。PDFBox はピクセルをそのままポイントとして扱っても OK
+			final float imgWidth = image.getWidth();
+			final float imgHeight = image.getHeight();
+			// 描画サイズ計算
+			float drawWidth;
+			float drawHeight;
+			// 画像が A4 より小さい → 拡大しない
+			if (imgWidth <= pageWidth && imgHeight <= pageHeight) {
+				drawWidth = imgWidth;
+				drawHeight = imgHeight;
+			} else {
+				// 画像が A4 より大きい → A4 に収まるように縮小
+				final float scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+				drawWidth = imgWidth * scale;
+				drawHeight = imgHeight * scale;
+			}
+			// 中央配置用の座標計算（原点は左下）
+			final float x = (pageWidth - drawWidth) / 2f;
+			final float y = (pageHeight - drawHeight) / 2f;
+			try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+				contentStream.drawImage(image, x, y, drawWidth, drawHeight);
 			}
 			final var out = new ByteArrayOutputStream();
 			doc.save(out);
@@ -272,12 +284,6 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final IOException e) {
 			e.printStackTrace();
 			return new byte[0];
-		} finally {
-			try {
-				doc.close();
-			} catch (final IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
