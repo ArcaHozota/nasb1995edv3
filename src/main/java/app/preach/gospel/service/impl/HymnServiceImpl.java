@@ -42,6 +42,7 @@ import org.jooq.exception.DataAccessException;
 import org.jooq.exception.DataChangedException;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -283,7 +284,7 @@ public class HymnServiceImpl implements IHymnService {
 			return out.toByteArray();
 		} catch (final IOException e) {
 			e.printStackTrace();
-			return new byte[0];
+			return ProjectConstants.EMPTY_ARR;
 		}
 	}
 
@@ -804,8 +805,15 @@ public class HymnServiceImpl implements IHymnService {
 			}
 			final var tika = new Tika();
 			final String pdfDiscernment = tika.detect(file);
-			hymnsWorkRecord.setBiko(pdfDiscernment);
 			final byte[] centeredImage = this.convertCenteredImage(file);
+			if (Arrays.equals(ProjectConstants.EMPTY_ARR, centeredImage)) {
+				hymnsWorkRecord.setBiko(pdfDiscernment);
+				hymnsWorkRecord.setScore(centeredImage);
+				hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
+				hymnsWorkRecord.update();
+				return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
+			}
+			hymnsWorkRecord.setBiko(MediaType.APPLICATION_PDF_VALUE);
 			hymnsWorkRecord.setScore(centeredImage);
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
 			hymnsWorkRecord.update();

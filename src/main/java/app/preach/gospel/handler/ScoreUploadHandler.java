@@ -11,8 +11,8 @@ import org.apache.struts2.ActionContext;
 import org.apache.struts2.action.ServletRequestAware;
 import org.apache.struts2.dispatcher.DefaultActionSupport;
 import org.jooq.exception.DataAccessException;
+import org.jooq.exception.NoDataFoundException;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -132,8 +132,13 @@ public class ScoreUploadHandler extends DefaultActionSupport implements ServletR
 			throw hymnInfoById.getErr();
 		}
 		final HymnDto hymnDto = hymnInfoById.getData();
-		this.setContentType(MediaType.APPLICATION_PDF_VALUE);
-		this.setFileName(hymnDto.id() + CoProjectUtils.DOT.concat(ProjectConstants.ATTRNAME_PDF));
+		final String biko = hymnDto.biko();
+		if (CoProjectUtils.isEmpty(biko)) {
+			throw new NoDataFoundException(ProjectConstants.MESSAGE_STRING_FATAL_ERROR);
+		}
+		final int indexOf = biko.indexOf(CoProjectUtils.SLASH) + 1;
+		this.setContentType(biko);
+		this.setFileName(hymnDto.id() + CoProjectUtils.DOT.concat(biko.substring(indexOf)));
 		this.setFileData(hymnDto.score());
 		return SUCCESS;
 	}
