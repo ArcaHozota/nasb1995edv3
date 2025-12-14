@@ -390,6 +390,80 @@ public class HymnServiceImpl implements IHymnService {
 					return CoResult.ok(pagination);
 				}
 			}
+			final String[] splits = keyword.split("&");
+			if (splits.length > 1) {
+				final String searchStr1 = getHymnSpecification(splits[0]);
+				final String searchStr2 = getHymnSpecification(splits[1]);
+				final Field<Float> smlField1 = similarity(HYMNS.NAME_JP, val(splits[0]));
+				final Field<Float> smlField2 = similarity(HYMNS.NAME_KR, val(splits[0]));
+				final Field<Float> smlField3 = similarity(HYMNS.NAME_JP, val(splits[1]));
+				final Field<Float> smlField4 = similarity(HYMNS.NAME_KR, val(splits[1]));
+				final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+						.and(HYMNS.NAME_JP.like(searchStr1).or(HYMNS.NAME_KR.like(searchStr1))
+								.or(HYMNS.NAME_JP.like(searchStr2)).or(HYMNS.NAME_KR.like(searchStr2))
+								.or(smlField1.gt(0.33f)).or(smlField2.gt(0.33f)).or(smlField3.gt(0.33f))
+								.or(smlField4.gt(0.33f)))
+						.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP),
+								rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+								rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+								LineNumber.BURGUNDY));
+				final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
+				final String detailKeyword1 = CoStringUtils.getDetailKeyword(splits[0]);
+				final String detailKeyword2 = CoStringUtils.getDetailKeyword(splits[1]);
+				final var tokenizer = new Tokenizer();
+				final var sBuilder1 = new StringBuilder();
+				final var sBuilder2 = new StringBuilder();
+				final List<Token> tokens1 = tokenizer.tokenize(splits[0]);
+				final List<Token> tokens2 = tokenizer.tokenize(splits[1]);
+				tokens1.forEach(ab -> {
+					sBuilder1.append(ab.getPronunciation());
+				});
+				final String detailKeyword3 = CoStringUtils.getDetailKeyword(sBuilder1.toString());
+				tokens2.forEach(ab -> {
+					sBuilder2.append(ab.getPronunciation());
+				});
+				final String detailKeyword4 = CoStringUtils.getDetailKeyword(sBuilder2.toString());
+				final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+						.and(HYMNS.LYRIC.like(detailKeyword1).or(HYMNS.LYRIC.like(detailKeyword2))
+								.or(HYMNS_WORK.FURIGANA.like(detailKeyword3))
+								.or(HYMNS_WORK.FURIGANA.like(detailKeyword4)))
+						.fetch(rd -> {
+							final String hymnId = rd.get(HYMNS.ID).toString();
+							if (withNameLikeIds.contains(hymnId)) {
+								return null;
+							}
+							return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
+									rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+									rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+									LineNumber.NAPLES);
+						});
+				withRandomFive.removeIf(a -> a == null);
+				final var withRandomFiveIds = withRandomFive.stream().map(HymnDto::id).toList();
+				final var otherHymns = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
+						.fetch(rd -> {
+							final String hymnId = rd.get(HYMNS.ID).toString();
+							if (withNameLikeIds.contains(hymnId) || withRandomFiveIds.contains(hymnId)) {
+								return null;
+							}
+							return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
+									rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+									rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+									LineNumber.SNOWY);
+						});
+				otherHymns.removeIf(a -> a == null);
+				final var hymnDtos = new ArrayList<HymnDto>(withNameLike);
+				hymnDtos.addAll(withRandomFive);
+				hymnDtos.addAll(otherHymns);
+				final var sortedHymnDtos = hymnDtos.stream()
+						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList();
+				final var pagination = Pagination.of(
+						sortedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords,
+						pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
+				this.nlpCache.put(docKey, sortedHymnDtos);
+				return CoResult.ok(pagination);
+			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword)))

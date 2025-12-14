@@ -12,7 +12,6 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.util.StringUtils;
 
 import app.preach.gospel.common.ProjectConstants;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +25,7 @@ import lombok.NoArgsConstructor;
  * @since 1.00beta
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CoStringUtils extends StringUtils {
+public final class CoStringUtils {
 
 	/**
 	 * UTF-8キャラセット
@@ -34,29 +33,14 @@ public final class CoStringUtils extends StringUtils {
 	public static final Charset CHARSET_UTF8 = StandardCharsets.UTF_8;
 
 	/**
-	 * 空文字列
-	 */
-	public static final String EMPTY_STRING = "";
-
-	/**
-	 * 半角スペース
-	 */
-	public static final String HANKAKU_SPACE = "\u0020";
-
-	/**
-	 * 半角パーセント記号
-	 */
-	public static final String HANKAKU_PERCENTSIGN = "\u0025";
-
-	/**
-	 * スラッシュマーク
-	 */
-	public static final String SLASH = "\u002f";
-
-	/**
 	 * ドットマーク
 	 */
 	public static final String DOT = "\u002e";
+
+	/**
+	 * 空文字列
+	 */
+	public static final String EMPTY_STRING = "";
 
 	/**
 	 * 半角コロン
@@ -64,9 +48,24 @@ public final class CoStringUtils extends StringUtils {
 	public static final String HANKAKU_COLON = "\u003a";
 
 	/**
+	 * 半角パーセント記号
+	 */
+	public static final String HANKAKU_PERCENTSIGN = "\u0025";
+
+	/**
 	 * 半角シャープ
 	 */
 	public static final String HANKAKU_SHARP = "\u0023";
+
+	/**
+	 * 半角スペース
+	 */
+	public static final String HANKAKU_SPACE = "\u0020";
+
+	/**
+	 * スラッシュマーク
+	 */
+	public static final String SLASH = "\u002f";
 
 	/**
 	 * 全角半角変換マップ
