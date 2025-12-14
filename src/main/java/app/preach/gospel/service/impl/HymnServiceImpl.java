@@ -59,7 +59,7 @@ import app.preach.gospel.dto.VecKey;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 import app.preach.gospel.service.IHymnService;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.LineNumber;
 import app.preach.gospel.utils.Pagination;
@@ -152,8 +152,8 @@ public class HymnServiceImpl implements IHymnService {
 	 * @return Specification<Hymn>
 	 */
 	private static @NotNull String getHymnSpecification(final String keyword) {
-		return CoProjectUtils.isEmpty(keyword) ? CoProjectUtils.HANKAKU_PERCENTSIGN
-				: CoProjectUtils.HANKAKU_PERCENTSIGN.concat(keyword).concat(CoProjectUtils.HANKAKU_PERCENTSIGN);
+		return CoStringUtils.isEmpty(keyword) ? CoStringUtils.HANKAKU_PERCENTSIGN
+				: CoStringUtils.HANKAKU_PERCENTSIGN.concat(keyword).concat(CoStringUtils.HANKAKU_PERCENTSIGN);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class HymnServiceImpl implements IHymnService {
 	 */
 	private static @NotNull String trimSerif(final @NotNull String serif) {
 		final var zenkakuSpace = "\u3000";
-		final var replace = serif.replace(zenkakuSpace, CoProjectUtils.EMPTY_STRING);
+		final var replace = serif.replace(zenkakuSpace, CoStringUtils.EMPTY_STRING);
 		return replace.trim();
 	}
 
@@ -183,7 +183,7 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String nameJp) {
 		try {
-			if (CoProjectUtils.isDigital(id)) {
+			if (CoStringUtils.isDigital(id)) {
 				final var checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 						.and(HYMNS.ID.ne(Long.parseLong(id))).and(HYMNS.NAME_JP.eq(nameJp)).fetchSingle()
 						.into(Integer.class);
@@ -203,7 +203,7 @@ public class HymnServiceImpl implements IHymnService {
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated2(final String id, final String nameKr) {
 		try {
-			if (CoProjectUtils.isDigital(id)) {
+			if (CoStringUtils.isDigital(id)) {
 				final var checkDuplicated = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION)
 						.and(HYMNS.ID.ne(Long.parseLong(id))).and(HYMNS.NAME_KR.eq(nameKr)).fetchSingle()
 						.into(Integer.class);
@@ -364,7 +364,7 @@ public class HymnServiceImpl implements IHymnService {
 						ProjectConstants.DEFAULT_PAGE_SIZE);
 				return CoResult.ok(pagination);
 			}
-			if (CoProjectUtils.isEmpty(keyword)) {
+			if (CoStringUtils.isEmpty(keyword)) {
 				final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
 						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getLyric(),
 								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
@@ -416,14 +416,14 @@ public class HymnServiceImpl implements IHymnService {
 					});
 			withNameLike.removeIf(a -> a == null);
 			final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
-			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
+			final String detailKeyword = CoStringUtils.getDetailKeyword(keyword);
 			final var tokenizer = new Tokenizer();
 			final var sBuilder = new StringBuilder();
 			final List<Token> tokens = tokenizer.tokenize(keyword);
 			tokens.forEach(ab -> {
 				sBuilder.append(ab.getPronunciation());
 			});
-			final String detailKeyword2 = CoProjectUtils.getDetailKeyword(sBuilder.toString());
+			final String detailKeyword2 = CoStringUtils.getDetailKeyword(sBuilder.toString());
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
 					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(detailKeyword2))).fetch(rd -> {
@@ -481,7 +481,7 @@ public class HymnServiceImpl implements IHymnService {
 					return CoResult.ok(hymnDtos);
 				}
 			}
-			if (CoProjectUtils.isEmpty(keyword)) {
+			if (CoStringUtils.isEmpty(keyword)) {
 				final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
 						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getLyric(),
 								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
@@ -521,7 +521,7 @@ public class HymnServiceImpl implements IHymnService {
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
-			final String detailKeyword = CoProjectUtils.getDetailKeyword(keyword);
+			final String detailKeyword = CoStringUtils.getDetailKeyword(keyword);
 			final var tokenizer = new Tokenizer();
 			final var sBuilder = new StringBuilder();
 			final List<Token> tokens = tokenizer.tokenize(detailKeyword);
@@ -628,7 +628,7 @@ public class HymnServiceImpl implements IHymnService {
 	 * @return String
 	 */
 	private String hash(final String text) {
-		final var b = SHA256.get().digest(text.getBytes(CoProjectUtils.CHARSET_UTF8));
+		final var b = SHA256.get().digest(text.getBytes(CoStringUtils.CHARSET_UTF8));
 		final var sb = new StringBuilder();
 		for (final byte x : b) {
 			sb.append(String.format("%02x", x));
@@ -694,7 +694,7 @@ public class HymnServiceImpl implements IHymnService {
 			hymnsWorkRecord.insert();
 			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
-			final int discernLargestPage = CoProjectUtils.discernLargestPage(totalRecords);
+			final int discernLargestPage = CoStringUtils.discernLargestPage(totalRecords);
 			return CoResult.ok(discernLargestPage);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -720,10 +720,10 @@ public class HymnServiceImpl implements IHymnService {
 					.format(hymnsRecord2.getUpdatedTime().atZoneSameInstant(ZoneOffset.ofHours(9)).toLocalDateTime());
 			hymnsRecord2.setUpdatedTime(null);
 			hymnsRecord2.setUpdatedUser(null);
-			if (CoProjectUtils.isEqual(hymnsRecord, hymnsRecord2)) {
+			if (CoStringUtils.isEqual(hymnsRecord, hymnsRecord2)) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
-			if (CoProjectUtils.isNotEqual(updatedTime1, updatedTime2)) {
+			if (CoStringUtils.isNotEqual(updatedTime1, updatedTime2)) {
 				return CoResult.err(new DataChangedException(ProjectConstants.MESSAGE_OPTIMISTIC_ERROR));
 			}
 			final var trimedSerif = trimSerif(hymnsRecord.getLyric());
@@ -800,15 +800,15 @@ public class HymnServiceImpl implements IHymnService {
 		try {
 			final var hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id))
 					.fetchSingle();
-			if (Arrays.equals(hymnsWorkRecord.getScore(), file)) {
-				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
-			}
+//			if (Arrays.equals(hymnsWorkRecord.getScore(), file)) {
+//				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
+//			}
 			final var tika = new Tika();
 			final String pdfDiscernment = tika.detect(file);
 			final byte[] centeredImage = this.convertCenteredImage(file);
 			if (Arrays.equals(ProjectConstants.EMPTY_ARR, centeredImage)) {
 				hymnsWorkRecord.setBiko(pdfDiscernment);
-				hymnsWorkRecord.setScore(centeredImage);
+				hymnsWorkRecord.setScore(file);
 				hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
 				hymnsWorkRecord.update();
 				return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
@@ -835,7 +835,7 @@ public class HymnServiceImpl implements IHymnService {
 			}
 		}
 		final var koreanText = builder.toString();
-		if (CoProjectUtils.isEmpty(koreanText)) {
+		if (CoStringUtils.isEmpty(koreanText)) {
 			return new ArrayList<>();
 		}
 		final var key = new TokKey(lang, tokenizer, this.hash(koreanText));

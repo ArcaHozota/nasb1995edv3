@@ -17,7 +17,7 @@ import com.alibaba.fastjson2.JSON;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.Pagination;
 import jakarta.annotation.Resource;
@@ -114,7 +114,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 			this.setResponseError(ProjectConstants.MESSAGE_HYMN_NAME_DUPLICATED);
 			return ERROR;
 		}
-		this.setResponseJsonData(CoProjectUtils.EMPTY_STRING);
+		this.setResponseJsonData(CoStringUtils.EMPTY_STRING);
 		return NONE;
 	}
 
@@ -135,7 +135,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 			this.setResponseError(ProjectConstants.MESSAGE_HYMN_NAME_DUPLICATED);
 			return ERROR;
 		}
-		this.setResponseJsonData(CoProjectUtils.EMPTY_STRING);
+		this.setResponseJsonData(CoStringUtils.EMPTY_STRING);
 		return NONE;
 	}
 
@@ -328,7 +328,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	 */
 	public String toPages() {
 		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
-		if (CoProjectUtils.isDigital(pageNum)) {
+		if (CoStringUtils.isDigital(pageNum)) {
 			ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 			return SUCCESS;
 		}

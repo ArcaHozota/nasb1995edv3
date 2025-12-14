@@ -16,7 +16,7 @@ import com.alibaba.fastjson2.JSON;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.StudentDto;
 import app.preach.gospel.service.IStudentService;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -107,7 +107,7 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 			this.setResponseError(ProjectConstants.MESSAGE_STUDENT_NAME_DUPLICATED);
 			return ERROR;
 		}
-		this.setResponseJsonData(CoProjectUtils.EMPTY_STRING);
+		this.setResponseJsonData(CoStringUtils.EMPTY_STRING);
 		return NONE;
 	}
 

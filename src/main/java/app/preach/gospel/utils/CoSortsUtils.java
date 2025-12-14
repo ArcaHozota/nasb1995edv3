@@ -1,10 +1,62 @@
 package app.preach.gospel.utils;
 
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Arrays;
 
-public final class FastSorts {
+import javax.imageio.ImageIO;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.exif.ExifIFD0Directory;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CoSortsUtils {
 
 	private static final int INSERTION_SORT_THRESHOLD = 32;
+
+	private static BufferedImage applyOrientation(final BufferedImage src, final int orientation) {
+		// よくあるのは 6(90°) / 3(180°) / 8(270°) / 1(そのまま)
+		double theta;
+		int dstW = src.getWidth();
+		int dstH = src.getHeight();
+		final AffineTransform tx = new AffineTransform();
+		switch (orientation) {
+		case 6: // 90 CW
+			theta = Math.toRadians(90);
+			dstW = src.getHeight();
+			dstH = src.getWidth();
+			tx.translate(dstW, 0);
+			tx.rotate(theta);
+			break;
+		case 3: // 180
+			theta = Math.toRadians(180);
+			tx.translate(dstW, dstH);
+			tx.rotate(theta);
+			break;
+		case 8: // 270 CW (or 90 CCW)
+			theta = Math.toRadians(270);
+			dstW = src.getHeight();
+			dstH = src.getWidth();
+			tx.translate(0, dstH);
+			tx.rotate(theta);
+			break;
+		default: // 1 or unknown
+			return src;
+		}
+		final BufferedImage dst = new BufferedImage(dstW, dstH, BufferedImage.TYPE_INT_RGB);
+		final Graphics2D g2 = dst.createGraphics();
+		g2.setTransform(tx);
+		g2.drawImage(src, 0, 0, null);
+		g2.dispose();
+		return dst;
+	}
 
 	// =========================
 	// 1. 非负整数基数排序 (LSD, 基数=256)
@@ -188,6 +240,24 @@ public final class FastSorts {
 		reverse(a); // 最快最稳
 	}
 
+	public static BufferedImage readAndNormalizeOrientation(final File jpgFile) throws Exception {
+		final BufferedImage img = ImageIO.read(jpgFile);
+		if (img == null) {
+			return null;
+		}
+		int orientation = 1;
+		try {
+			final Metadata metadata = ImageMetadataReader.readMetadata(jpgFile);
+			final ExifIFD0Directory dir = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			if (dir != null && dir.containsTag(ExifDirectoryBase.TAG_ORIENTATION)) {
+				orientation = dir.getInt(ExifDirectoryBase.TAG_ORIENTATION);
+			}
+		} catch (final Exception ignore) {
+			// EXIF 取れない画像もあるので握りつぶしてOK
+		}
+		return applyOrientation(img, orientation);
+	}
+
 	/**
 	 * スライスに対して順序を逆転する
 	 *
@@ -241,10 +311,6 @@ public final class FastSorts {
 	public static void smartSortDesc(final int[] a) {
 		smartSort(a);
 		reverse(a);
-	}
-
-	private FastSorts() {
-		// 工具类，不允许实例化
 	}
 
 }

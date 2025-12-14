@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -133,12 +133,12 @@ public class ScoreUploadHandler extends DefaultActionSupport implements ServletR
 		}
 		final HymnDto hymnDto = hymnInfoById.getData();
 		final String biko = hymnDto.biko();
-		if (CoProjectUtils.isEmpty(biko)) {
+		if (CoStringUtils.isEmpty(biko)) {
 			throw new NoDataFoundException(ProjectConstants.MESSAGE_STRING_FATAL_ERROR);
 		}
-		final int indexOf = biko.indexOf(CoProjectUtils.SLASH) + 1;
+		final int indexOf = biko.indexOf(CoStringUtils.SLASH) + 1;
 		this.setContentType(biko);
-		this.setFileName(hymnDto.id() + CoProjectUtils.DOT.concat(biko.substring(indexOf)));
+		this.setFileName(hymnDto.id() + CoStringUtils.DOT.concat(biko.substring(indexOf)));
 		this.setFileData(hymnDto.score());
 		return SUCCESS;
 	}

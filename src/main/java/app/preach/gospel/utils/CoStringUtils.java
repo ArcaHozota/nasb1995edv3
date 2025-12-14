@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
  * @since 1.00beta
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CoProjectUtils extends StringUtils {
+public final class CoStringUtils extends StringUtils {
 
 	/**
 	 * UTF-8キャラセット
@@ -313,7 +313,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return ファジークエリ
 	 */
 	public static String getDetailKeyword(final String keyword) {
-		if (CoProjectUtils.isEmpty(keyword)) {
+		if (CoStringUtils.isEmpty(keyword)) {
 			return HANKAKU_PERCENTSIGN;
 		}
 		final StringBuilder builder = new StringBuilder();
@@ -364,7 +364,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return true: すべて数字, false: 文字も含める
 	 */
 	public static boolean isDigital(@Nullable final String string) {
-		if (CoProjectUtils.isEmpty(string)) {
+		if (CoStringUtils.isEmpty(string)) {
 			return false;
 		}
 		return Pattern.compile("\\d*").matcher(string).matches();
@@ -432,7 +432,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return true: 空ではない, false: 空
 	 */
 	public static boolean isNotEmpty(@Nullable final String str) {
-		return !CoProjectUtils.isEmpty(str);
+		return !CoStringUtils.isEmpty(str);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return true: イコールしない, false: イコール
 	 */
 	public static boolean isNotEqual(@Nullable final Long long1, @Nullable final Long long2) {
-		return !CoProjectUtils.isEqual(long1, long2);
+		return !CoStringUtils.isEqual(long1, long2);
 	}
 
 	/**
@@ -454,7 +454,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return true: イコールしない, false: イコール
 	 */
 	public static boolean isNotEqual(@Nullable final Object obj1, @Nullable final Object obj2) {
-		return !CoProjectUtils.isEqual(obj1, obj2);
+		return !CoStringUtils.isEqual(obj1, obj2);
 	}
 
 	/**
@@ -465,7 +465,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return true: イコールしない, false: イコール
 	 */
 	public static boolean isNotEqual(@Nullable final String str1, @Nullable final String str2) {
-		return !CoProjectUtils.isEqual(str1, str2);
+		return !CoStringUtils.isEqual(str1, str2);
 	}
 
 	/**
@@ -475,7 +475,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return 半角文字
 	 */
 	public static String toHankaku(@Nullable final String zenkaku) {
-		if (CoProjectUtils.isEmpty(zenkaku)) {
+		if (CoStringUtils.isEmpty(zenkaku)) {
 			return EMPTY_STRING;
 		}
 		final StringBuilder builder = new StringBuilder();
@@ -498,7 +498,7 @@ public final class CoProjectUtils extends StringUtils {
 	 * @return 全角文字
 	 */
 	public static String toZenkaku(@Nullable final String hankaku) {
-		if (CoProjectUtils.isEmpty(hankaku)) {
+		if (CoStringUtils.isEmpty(hankaku)) {
 			return EMPTY_STRING;
 		}
 		final StringBuilder builder = new StringBuilder();

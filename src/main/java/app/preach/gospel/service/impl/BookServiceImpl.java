@@ -17,7 +17,7 @@ import app.preach.gospel.dto.BookDto;
 import app.preach.gospel.dto.ChapterDto;
 import app.preach.gospel.dto.PhraseDto;
 import app.preach.gospel.service.IBookService;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +55,7 @@ public class BookServiceImpl implements IBookService {
 	@Override
 	public CoResult<List<ChapterDto>, DataAccessException> getChaptersByBookId(final String id) {
 		try {
-			if (CoProjectUtils.isDigital(id)) {
+			if (CoStringUtils.isDigital(id)) {
 				final var chapterDtos = this.dslContext.selectFrom(CHAPTERS)
 						.where(CHAPTERS.BOOK_ID.eq(Short.valueOf(id))).orderBy(CHAPTERS.ID.asc())
 						.fetch(r -> new ChapterDto(r.get(CHAPTERS.ID).toString(), r.get(CHAPTERS.NAME),
@@ -90,7 +90,7 @@ public class BookServiceImpl implements IBookService {
 				fetchOne.setChapterId(chapterId);
 				final var textEn = phraseDto.textEn();
 				if (textEn.endsWith("#")) {
-					fetchOne.setTextEn(textEn.replace("#", CoProjectUtils.EMPTY_STRING));
+					fetchOne.setTextEn(textEn.replace("#", CoStringUtils.EMPTY_STRING));
 					fetchOne.setChangeLine(Boolean.TRUE);
 				} else {
 					fetchOne.setTextEn(phraseDto.textEn());
@@ -104,7 +104,7 @@ public class BookServiceImpl implements IBookService {
 			phrasesRecord.setChapterId(chapterId);
 			final var textEn = phraseDto.textEn();
 			if (textEn.endsWith("#")) {
-				phrasesRecord.setTextEn(textEn.replace("#", CoProjectUtils.EMPTY_STRING));
+				phrasesRecord.setTextEn(textEn.replace("#", CoStringUtils.EMPTY_STRING));
 				phrasesRecord.setChangeLine(Boolean.TRUE);
 			} else {
 				phrasesRecord.setTextEn(phraseDto.textEn());

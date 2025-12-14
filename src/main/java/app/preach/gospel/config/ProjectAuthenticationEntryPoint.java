@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.common.ProjectURLConstants;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
@@ -31,7 +31,7 @@ public class ProjectAuthenticationEntryPoint implements AuthenticationEntryPoint
 			final AuthenticationException authException) throws IOException {
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		response.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-		response.sendRedirect(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoProjectUtils.SLASH)
+		response.sendRedirect(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
 				.concat(ProjectURLConstants.URL_TO_LOGIN_WITH_ERROR));
 		log.warn(ProjectConstants.MESSAGE_STRING_NOT_LOGIN);
 	}

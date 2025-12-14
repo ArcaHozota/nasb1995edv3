@@ -21,7 +21,7 @@ import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.StudentDto;
 import app.preach.gospel.service.IStudentService;
 import app.preach.gospel.utils.CoBeanUtils;
-import app.preach.gospel.utils.CoProjectUtils;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +60,7 @@ public class StudentServiceImpl implements IStudentService {
 	@Override
 	public CoResult<Integer, DataAccessException> checkDuplicated(final String id, final String loginAccount) {
 		try {
-			if (CoProjectUtils.isDigital(id)) {
+			if (CoStringUtils.isDigital(id)) {
 				final var checkDuplicated = this.dslContext.selectCount().from(STUDENTS).where(COMMON_CONDITION)
 						.and(STUDENTS.ID.ne(Long.parseLong(id))).and(STUDENTS.LOGIN_ACCOUNT.eq(loginAccount))
 						.fetchSingle().into(Integer.class);
@@ -110,12 +110,12 @@ public class StudentServiceImpl implements IStudentService {
 			studentsRecord2.setPassword(null);
 			studentsRecord2.setUpdatedTime(null);
 			boolean passwordDiscernment;
-			if (CoProjectUtils.isEqual(studentDto.password(), password)) {
+			if (CoStringUtils.isEqual(studentDto.password(), password)) {
 				passwordDiscernment = true;
 			} else {
 				passwordDiscernment = ENCODER.matches(studentDto.password(), password);
 			}
-			if (CoProjectUtils.isEqual(studentsRecord, studentsRecord2) && passwordDiscernment) {
+			if (CoStringUtils.isEqual(studentsRecord, studentsRecord2) && passwordDiscernment) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
 			CoBeanUtils.copyNullableProperties(studentsRecord, studentsRecord2);
