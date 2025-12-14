@@ -59,8 +59,8 @@ import app.preach.gospel.dto.VecKey;
 import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 import app.preach.gospel.service.IHymnService;
-import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.LineNumber;
 import app.preach.gospel.utils.Pagination;
 import app.preach.gospel.utils.SnowflakeUtils;
@@ -800,12 +800,13 @@ public class HymnServiceImpl implements IHymnService {
 		try {
 			final var hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id))
 					.fetchSingle();
-//			if (Arrays.equals(hymnsWorkRecord.getScore(), file)) {
-//				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
-//			}
+			final byte[] centeredImage = this.convertCenteredImage(file);
+			if (Arrays.equals(hymnsWorkRecord.getScore(), file)
+					|| Arrays.equals(hymnsWorkRecord.getScore(), centeredImage)) {
+				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
+			}
 			final var tika = new Tika();
 			final String pdfDiscernment = tika.detect(file);
-			final byte[] centeredImage = this.convertCenteredImage(file);
 			if (Arrays.equals(ProjectConstants.EMPTY_ARR, centeredImage)) {
 				hymnsWorkRecord.setBiko(pdfDiscernment);
 				hymnsWorkRecord.setScore(file);
