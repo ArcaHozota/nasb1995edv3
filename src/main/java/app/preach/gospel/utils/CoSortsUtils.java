@@ -3,7 +3,9 @@ package app.preach.gospel.utils;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
@@ -238,6 +240,30 @@ public final class CoSortsUtils {
 	public static void radixSortDesc(final int[] a) {
 		radixSort(a);
 		reverse(a); // 最快最稳
+	}
+
+	public static BufferedImage readAndNormalizeOrientation(final byte[] jpgBytes) throws Exception {
+		// ① 画像読み込み（ImageIO）
+		BufferedImage img;
+		try (InputStream imgIn = new ByteArrayInputStream(jpgBytes)) {
+			img = ImageIO.read(imgIn);
+		}
+		if (img == null) {
+			return null;
+		}
+		// ② EXIF Orientation 取得
+		int orientation = 1;
+		try (InputStream metaIn = new ByteArrayInputStream(jpgBytes)) {
+			final Metadata metadata = ImageMetadataReader.readMetadata(metaIn);
+			final ExifIFD0Directory dir = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			if (dir != null && dir.containsTag(ExifDirectoryBase.TAG_ORIENTATION)) {
+				orientation = dir.getInt(ExifDirectoryBase.TAG_ORIENTATION);
+			}
+		} catch (final Exception ignore) {
+			// EXIF が無い / 壊れている場合は orientation=1 のまま
+		}
+		// ③ 回転・反転補正
+		return applyOrientation(img, orientation);
 	}
 
 	public static BufferedImage readAndNormalizeOrientation(final File jpgFile) throws Exception {

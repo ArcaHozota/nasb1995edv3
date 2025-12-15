@@ -6,6 +6,7 @@ import static app.preach.gospel.jooq.Tables.HYMNS_WORK;
 import static app.preach.gospel.jooq.Tables.STUDENTS;
 import static org.jooq.impl.DSL.val;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -31,6 +32,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.tika.Tika;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +62,7 @@ import app.preach.gospel.jooq.Keys;
 import app.preach.gospel.jooq.tables.records.HymnsWorkRecord;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoResult;
+import app.preach.gospel.utils.CoSortsUtils;
 import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.LineNumber;
 import app.preach.gospel.utils.Pagination;
@@ -252,8 +255,7 @@ public class HymnServiceImpl implements IHymnService {
 		try (var doc = new PDDocument()) {
 			final var page = new PDPage(PDRectangle.A4);
 			doc.addPage(page);
-			// 画像オブジェクト作成
-			final PDImageXObject image = PDImageXObject.createFromByteArray(doc, img, "image");
+			final BufferedImage image = CoSortsUtils.readAndNormalizeOrientation(img);
 			// A4 の幅・高さ（ポイント: 1pt = 1/72 inch）
 			final float pageWidth = page.getMediaBox().getWidth();
 			final float pageHeight = page.getMediaBox().getHeight();
@@ -273,11 +275,13 @@ public class HymnServiceImpl implements IHymnService {
 				drawWidth = imgWidth * scale;
 				drawHeight = imgHeight * scale;
 			}
+			// 画像オブジェクト作成
+			final PDImageXObject pdfImage = LosslessFactory.createFromImage(doc, image);
 			// 中央配置用の座標計算（原点は左下）
 			final float x = (pageWidth - drawWidth) / 2f;
 			final float y = (pageHeight - drawHeight) / 2f;
 			try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
-				contentStream.drawImage(image, x, y, drawWidth, drawHeight);
+				contentStream.drawImage(pdfImage, x, y, drawWidth, drawHeight);
 			}
 			final var out = new ByteArrayOutputStream();
 			doc.save(out);
@@ -285,6 +289,9 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final IOException e) {
 			e.printStackTrace();
 			return ProjectConstants.EMPTY_ARR;
+		} catch (final Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -398,12 +405,13 @@ public class HymnServiceImpl implements IHymnService {
 				final Field<Float> smlField2 = similarity(HYMNS.NAME_KR, val(splits[0]));
 				final Field<Float> smlField3 = similarity(HYMNS.NAME_JP, val(splits[1]));
 				final Field<Float> smlField4 = similarity(HYMNS.NAME_KR, val(splits[1]));
+				final Condition condition1 = HYMNS.NAME_JP.like(searchStr1).and(HYMNS.NAME_JP.like(searchStr2));
+				final Condition condition2 = HYMNS.NAME_KR.like(searchStr1).and(HYMNS.NAME_KR.like(searchStr2));
+				final Condition condition3 = smlField1.gt(0.33f).and(smlField3.gt(0.33f));
+				final Condition condition4 = smlField2.gt(0.33f).and(smlField4.gt(0.33f));
 				final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-						.and(HYMNS.NAME_JP.like(searchStr1).or(HYMNS.NAME_KR.like(searchStr1))
-								.or(HYMNS.NAME_JP.like(searchStr2)).or(HYMNS.NAME_KR.like(searchStr2))
-								.or(smlField1.gt(0.33f)).or(smlField2.gt(0.33f)).or(smlField3.gt(0.33f))
-								.or(smlField4.gt(0.33f)))
+						.and(condition1.or(condition2).or(condition3).or(condition4))
 						.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP),
 								rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
 								rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
@@ -426,9 +434,8 @@ public class HymnServiceImpl implements IHymnService {
 				final String detailKeyword4 = CoStringUtils.getDetailKeyword(sBuilder2.toString());
 				final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-						.and(HYMNS.LYRIC.like(detailKeyword1).or(HYMNS.LYRIC.like(detailKeyword2))
-								.or(HYMNS_WORK.FURIGANA.like(detailKeyword3))
-								.or(HYMNS_WORK.FURIGANA.like(detailKeyword4)))
+						.and((HYMNS.LYRIC.like(detailKeyword1).and(HYMNS.LYRIC.like(detailKeyword2))).or(
+								HYMNS_WORK.FURIGANA.like(detailKeyword3).and(HYMNS_WORK.FURIGANA.like(detailKeyword4))))
 						.fetch(rd -> {
 							final String hymnId = rd.get(HYMNS.ID).toString();
 							if (withNameLikeIds.contains(hymnId)) {
