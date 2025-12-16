@@ -16,7 +16,8 @@ spring:
       name: nasb1995edv3
    servlet:
       multipart:
-         max-file-size: 2MB
+         max-file-size: 3MB
+         max-request-size: 3.3MB
    datasource:
       driver-class-name: org.postgresql.Driver
       url: jdbc:postgresql://database-1.cdd6uaafebcj.ap-northeast-1.rds.amazonaws.com:5432/nasb1995?reWriteBatchedInserts=true
