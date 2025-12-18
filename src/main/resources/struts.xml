@@ -35,7 +35,8 @@
 	<!-- アップロードファイルのサイズは最大2MBにする -->
 	<constant name="struts.multipart.maxSize" value="3145728" />
 	<!-- アップロードファイルの一時保存するフォルダ -->
-	<constant name="struts.multipart.saveDir" value="/tmp/struts-upload" />
+	<constant name="struts.multipart.saveDir"
+		value="/tmp/struts-upload" />
 	<!-- 例外処理ハンドラ -->
 	<constant name="struts.dispatcher.errorHandler"
 		value="app.preach.gospel.listener.ProjectExceptionHandler" />

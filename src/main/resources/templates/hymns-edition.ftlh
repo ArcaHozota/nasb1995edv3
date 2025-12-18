@@ -65,7 +65,7 @@
 								<label for="serifEdit" class="col-sm-3 col-form-label text-end">セリフ</label>
 								<div class="col-sm-7" style="height: 26vh;">
 									<textarea class="form-control" style="height: 100%" id="serifEdit"
-										placeholder="セリフを入力してください">${arawaseta.serif()}</textarea>
+										placeholder="セリフを入力してください">${arawaseta.lyric()}</textarea>
 									<span class="form-text" style="font-size: 10px;margin-top: 0px;"></span>
 								</div>
 							</div>
