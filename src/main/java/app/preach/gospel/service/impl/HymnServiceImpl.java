@@ -7,6 +7,7 @@ import static app.preach.gospel.jooq.Tables.STUDENTS;
 import static org.jooq.impl.DSL.val;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -27,6 +28,8 @@ import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -248,14 +251,20 @@ public class HymnServiceImpl implements IHymnService {
 	/**
 	 * イメージからPDFへ変換する
 	 *
-	 * @param img イメージ
+	 * @param img            イメージ
+	 * @param pdfDiscernment タイプ
 	 * @return byte[]
 	 */
-	private byte[] convertCenteredImage(final byte[] img) {
-		try (var doc = new PDDocument()) {
+	private byte[] convertCenteredImage(final byte[] img, final String pdfDiscernment) {
+		if (CoStringUtils.isEqual(MediaType.APPLICATION_PDF_VALUE, pdfDiscernment)) {
+			return img;
+		}
+		try (final var doc = new PDDocument()) {
 			final var page = new PDPage(PDRectangle.A4);
 			doc.addPage(page);
-			final BufferedImage image = CoSortsUtils.readAndNormalizeOrientation(img);
+			final BufferedImage image = (CoStringUtils.isEqual(MediaType.IMAGE_JPEG_VALUE, pdfDiscernment))
+					? CoSortsUtils.readAndNormalizeOrientation(img)
+					: ImageIO.read(new ByteArrayInputStream(img));
 			// A4 の幅・高さ（ポイント: 1pt = 1/72 inch）
 			final float pageWidth = page.getMediaBox().getWidth();
 			final float pageHeight = page.getMediaBox().getHeight();
@@ -881,13 +890,13 @@ public class HymnServiceImpl implements IHymnService {
 		try {
 			final var hymnsWorkRecord = this.dslContext.selectFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id))
 					.fetchSingle();
-			final byte[] centeredImage = this.convertCenteredImage(file);
+			final var tika = new Tika();
+			final String pdfDiscernment = tika.detect(file);
+			final byte[] centeredImage = this.convertCenteredImage(file, pdfDiscernment);
 			if (Arrays.equals(hymnsWorkRecord.getScore(), file)
 					|| Arrays.equals(hymnsWorkRecord.getScore(), centeredImage)) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
-			final var tika = new Tika();
-			final String pdfDiscernment = tika.detect(file);
 			if (Arrays.equals(ProjectConstants.EMPTY_ARR, centeredImage)) {
 				hymnsWorkRecord.setBiko(pdfDiscernment);
 				hymnsWorkRecord.setScore(file);
