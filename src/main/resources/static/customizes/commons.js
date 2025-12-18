@@ -128,17 +128,12 @@ function projectAjaxModify(url, type, data, successFunction) {
 		body: data
 	}).then(async res => {
 		if (!res.ok) {
-			const contentType = res.headers.get("content-type");
-			if (contentType && contentType.includes("application/json")) {
-				const json = await res.json();
-				throw new Error(json.message ?? JSON.stringify(json));
-			} else {
-				throw new Error(await res.text());
-			}
+			// ★ ここで Response を処理する
+			const text = await res.text();
+			throw new Error(text);
 		}
 		return res.json();
-	})
-		.then(successFunction)
+	}).then(successFunction)
 		.catch(err => {
 			layer.msg(trimQuote(err.message));
 		});
