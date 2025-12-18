@@ -126,12 +126,21 @@ function projectAjaxModify(url, type, data, successFunction) {
 			...(header && token ? { [header]: token } : {})
 		},
 		body: data
+	}).then(async res => {
+		if (!res.ok) {
+			const contentType = res.headers.get("content-type");
+			if (contentType && contentType.includes("application/json")) {
+				const json = await res.json();
+				throw new Error(json.message ?? JSON.stringify(json));
+			} else {
+				throw new Error(await res.text());
+			}
+		}
+		return res.json();
 	})
-		.then(res => res.json())
 		.then(successFunction)
-		.catch(async (xhr) => {
-			const message = trimQuote(await xhr.text());
-			layer.msg(message);
+		.catch(err => {
+			layer.msg(trimQuote(err.message));
 		});
 }
 
