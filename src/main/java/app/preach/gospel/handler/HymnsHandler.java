@@ -17,8 +17,8 @@ import com.alibaba.fastjson2.JSON;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
-import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
+import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.Pagination;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,6 +58,11 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	private String link;
 
 	/**
+	 * 歌詞
+	 */
+	private String lyric;
+
+	/**
 	 * 日本語名称
 	 */
 	private String nameJp;
@@ -76,11 +81,6 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	 * JSONリスポンス
 	 */
 	private transient Object responseJsonData;
-
-	/**
-	 * セリフ
-	 */
-	private String serif;
 
 	/**
 	 * リクエスト
@@ -153,7 +153,7 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	 */
 	@Contract(" -> new")
 	private @NotNull HymnDto getHymnDto() {
-		return new HymnDto(this.getId(), this.getNameJp(), this.getNameKr(), this.getSerif(), this.getLink(), null,
+		return new HymnDto(this.getId(), this.getNameJp(), this.getNameKr(), this.getLyric(), this.getLink(), null,
 				null, this.getUpdatedUser(), this.getUpdatedTime(), null);
 	}
 

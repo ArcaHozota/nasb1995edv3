@@ -761,7 +761,7 @@ public class HymnServiceImpl implements IHymnService {
 	public CoResult<Integer, DataAccessException> infoStorage(final @NotNull HymnDto hymnDto) {
 		try {
 			final var hymnsRecord = this.dslContext.newRecord(HYMNS);
-			final var trimedSerif = HymnServiceImpl.trimSerif(hymnDto.lyric());
+			final var trimedSerif = trimSerif(hymnDto.lyric());
 			hymnsRecord.setId(SnowflakeUtils.snowflakeId());
 			hymnsRecord.setNameJp(hymnDto.nameJp());
 			hymnsRecord.setNameKr(hymnDto.nameKr());
@@ -775,9 +775,11 @@ public class HymnServiceImpl implements IHymnService {
 			final var tokenizer = new Tokenizer();
 			final var sBuilder = new StringBuilder();
 			final List<Token> tokens = tokenizer.tokenize(trimedSerif);
-			tokens.forEach(ab -> {
-				sBuilder.append(ab.getAllFeatures());
-			});
+			if (!tokens.isEmpty()) {
+				tokens.forEach(ab -> {
+					sBuilder.append(ab.getAllFeatures());
+				});
+			}
 			hymnsWorkRecord.setWorkId(hymnsRecord.getId());
 			hymnsWorkRecord.setFurigana(sBuilder.toString());
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());

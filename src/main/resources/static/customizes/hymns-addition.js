@@ -24,7 +24,6 @@ document.getElementById("nameKrInput")?.addEventListener("change", (e) => {
 
 document.getElementById("infoStorageBtn")?.addEventListener("click", () => {
 	const inputArrays = ["#nameJpInput", "#nameKrInput", "#linkInput", "#serifInput"];
-
 	inputArrays.forEach(sel => {
 		const el = document.querySelector(sel);
 		el.classList.remove("is-valid", "is-invalid");
@@ -34,9 +33,7 @@ document.getElementById("infoStorageBtn")?.addEventListener("click", () => {
 			span.textContent = emptyString;
 		}
 	});
-
 	const listArray = projectInputContextGet(inputArrays);
-
 	if (listArray.includes(emptyString)) {
 		projectNullInputBoxDiscern(inputArrays);
 	} else if (document.getElementById("inputForm").querySelector(".is-invalid")) {
@@ -46,9 +43,8 @@ document.getElementById("infoStorageBtn")?.addEventListener("click", () => {
 			nameJp: document.getElementById("nameJpInput").value.trim(),
 			nameKr: document.getElementById("nameKrInput").value.trim(),
 			link: document.getElementById("linkInput").value,
-			serif: document.getElementById("serifInput").value
+			lyric: document.getElementById("serifInput").value
 		});
-
 		projectAjaxModify('/hymns/info-storage', POST, postData, hymnsPostSuccessFunction);
 	}
 });
@@ -86,7 +82,7 @@ document.getElementById("infoUpdateBtn")?.addEventListener("click", () => {
 			nameJp: document.getElementById("nameJpEdit").value.trim(),
 			nameKr: document.getElementById("nameKrEdit").value.trim(),
 			link: document.getElementById("linkEdit").value,
-			serif: document.getElementById("serifEdit").value,
+			lyric: document.getElementById("serifEdit").value,
 			updatedTime: document.getElementById("datestampContainer").value
 		});
 

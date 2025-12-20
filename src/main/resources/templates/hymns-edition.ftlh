@@ -62,7 +62,7 @@
 								</div>
 							</div>
 							<div class="form-group row">
-								<label for="serifEdit" class="col-sm-3 col-form-label text-end">セリフ</label>
+								<label for="serifEdit" class="col-sm-3 col-form-label text-end">歌詞</label>
 								<div class="col-sm-7" style="height: 26vh;">
 									<textarea class="form-control" style="height: 100%" id="serifEdit"
 										placeholder="セリフを入力してください">${arawaseta.lyric()}</textarea>
