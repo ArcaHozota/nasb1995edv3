@@ -58,15 +58,20 @@ function randomRetrieve(keyword) {
 
 function toSelectedPg(pageNum, keyword) {
 	fetch(`/hymns/pagination?pageNum=${encodeURIComponent(pageNum)}&keyword=${encodeURIComponent(keyword)}`)
-		.then(res => res.json())
+		.then(async res => {
+			if (!res.ok) {
+				const text = await res.text();
+				throw new Error(text);
+			}
+			return res.json();
+		})
 		.then(response => {
 			buildTableBody2(response);
 			buildPageInfos(response);
 			buildPageNavi(response);
 		})
-		.catch(async (xhr) => {
-			const message = trimQuote(await xhr.text());
-			layer.msg(message);
+		.catch(err => {
+			layer.msg(trimQuote(err.message));
 		});
 }
 

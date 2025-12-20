@@ -39,11 +39,13 @@ document.getElementById("infoStorageBtn")?.addEventListener("click", () => {
 	} else if (document.getElementById("inputForm").querySelector(".is-invalid")) {
 		layer.msg(inputWarning);
 	} else {
+		const userId = document.getElementById("toPersonal").querySelector("input")?.value;
 		const postData = JSON.stringify({
 			nameJp: document.getElementById("nameJpInput").value.trim(),
 			nameKr: document.getElementById("nameKrInput").value.trim(),
 			link: document.getElementById("linkInput").value,
-			lyric: document.getElementById("serifInput").value
+			lyric: document.getElementById("serifInput").value,
+			updatedUser: userId
 		});
 		projectAjaxModify('/hymns/info-storage', POST, postData, hymnsPostSuccessFunction);
 	}
@@ -77,15 +79,16 @@ document.getElementById("infoUpdateBtn")?.addEventListener("click", () => {
 	} else if (document.getElementById("editForm").querySelector(".is-invalid")) {
 		layer.msg(inputWarning);
 	} else {
+		const userId = document.getElementById("toPersonal").querySelector("input")?.value;
 		const putData = JSON.stringify({
 			id: document.getElementById("idContainer").value,
 			nameJp: document.getElementById("nameJpEdit").value.trim(),
 			nameKr: document.getElementById("nameKrEdit").value.trim(),
 			link: document.getElementById("linkEdit").value,
 			lyric: document.getElementById("serifEdit").value,
-			updatedTime: document.getElementById("datestampContainer").value
+			updatedTime: document.getElementById("datestampContainer").value,
+			updatedUser: userId
 		});
-
 		projectAjaxModify('/hymns/info-update', PUT, putData, hymnsPutSuccessFunction);
 	}
 });

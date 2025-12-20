@@ -371,11 +371,13 @@ public class HymnServiceImpl implements IHymnService {
 			final var totalRecords = this.dslContext.selectCount().from(HYMNS).where(COMMON_CONDITION).fetchSingle()
 					.into(Long.class);
 			final int offset = (pageNum - 1) * ProjectConstants.DEFAULT_PAGE_SIZE;
+			final int margrave = (int) ((offset + ProjectConstants.DEFAULT_PAGE_SIZE) > totalRecords ? totalRecords
+					: offset + ProjectConstants.DEFAULT_PAGE_SIZE);
 			final var docKey = new DocKey(keyword, this.getCorpusVersion(), totalRecords);
 			@SuppressWarnings("unchecked")
 			final var nlpedHymnDtos = (List<HymnDto>) this.nlpCache.getIfPresent(docKey);
 			if (nlpedHymnDtos != null) {
-				final var subList = nlpedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE);
+				final var subList = nlpedHymnDtos.subList(offset, margrave);
 				final var pagination = Pagination.of(subList, totalRecords, pageNum,
 						ProjectConstants.DEFAULT_PAGE_SIZE);
 				return CoResult.ok(pagination);
@@ -385,8 +387,7 @@ public class HymnServiceImpl implements IHymnService {
 						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getLyric(),
 								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
 								rd.getUpdatedTime().toString(), LineNumber.SNOWY));
-				final var pagination = Pagination.of(
-						hymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
+				final var pagination = Pagination.of(hymnDtos.subList(offset, margrave), totalRecords, pageNum,
 						ProjectConstants.DEFAULT_PAGE_SIZE);
 				this.nlpCache.put(docKey, hymnDtos);
 				return CoResult.ok(pagination);
@@ -474,9 +475,8 @@ public class HymnServiceImpl implements IHymnService {
 				hymnDtos.addAll(otherHymns);
 				final var sortedHymnDtos = hymnDtos.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList();
-				final var pagination = Pagination.of(
-						sortedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords,
-						pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
+				final var pagination = Pagination.of(sortedHymnDtos.subList(offset, margrave), totalRecords, pageNum,
+						ProjectConstants.DEFAULT_PAGE_SIZE);
 				this.nlpCache.put(docKey, sortedHymnDtos);
 				return CoResult.ok(pagination);
 			}
@@ -544,8 +544,7 @@ public class HymnServiceImpl implements IHymnService {
 			hymnDtos.addAll(otherHymns);
 			final var sortedHymnDtos = hymnDtos.stream()
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList();
-			final var pagination = Pagination.of(
-					sortedHymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords, pageNum,
+			final var pagination = Pagination.of(sortedHymnDtos.subList(offset, margrave), totalRecords, pageNum,
 					ProjectConstants.DEFAULT_PAGE_SIZE);
 			this.nlpCache.put(docKey, sortedHymnDtos);
 			return CoResult.ok(pagination);
@@ -780,6 +779,8 @@ public class HymnServiceImpl implements IHymnService {
 					sBuilder.append(ab.getAllFeatures());
 				});
 			}
+			final int count = this.dslContext.selectCount().from(HYMNS_WORK).fetchSingle().into(Integer.class);
+			hymnsWorkRecord.setId(Long.valueOf(count + 1L));
 			hymnsWorkRecord.setWorkId(hymnsRecord.getId());
 			hymnsWorkRecord.setFurigana(sBuilder.toString());
 			hymnsWorkRecord.setUpdatedTime(OffsetDateTime.now());
