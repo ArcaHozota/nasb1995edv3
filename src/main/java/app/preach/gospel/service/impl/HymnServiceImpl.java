@@ -896,8 +896,10 @@ public class HymnServiceImpl implements IHymnService {
 			final var tika = new Tika();
 			final String pdfDiscernment = tika.detect(file);
 			final byte[] centeredImage = this.convertCenteredImage(file, pdfDiscernment);
-			if (Arrays.equals(hymnsWorkRecord.getScore(), file)
-					|| Arrays.equals(hymnsWorkRecord.getScore(), centeredImage)) {
+			if ((CoStringUtils.isEqual(MediaType.APPLICATION_PDF_VALUE, pdfDiscernment)
+					&& Arrays.equals(hymnsWorkRecord.getScore(), file))
+					|| (CoStringUtils.isNotEqual(MediaType.APPLICATION_PDF_VALUE, pdfDiscernment)
+							&& Arrays.equals(hymnsWorkRecord.getScore(), centeredImage))) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
 			}
 			if (Arrays.equals(ProjectConstants.EMPTY_ARR, centeredImage)) {
