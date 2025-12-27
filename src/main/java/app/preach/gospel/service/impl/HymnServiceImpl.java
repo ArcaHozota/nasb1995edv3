@@ -199,6 +199,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -219,6 +220,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -267,7 +269,7 @@ public class HymnServiceImpl implements IHymnService {
 			// A4 の幅・高さ（ポイント: 1pt = 1/72 inch）
 			final float pageWidth = page.getMediaBox().getWidth();
 			final float pageHeight = page.getMediaBox().getHeight();
-			// 画像の元サイズ（ピクセル）。PDFBox はピクセルをそのままポイントとして扱っても OK
+			// 画像の元サイズ（ピクセル）。PDFBox はピクセルをそのままポイントとして扱ってもOK
 			final float imgWidth = image.getWidth();
 			final float imgHeight = image.getHeight();
 			// 描画サイズ計算
@@ -295,10 +297,9 @@ public class HymnServiceImpl implements IHymnService {
 			doc.save(out);
 			return out.toByteArray();
 		} catch (final IOException e) {
-			e.printStackTrace();
 			return ProjectConstants.EMPTY_ARR;
 		} catch (final Exception e) {
-			e.printStackTrace();
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -572,6 +573,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -770,6 +772,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -816,6 +819,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -830,6 +834,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -876,6 +881,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -916,6 +922,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -965,6 +972,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -1041,6 +1049,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
+			log.error(e.getStackTrace());
 			throw new RuntimeException(e.getMessage());
 		}
 	}
