@@ -21,7 +21,6 @@ import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.CoStringUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 聖書章節サービス実装クラス
@@ -29,7 +28,6 @@ import lombok.extern.log4j.Log4j2;
  * @author ArkamaHozota
  * @since 1.00beta
  */
-@Log4j2
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookServiceImpl implements IBookService {
@@ -49,8 +47,7 @@ public class BookServiceImpl implements IBookService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.warn(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -72,8 +69,7 @@ public class BookServiceImpl implements IBookService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.warn(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -119,8 +115,7 @@ public class BookServiceImpl implements IBookService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.warn(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 

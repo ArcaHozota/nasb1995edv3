@@ -199,8 +199,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -220,8 +219,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -299,8 +297,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final IOException e) {
 			return ProjectConstants.EMPTY_ARR;
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -360,6 +357,8 @@ public class HymnServiceImpl implements IHymnService {
 			return CoResult.ok(hymnDto);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -573,8 +572,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -772,8 +770,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -819,8 +816,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -834,8 +830,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -881,8 +876,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -922,8 +916,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -972,8 +965,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -1049,8 +1041,7 @@ public class HymnServiceImpl implements IHymnService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -25,7 +25,6 @@ import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.CoStringUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 奉仕者サービス実装クラス
@@ -33,7 +32,6 @@ import lombok.extern.log4j.Log4j2;
  * @author ArkamaHozota
  * @since 1.00beta
  */
-@Log4j2
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class StudentServiceImpl implements IStudentService {
@@ -74,8 +72,7 @@ public class StudentServiceImpl implements IStudentService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -92,8 +89,7 @@ public class StudentServiceImpl implements IStudentService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -134,8 +130,7 @@ public class StudentServiceImpl implements IStudentService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -157,8 +152,7 @@ public class StudentServiceImpl implements IStudentService {
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
 		} catch (final Exception e) {
-			log.error(e.getStackTrace());
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 

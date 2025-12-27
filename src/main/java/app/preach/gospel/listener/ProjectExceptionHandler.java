@@ -50,7 +50,11 @@ public final class ProjectExceptionHandler extends DefaultDispatcherErrorHandler
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.getWriter().print(JSON.toJSON(errorMessage));
 				response.getWriter().close();
-				log.error(exception.getStackTrace());
+				exception.printStackTrace();
+//				final StackTraceElement[] stackTraceElements = exception.getStackTrace();
+//				for (final var en : stackTraceElements) {
+//					log.error(en.toString());
+//				}
 			}
 		} catch (final Exception e) {
 			// Log illegal state instead of passing unrecoverable exception to calling
