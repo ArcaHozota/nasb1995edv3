@@ -33,7 +33,7 @@
 							<div class="form-group row">
 								<label for="scoreEdit" class="col-sm-3 col-form-label text-end">楽譜</label>
 								<div class="col-sm-7" style="height: 8vh;">
-									<input type="file" class="form-control" name="file" id="scoreEdit" accept=".pdf,.jpg,.png,.jpeg" required>
+									<input type="file" class="form-control" name="file" id="scoreEdit" accept=".pdf,.jpg,.jpeg,.png,.gif,.svg" required>
 								</div>
 							</div>
 						</form>
