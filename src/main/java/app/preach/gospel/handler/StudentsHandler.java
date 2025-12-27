@@ -3,10 +3,9 @@ package app.preach.gospel.handler;
 import java.io.Serial;
 
 import org.apache.struts2.ActionContext;
+import org.apache.struts2.ModelDriven;
 import org.apache.struts2.action.ServletRequestAware;
 import org.apache.struts2.dispatcher.DefaultActionSupport;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.exception.DataAccessException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -16,8 +15,8 @@ import com.alibaba.fastjson2.JSON;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.StudentDto;
 import app.preach.gospel.service.IStudentService;
-import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
+import app.preach.gospel.utils.CoStringUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,41 +33,16 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class StudentsHandler extends DefaultActionSupport implements ServletRequestAware {
+public class StudentsHandler extends DefaultActionSupport implements ModelDriven<StudentDto>, ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = 1592265866534993918L;
-
-	/**
-	 * 生年月日
-	 */
-	private String dateOfBirth;
-
-	/**
-	 * メール
-	 */
-	private String email;
-
-	/**
-	 * ID
-	 */
-	private String id;
 
 	/**
 	 * 奉仕者サービスインターフェス
 	 */
 	@Resource
 	private IStudentService iStudentService;
-
-	/**
-	 * アカウント
-	 */
-	private String loginAccount;
-
-	/**
-	 * パスワード
-	 */
-	private String password;
 
 	/**
 	 * エラーリスポンス
@@ -86,9 +60,9 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 	private transient HttpServletRequest servletRequest;
 
 	/**
-	 * ユーザ名称
+	 * 奉仕者情報転送クラス
 	 */
-	private String username;
+	private StudentDto studentDto = new StudentDto();
 
 	/**
 	 * アカウント重複チェック
@@ -97,7 +71,7 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 	 */
 	public String checkDuplicated() {
 		final CoResult<Integer, DataAccessException> checkDuplicated = this.iStudentService
-				.checkDuplicated(this.getId(), this.getLoginAccount());
+				.checkDuplicated(this.getModel().getId(), this.getModel().getLoginAccount());
 		if (!checkDuplicated.isOk()) {
 			throw checkDuplicated.getErr();
 		}
@@ -111,13 +85,9 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 		return NONE;
 	}
 
-	/**
-	 * 奉仕者情報転送クラス
-	 */
-	@Contract(" -> new")
-	private @NotNull StudentDto getStudentDto() {
-		return new StudentDto(this.getId(), this.getLoginAccount(), this.getUsername(), this.getPassword(),
-				this.getEmail(), this.getDateOfBirth(), null);
+	@Override
+	public StudentDto getModel() {
+		return this.getStudentDto();
 	}
 
 	/**
@@ -126,8 +96,7 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 	 * @return String
 	 */
 	public String infoUpdation() {
-		final CoResult<String, DataAccessException> infoUpdation = this.iStudentService
-				.infoUpdation(this.getStudentDto());
+		final CoResult<String, DataAccessException> infoUpdation = this.iStudentService.infoUpdation(this.getModel());
 		if (!infoUpdation.isOk()) {
 			throw infoUpdation.getErr();
 		}
@@ -157,9 +126,8 @@ public class StudentsHandler extends DefaultActionSupport implements ServletRequ
 	 * @return String
 	 */
 	public String preLogin() {
-		final CoResult<String, DataAccessException> preLoginUpdation = this.iStudentService.preLoginUpdate(
-				this.getServletRequest().getParameter("loginAccount"),
-				this.getServletRequest().getParameter("password"));
+		final CoResult<String, DataAccessException> preLoginUpdation = this.iStudentService
+				.preLoginUpdate(this.getModel().getLoginAccount(), this.getModel().getPassword());
 		if (!preLoginUpdation.isOk()) {
 			throw preLoginUpdation.getErr();
 		}

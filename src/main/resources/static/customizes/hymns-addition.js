@@ -94,11 +94,11 @@ document.getElementById("infoUpdateBtn")?.addEventListener("click", () => {
 });
 
 document.getElementById("resetBtn")?.addEventListener("click", () => {
-	formReset("#inputForm");
+	formReset("inputForm");
 });
 
 document.getElementById("restoreBtn")?.addEventListener("click", () => {
-	formReset("#editForm");
+	formReset("editForm");
 });
 
 function hymnsPostSuccessFunction(response) {

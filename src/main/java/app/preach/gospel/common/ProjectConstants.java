@@ -84,5 +84,5 @@ public final class ProjectConstants {
 
 	public static final String MESSAGE_STUDENT_NAME_DUPLICATED = "ユーザ名称がすでに存在します。";
 
-	public static final String MESSAGE_STUDENT_NOT_FOUND = "勉強者情報が見つかりませんでした";
+	public static final String MESSAGE_STUDENT_NOT_FOUND = "奉仕者情報が見つかりませんでした";
 }

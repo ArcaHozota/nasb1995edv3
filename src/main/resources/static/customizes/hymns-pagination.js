@@ -27,7 +27,6 @@ document.getElementById("searchBtn2")?.addEventListener("click", () => {
 tableBody?.addEventListener("click", (e) => {
 	const target = e.target.closest(".delete-btn, .edit-btn, .score-btn, .link-btn, .score-download-btn");
 	if (!target) return;
-
 	if (target.classList.contains("delete-btn")) {
 		const deleteId = target.getAttribute("data-delete-id");
 		const nameJp = target.closest("tr")?.querySelector("th")?.textContent.trim();
@@ -79,12 +78,10 @@ function buildTableBody(response) {
 		nameJpTd.className = "text-left";
 		nameJpTd.style = "width: 130px; vertical-align: middle;";
 		nameJpTd.textContent = item.nameJp;
-
 		const nameKrTd = document.createElement("td");
 		nameKrTd.className = "text-left";
 		nameKrTd.style = "width: 100px; vertical-align: middle;";
 		nameKrTd.textContent = item.nameKr;
-
 		const linkTd = document.createElement("td");
 		linkTd.className = "text-center";
 		linkTd.style = "width: 20px; vertical-align: middle;";
@@ -94,7 +91,6 @@ function buildTableBody(response) {
 		linkA.setAttribute("data-transfer-val", item.link);
 		linkA.textContent = "Link";
 		linkTd.appendChild(linkA);
-
 		const scoreTd = document.createElement("td");
 		scoreTd.className = "text-center";
 		scoreTd.style = "width: 20px; vertical-align: middle;";
@@ -104,39 +100,32 @@ function buildTableBody(response) {
 		scoreA.setAttribute("data-score-id", item.id);
 		scoreA.innerHTML = "&#x1D11E;";
 		scoreTd.appendChild(scoreA);
-
 		const btnTd = document.createElement("td");
 		btnTd.className = "text-center";
 		btnTd.style = "width: 80px; vertical-align: middle;";
-
 		const scoreBtn = document.createElement("button");
-		scoreBtn.className = "btn btn-success btn-sm score-btn";
+		scoreBtn.className = "btn btn-danger btn-sm score-btn";
 		scoreBtn.setAttribute("data-score-id", item.id);
-		scoreBtn.innerHTML = '<i class="fa-solid fa-music"></i> 楽譜';
-
+		scoreBtn.innerHTML = '<i class="fa-solid fa-file"></i> 楽譜';
 		const editBtn = document.createElement("button");
 		editBtn.className = "btn btn-primary btn-sm edit-btn";
 		editBtn.setAttribute("data-edit-id", item.id);
 		editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i> 編集';
-
 		const deleteBtn = document.createElement("button");
-		deleteBtn.className = "btn btn-danger btn-sm delete-btn";
+		deleteBtn.className = "btn btn-warning btn-sm delete-btn";
 		deleteBtn.setAttribute("data-delete-id", item.id);
 		deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> 削除';
-
 		btnTd.appendChild(scoreBtn);
 		btnTd.append(" ");
 		btnTd.appendChild(editBtn);
 		btnTd.append(" ");
 		btnTd.appendChild(deleteBtn);
-
 		const tr = document.createElement("tr");
 		tr.appendChild(nameJpTd);
 		tr.appendChild(nameKrTd);
 		tr.appendChild(linkTd);
 		tr.appendChild(scoreTd);
 		tr.appendChild(btnTd);
-
 		switch (item.lineNumber) {
 			case 'BURGUNDY':
 				tr.className = "table-danger";
@@ -150,7 +139,6 @@ function buildTableBody(response) {
 			default:
 				tr.className = "table-light";
 		}
-
 		tableBody.appendChild(tr);
 	});
 }

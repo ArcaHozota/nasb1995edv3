@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		toTemporary.classList.add('active');
 	}
 });
-
 const bookInput = document.getElementById("bookInput");
 const chapterInput = document.getElementById("chapterInput");
 const infoStorageBtn = document.getElementById("infoStorageBtn");

@@ -82,9 +82,13 @@ public class StudentServiceImpl implements IStudentService {
 		try {
 			final var studentsRecord = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.ID.eq(id)).fetchSingle();
-			final var studentDto = new StudentDto(studentsRecord.getId().toString(), studentsRecord.getLoginAccount(),
-					studentsRecord.getUsername(), studentsRecord.getPassword(), studentsRecord.getEmail(),
-					FORMATTER.format(studentsRecord.getDateOfBirth()), null);
+			final var studentDto = new StudentDto();
+			studentDto.setId(studentsRecord.getId().toString());
+			studentDto.setLoginAccount(studentsRecord.getLoginAccount());
+			studentDto.setUsername(studentsRecord.getUsername());
+			studentDto.setPassword(studentsRecord.getPassword());
+			studentDto.setEmail(studentsRecord.getEmail());
+			studentDto.setDateOfBirth(FORMATTER.format(studentsRecord.getDateOfBirth()));
 			return CoResult.ok(studentDto);
 		} catch (final DataAccessException e) {
 			return CoResult.err(e);
@@ -97,11 +101,11 @@ public class StudentServiceImpl implements IStudentService {
 	public CoResult<String, DataAccessException> infoUpdation(final @NotNull StudentDto studentDto) {
 		try {
 			final var studentsRecord = this.dslContext.newRecord(STUDENTS);
-			studentsRecord.setId(Long.valueOf(studentDto.id()));
-			studentsRecord.setLoginAccount(studentDto.loginAccount());
-			studentsRecord.setUsername(studentDto.username());
-			studentsRecord.setDateOfBirth(LocalDate.parse(studentDto.dateOfBirth(), FORMATTER));
-			studentsRecord.setEmail(studentDto.email());
+			studentsRecord.setId(Long.valueOf(studentDto.getId()));
+			studentsRecord.setLoginAccount(studentDto.getLoginAccount());
+			studentsRecord.setUsername(studentDto.getUsername());
+			studentsRecord.setDateOfBirth(LocalDate.parse(studentDto.getDateOfBirth(), FORMATTER));
+			studentsRecord.setEmail(studentDto.getEmail());
 			studentsRecord.setVisibleFlg(Boolean.TRUE);
 			final var studentsRecord2 = this.dslContext.selectFrom(STUDENTS).where(COMMON_CONDITION)
 					.and(STUDENTS.ID.eq(studentsRecord.getId())).fetchSingle();
@@ -110,10 +114,10 @@ public class StudentServiceImpl implements IStudentService {
 			studentsRecord2.setPassword(null);
 			studentsRecord2.setUpdatedTime(null);
 			boolean passwordDiscernment;
-			if (CoStringUtils.isEqual(studentDto.password(), password)) {
+			if (CoStringUtils.isEqual(studentDto.getPassword(), password)) {
 				passwordDiscernment = true;
 			} else {
-				passwordDiscernment = ENCODER.matches(studentDto.password(), password);
+				passwordDiscernment = ENCODER.matches(studentDto.getPassword(), password);
 			}
 			if (CoStringUtils.isEqual(studentsRecord, studentsRecord2) && passwordDiscernment) {
 				return CoResult.err(new ConfigurationException(ProjectConstants.MESSAGE_STRING_NO_CHANGE));
@@ -123,7 +127,7 @@ public class StudentServiceImpl implements IStudentService {
 			if (passwordDiscernment) {
 				studentsRecord2.setPassword(password);
 			} else {
-				studentsRecord2.setPassword(ENCODER.encode(studentDto.password()));
+				studentsRecord2.setPassword(ENCODER.encode(studentDto.getPassword()));
 			}
 			studentsRecord2.update();
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);

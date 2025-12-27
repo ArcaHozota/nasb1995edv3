@@ -1,5 +1,6 @@
 package app.preach.gospel.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
@@ -7,6 +8,9 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import app.preach.gospel.utils.LineNumber;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 賛美情報転送クラス
@@ -14,66 +18,63 @@ import app.preach.gospel.utils.LineNumber;
  * @author ArkamaHozota
  * @since 1.00beta
  */
-public record HymnDto(
+@Getter
+@Setter
+@NoArgsConstructor
+public final class HymnDto implements Serializable {
 
-		/*
-		 * ID
-		 */
-		String id,
+	@Serial
+	private static final long serialVersionUID = 8503008003122740312L;
 
-		/*
-		 * 日本語名称
-		 */
-		String nameJp,
+	/*
+	 * 備考
+	 */
+	private String biko;
 
-		/*
-		 * 韓国語名称
-		 */
-		String nameKr,
+	/*
+	 * ID
+	 */
+	private String id;
 
-		/*
-		 * 歌詞
-		 */
-		String lyric,
+	/*
+	 * LINENUMBER
+	 */
+	private LineNumber lineNumber;
 
-		/*
-		 * ビデオリンク
-		 */
-		String link,
+	/*
+	 * ビデオリンク
+	 */
+	private String link;
 
-		/*
-		 * 楽譜
-		 */
-		byte[] score,
+	/*
+	 * 歌詞
+	 */
+	private String lyric;
 
-		/*
-		 * 備考
-		 */
-		String biko,
+	/*
+	 * 日本語名称
+	 */
+	private String nameJp;
 
-		/*
-		 * 更新者
-		 */
-		String updatedUser,
+	/*
+	 * 韓国語名称
+	 */
+	private String nameKr;
 
-		/*
-		 * 更新時間
-		 */
-		String updatedTime,
+	/*
+	 * 楽譜
+	 */
+	private byte[] score;
 
-		/*
-		 * LINENUMBER
-		 */
-		LineNumber lineNumber) implements Serializable {
+	/*
+	 * 更新時間
+	 */
+	private String updatedTime;
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = (prime * result) + Arrays.hashCode(this.score);
-		return (prime * result) + Objects.hash(this.biko, this.id, this.lineNumber, this.link, this.nameJp, this.nameKr,
-				this.lyric, this.updatedTime, this.updatedUser);
-	}
+	/*
+	 * 更新者
+	 */
+	private String updatedUser;
 
 	@Override
 	public boolean equals(final Object obj) {
@@ -89,6 +90,15 @@ public record HymnDto(
 				&& Arrays.equals(this.score, other.score) && Objects.equals(this.lyric, other.lyric)
 				&& Objects.equals(this.updatedTime, other.updatedTime)
 				&& Objects.equals(this.updatedUser, other.updatedUser);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + Arrays.hashCode(this.score);
+		return (prime * result) + Objects.hash(this.biko, this.id, this.lineNumber, this.link, this.nameJp, this.nameKr,
+				this.lyric, this.updatedTime, this.updatedUser);
 	}
 
 	@Override

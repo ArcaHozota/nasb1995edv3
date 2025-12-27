@@ -133,14 +133,14 @@ public class ScoreUploadHandler extends DefaultActionSupport implements ServletR
 			throw hymnInfoById.getErr();
 		}
 		final HymnDto hymnDto = hymnInfoById.getData();
-		final String biko = hymnDto.biko();
+		final String biko = hymnDto.getBiko();
 		if (CoStringUtils.isEmpty(biko)) {
 			throw new NoDataFoundException(ProjectConstants.MESSAGE_STRING_FATAL_ERROR);
 		}
 		final int indexOf = biko.indexOf(CoStringUtils.SLASH) + 1;
 		this.setContentType(biko);
-		this.setFileName(hymnDto.id() + CoStringUtils.DOT.concat(biko.substring(indexOf)));
-		this.setFileData(hymnDto.score());
+		this.setFileName(hymnDto.getId() + CoStringUtils.DOT.concat(biko.substring(indexOf)));
+		this.setFileData(hymnDto.getScore());
 		return SUCCESS;
 	}
 

@@ -4,10 +4,9 @@ import java.io.Serial;
 import java.util.List;
 
 import org.apache.struts2.ActionContext;
+import org.apache.struts2.ModelDriven;
 import org.apache.struts2.action.ServletRequestAware;
 import org.apache.struts2.dispatcher.DefaultActionSupport;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.exception.DataAccessException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -36,41 +35,21 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class HymnsHandler extends DefaultActionSupport implements ServletRequestAware {
+public class HymnsHandler extends DefaultActionSupport implements ModelDriven<HymnDto>, ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = -6535194800678567557L;
 
 	/**
-	 * ID
+	 * 賛美歌情報転送クラス
 	 */
-	private String id;
+	private HymnDto hymnDto = new HymnDto();
 
 	/**
 	 * 賛美歌サービスインターフェス
 	 */
 	@Resource
 	private IHymnService iHymnService;
-
-	/**
-	 * ビデオリンク
-	 */
-	private String link;
-
-	/**
-	 * 歌詞
-	 */
-	private String lyric;
-
-	/**
-	 * 日本語名称
-	 */
-	private String nameJp;
-
-	/**
-	 * 韓国語名称
-	 */
-	private String nameKr;
 
 	/**
 	 * エラーリスポンス
@@ -88,27 +67,17 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	private transient HttpServletRequest servletRequest;
 
 	/**
-	 * 更新時間
-	 */
-	private String updatedTime;
-
-	/**
-	 * 更新者
-	 */
-	private String updatedUser;
-
-	/**
 	 * 歌の名称の重複性をチェックする
 	 *
 	 * @return String
 	 */
 	public String checkDuplicated() {
-		final CoResult<Integer, DataAccessException> checkDuplicated = this.iHymnService.checkDuplicated(this.getId(),
-				this.getNameJp());
+		final CoResult<Integer, DataAccessException> checkDuplicated = this.iHymnService
+				.checkDuplicated(this.getModel().getId(), this.getModel().getNameJp());
 		if (!checkDuplicated.isOk()) {
 			throw checkDuplicated.getErr();
 		}
-		final Integer checkDuplicatedOk = checkDuplicated.getData();
+		final int checkDuplicatedOk = checkDuplicated.getData();
 		if (checkDuplicatedOk >= 1) {
 			ActionContext.getContext().getServletResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
 			this.setResponseError(ProjectConstants.MESSAGE_HYMN_NAME_DUPLICATED);
@@ -124,8 +93,8 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	 * @return String
 	 */
 	public String checkDuplicated2() {
-		final CoResult<Integer, DataAccessException> checkDuplicated = this.iHymnService.checkDuplicated2(this.getId(),
-				this.getNameKr());
+		final CoResult<Integer, DataAccessException> checkDuplicated = this.iHymnService
+				.checkDuplicated2(this.getModel().getId(), this.getModel().getNameKr());
 		if (!checkDuplicated.isOk()) {
 			throw checkDuplicated.getErr();
 		}
@@ -149,15 +118,6 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 	}
 
 	/**
-	 * 賛美歌情報転送クラス
-	 */
-	@Contract(" -> new")
-	private @NotNull HymnDto getHymnDto() {
-		return new HymnDto(this.getId(), this.getNameJp(), this.getNameKr(), this.getLyric(), this.getLink(), null,
-				null, this.getUpdatedUser(), this.getUpdatedTime(), null);
-	}
-
-	/**
 	 * 賛美歌情報を取得する
 	 *
 	 * @return String
@@ -171,6 +131,11 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 		}
 		this.setResponseJsonData(JSON.toJSON(hymnInfoById.getData()));
 		return NONE;
+	}
+
+	@Override
+	public HymnDto getModel() {
+		return this.getHymnDto();
 	}
 
 	/**
@@ -202,6 +167,30 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 		this.setResponseJsonData(infoDeletion.getData());
 		return NONE;
 	}
+
+	/**
+	 * 金海氏の検索を行う
+	 *
+	 * @return String
+	 * @throws DataAccessException 例外
+	 */
+//	public String kanumiRetrieve() {
+//		final String hymnId = this.getServletRequest().getParameter("hymnId");
+//		final CoResult<List<HymnDto>, DataAccessException> kanumiList = this.iHymnService
+//				.getKanumiList(Long.valueOf(hymnId));
+//		if (!kanumiList.isOk()) {
+//			throw kanumiList.getErr();
+//		}
+//		try {
+//			Thread.sleep(90000);
+//		} catch (final InterruptedException e) {
+//			this.setResponseError(e.getMessage());
+//			return ERROR;
+//		}
+//		final List<HymnDto> hymnDtos = kanumiList.getData();
+//		this.setResponseJsonData(JSON.toJSON(hymnDtos));
+//		return NONE;
+//	}
 
 	/**
 	 * 賛美歌情報を保存する
@@ -249,30 +238,6 @@ public class HymnsHandler extends DefaultActionSupport implements ServletRequest
 		this.setResponseJsonData(JSON.toJSON(pagination));
 		return NONE;
 	}
-
-	/**
-	 * 金海氏の検索を行う
-	 *
-	 * @return String
-	 * @throws DataAccessException 例外
-	 */
-//	public String kanumiRetrieve() {
-//		final String hymnId = this.getServletRequest().getParameter("hymnId");
-//		final CoResult<List<HymnDto>, DataAccessException> kanumiList = this.iHymnService
-//				.getKanumiList(Long.valueOf(hymnId));
-//		if (!kanumiList.isOk()) {
-//			throw kanumiList.getErr();
-//		}
-//		try {
-//			Thread.sleep(90000);
-//		} catch (final InterruptedException e) {
-//			this.setResponseError(e.getMessage());
-//			return ERROR;
-//		}
-//		final List<HymnDto> hymnDtos = kanumiList.getData();
-//		this.setResponseJsonData(JSON.toJSON(hymnDtos));
-//		return NONE;
-//	}
 
 	/**
 	 * ランダム五つを検索する
