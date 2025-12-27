@@ -30,7 +30,7 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<!-- SciJava Public -->
+		<!-- SciJava Public 
 		<repository>
 			<id>sci-java-publish</id>
 			<url>https://maven.scijava.org/content/repositories/public/</url>
@@ -40,7 +40,7 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-		</repository>
+		</repository> -->
 		<!-- Liferay Public -->
 		<repository>
 			<id>liferay-publish</id>
@@ -153,15 +153,21 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
 		<dependency>
-		    <groupId>org.apache.pdfbox</groupId>
-		    <artifactId>pdfbox</artifactId>
-		    <version>3.0.6</version>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.6</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
 			<version>3.2.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/it.unimi.dsi/fastutil -->
+		<dependency>
+			<groupId>it.unimi.dsi</groupId>
+			<artifactId>fastutil</artifactId>
+			<version>8.5.18</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
@@ -182,7 +188,8 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
+		<!--
+		https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
 		<dependency>
 			<groupId>com.drewnoakes</groupId>
 			<artifactId>metadata-extractor</artifactId>
@@ -223,7 +230,8 @@
 				<configuration>
 					<jdbc>
 						<driver>org.postgresql.Driver</driver>
-						<url>jdbc:postgresql://database-1.cdd6uaafebcj.ap-northeast-1.rds.amazonaws.com:5432/nasb1995</url>
+						<url>
+							jdbc:postgresql://database-1.cdd6uaafebcj.ap-northeast-1.rds.amazonaws.com:5432/nasb1995</url>
 						<user>postgres</user>
 						<password>postgres</password>
 					</jdbc>

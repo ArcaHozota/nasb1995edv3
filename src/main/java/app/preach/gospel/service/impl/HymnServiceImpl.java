@@ -20,13 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
@@ -70,6 +68,8 @@ import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.LineNumber;
 import app.preach.gospel.utils.Pagination;
 import app.preach.gospel.utils.SnowflakeUtils;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
 import lombok.AccessLevel;
@@ -234,14 +234,15 @@ public class HymnServiceImpl implements IHymnService {
 			return cached;
 		}
 		final var tokens = this.tokenize(lang, "KOMORAN", text);
-		final var tf = new HashMap<String, Integer>();
+		final var tf = new Object2IntOpenHashMap<String>();
 		tokens.forEach(t -> tf.merge(t, 1, Integer::sum));
 		final var vec = new double[idf.size()];
-		final Map<String, Integer> termIndex = this.indexOf(idf.keySet()); // term -> position の固定順序マップを作る
-		tf.forEach((term, cnt) -> {
-			final var i = termIndex.get(term);
-			if (i != null) {
-				vec[i] = cnt * idf.getOrDefault(term, 0.0);
+		final Object2IntOpenHashMap<String> termIndex = this.indexOf(idf.keySet()); // term -> position の固定順序マップを作る
+		tf.object2IntEntrySet().fastForEach(en -> {
+			final var term = en.getKey();
+			final int cnt = en.getIntValue();
+			if (termIndex.containsKey(term)) {
+				vec[termIndex.getInt(term)] = cnt * idf.getOrDefault(term, 0.0);
 			}
 		});
 		this.nlpCache.put(key, vec);
@@ -314,7 +315,7 @@ public class HymnServiceImpl implements IHymnService {
 	private List<HymnDto> findTopThreeMatches(final HymnDto target, final List<HymnDto> elements) {
 		final String corpusVersion = this.getCorpusVersion();
 		final var hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.lyric()));
-		final Map<String, Double> idf = this.getIdf(target.updatedTime().toString(), hymnsStream);
+		final Object2DoubleOpenHashMap<String> idf = this.getIdf(target.updatedTime().toString(), hymnsStream);
 		final double[] targetVector = this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(target.id()),
 				target.lyric(), idf);
 		final var elementVectors = elements.stream()
@@ -776,23 +777,26 @@ public class HymnServiceImpl implements IHymnService {
 	}
 
 	// 2) IDF キャッシュ（コーパススナップショットで）
-	private Map<String, Double> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
+	private Object2DoubleOpenHashMap<String> getIdf(final String corpusVersion, final Stream<List<String>> allDocs) {
 		final IdfKey key = new IdfKey(corpusVersion);
 		@SuppressWarnings("unchecked")
-		final var cached = (Map<String, Double>) this.nlpCache.getIfPresent(key);
+		final var cached = (Object2DoubleOpenHashMap<String>) this.nlpCache.getIfPresent(key);
 		if (cached != null) {
 			return cached;
 		}
-		final Map<String, Integer> df = new HashMap<>();
+		final var df = new Object2IntOpenHashMap<String>();
 		final var list = allDocs.toList();
 		for (final var docs : list) {
 			docs.stream().distinct().forEach(term -> df.merge(term, 1, Integer::sum));
 		}
 		final long totalDocs = list.size();
-		final var idf = df.entrySet().stream().collect(
-				Collectors.toMap(Map.Entry::getKey, e -> Math.log((totalDocs + 1.0) / (e.getValue() + 1.0)) + 1.0));
-		this.nlpCache.put(key, idf);
-		return idf;
+		final Object2DoubleOpenHashMap<String> res = new Object2DoubleOpenHashMap<String>();
+		df.object2IntEntrySet().fastForEach(en -> {
+			final double an = Math.log((totalDocs + 1.0) / (en.getIntValue() + 1.0)) + 1.0;
+			res.put(en.getKey(), an);
+		});
+		this.nlpCache.put(key, res);
+		return res;
 	}
 
 	@Transactional(readOnly = true)
@@ -853,8 +857,8 @@ public class HymnServiceImpl implements IHymnService {
 	 * @param terms リスト
 	 * @return Map<String, Integer>
 	 */
-	private Map<String, Integer> indexOf(final Collection<String> terms) {
-		final var map = new HashMap<String, Integer>(terms.size() * 2);
+	private Object2IntOpenHashMap<String> indexOf(final Collection<String> terms) {
+		final var map = new Object2IntOpenHashMap<String>(terms.size() * 2);
 		int i = 0;
 		for (final var t : terms) {
 			map.put(t, i++);
