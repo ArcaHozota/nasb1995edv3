@@ -15,13 +15,11 @@ import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -227,7 +225,7 @@ public class HymnServiceImpl implements IHymnService {
 
 	// 3) TF-IDF ベクトルキャッシュ
 	private double[] computeTfIdfVector(final String lang, final String hymnVersion, final long hymnId,
-			final String text, final Map<String, Double> idf) {
+			final String text, final Object2DoubleOpenHashMap<String> idf) {
 		final var key = new VecKey(lang, hymnVersion, hymnId, this.hash(text));
 		final var cached = (double[]) this.nlpCache.getIfPresent(key);
 		if (cached != null) {
@@ -321,13 +319,13 @@ public class HymnServiceImpl implements IHymnService {
 		final var elementVectors = elements.stream()
 				.map(item -> this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(item.id()), item.lyric(), idf))
 				.toList();
-		final var maxHeap = new PriorityQueue<Map.Entry<HymnDto, Double>>(
-				Comparator.comparing(Map.Entry<HymnDto, Double>::getValue).reversed());
+		final var maxHeap = new PriorityQueue<Object2DoubleOpenHashMap.Entry<HymnDto>>(
+				Comparator.comparing(Object2DoubleOpenHashMap.Entry<HymnDto>::getDoubleValue).reversed());
 		for (int i = 0; i < elements.size(); i++) {
 			final double similarity = HymnServiceImpl.cosineSimilarity(targetVector, elementVectors.get(i));
-			maxHeap.add(new AbstractMap.SimpleEntry<>(elements.get(i), similarity));
+			maxHeap.add(new Object2DoubleOpenHashMap.BasicEntry<>(elements.get(i), similarity));
 		}
-		return maxHeap.stream().limit(3).map(Map.Entry::getKey).toList();
+		return maxHeap.stream().limit(3).map(Object2DoubleOpenHashMap.Entry::getKey).toList();
 	}
 
 	@Transactional(readOnly = true)
@@ -855,7 +853,7 @@ public class HymnServiceImpl implements IHymnService {
 	 * インデクスを取得する
 	 *
 	 * @param terms リスト
-	 * @return Map<String, Integer>
+	 * @return Object2IntOpenHashMap<String>
 	 */
 	private Object2IntOpenHashMap<String> indexOf(final Collection<String> terms) {
 		final var map = new Object2IntOpenHashMap<String>(terms.size() * 2);

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serial;
 import java.util.Base64;
-import java.util.Map;
 
 import org.apache.struts2.ActionContext;
 import org.apache.struts2.action.ServletRequestAware;
@@ -20,8 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
-import app.preach.gospel.utils.CoStringUtils;
 import app.preach.gospel.utils.CoResult;
+import app.preach.gospel.utils.CoStringUtils;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -90,7 +90,8 @@ public class ScoreUploadHandler extends DefaultActionSupport implements ServletR
 			// 获取 JSON 数据
 			final ObjectMapper mapper = new ObjectMapper();
 			@SuppressWarnings("unchecked")
-			final Map<String, String> data = mapper.readValue(this.getServletRequest().getReader(), Map.class);
+			final Object2ObjectOpenHashMap<String, String> data = mapper.readValue(this.getServletRequest().getReader(),
+					Object2ObjectOpenHashMap.class);
 			// 获取参数
 			final String editId = data.get("id");
 			final String fileDataStr = data.get("score");
