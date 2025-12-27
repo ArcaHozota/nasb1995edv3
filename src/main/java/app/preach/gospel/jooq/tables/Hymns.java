@@ -100,6 +100,11 @@ public class Hymns extends TableImpl<HymnsRecord> {
      */
     public final TableField<HymnsRecord, Boolean> VISIBLE_FLG = createField(DSL.name("visible_flg"), SQLDataType.BOOLEAN.nullable(false), this, "論理削除フラグ");
 
+    /**
+     * The column <code>public.hymns.classical</code>.
+     */
+    public final TableField<HymnsRecord, Boolean> CLASSICAL = createField(DSL.name("classical"), SQLDataType.BOOLEAN, this, "");
+
     private Hymns(Name alias, Table<HymnsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -169,7 +174,7 @@ public class Hymns extends TableImpl<HymnsRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.HYMN_LINK, Indexes.HYMN_NAME_JP, Indexes.HYMN_NAME_KR, Indexes.IDX_HYMNS_LYRIC_TRGM);
+        return Arrays.asList(Indexes.HYMN_LINK, Indexes.HYMN_NAME_JP, Indexes.HYMN_NAME_KR, Indexes.IDX_HYMNS_NJP_TRGM, Indexes.IDX_HYMNS_NKR_TRGM);
     }
 
     @Override

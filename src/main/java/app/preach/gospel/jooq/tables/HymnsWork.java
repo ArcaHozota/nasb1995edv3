@@ -158,7 +158,7 @@ public class HymnsWork extends TableImpl<HymnsWorkRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.HYMNS_WORK_WORK_ID_KEY, Indexes.IDX_HYMNS_FURIGANA_TRGM);
+        return Arrays.asList(Indexes.HYMNS_WORK_WORK_ID_KEY);
     }
 
     @Override

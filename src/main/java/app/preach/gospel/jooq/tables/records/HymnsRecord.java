@@ -132,6 +132,20 @@ public class HymnsRecord extends UpdatableRecordImpl<HymnsRecord> {
         return (Boolean) get(7);
     }
 
+    /**
+     * Setter for <code>public.hymns.classical</code>.
+     */
+    public void setClassical(Boolean value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>public.hymns.classical</code>.
+     */
+    public Boolean getClassical() {
+        return (Boolean) get(8);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -155,7 +169,7 @@ public class HymnsRecord extends UpdatableRecordImpl<HymnsRecord> {
     /**
      * Create a detached, initialised HymnsRecord
      */
-    public HymnsRecord(Long id, String nameJp, String nameKr, String link, OffsetDateTime updatedTime, Long updatedUser, String lyric, Boolean visibleFlg) {
+    public HymnsRecord(Long id, String nameJp, String nameKr, String link, OffsetDateTime updatedTime, Long updatedUser, String lyric, Boolean visibleFlg, Boolean classical) {
         super(Hymns.HYMNS);
 
         setId(id);
@@ -166,6 +180,7 @@ public class HymnsRecord extends UpdatableRecordImpl<HymnsRecord> {
         setUpdatedUser(updatedUser);
         setLyric(lyric);
         setVisibleFlg(visibleFlg);
+        setClassical(classical);
         resetChangedOnNotNull();
     }
 }

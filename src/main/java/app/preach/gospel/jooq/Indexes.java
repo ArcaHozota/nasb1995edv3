@@ -32,8 +32,8 @@ public class Indexes {
     public static final Index HYMN_NAME_JP = Internal.createIndex(DSL.name("hymn_name_jp"), Hymns.HYMNS, new OrderField[] { Hymns.HYMNS.NAME_JP }, true);
     public static final Index HYMN_NAME_KR = Internal.createIndex(DSL.name("hymn_name_kr"), Hymns.HYMNS, new OrderField[] { Hymns.HYMNS.NAME_KR }, true);
     public static final Index HYMNS_WORK_WORK_ID_KEY = Internal.createIndex(DSL.name("hymns_work_work_id_key"), HymnsWork.HYMNS_WORK, new OrderField[] { HymnsWork.HYMNS_WORK.WORK_ID }, true);
-    public static final Index IDX_HYMNS_FURIGANA_TRGM = Internal.createIndex(DSL.name("idx_hymns_furigana_trgm"), HymnsWork.HYMNS_WORK, new OrderField[] { HymnsWork.HYMNS_WORK.FURIGANA }, false);
-    public static final Index IDX_HYMNS_LYRIC_TRGM = Internal.createIndex(DSL.name("idx_hymns_lyric_trgm"), Hymns.HYMNS, new OrderField[] { Hymns.HYMNS.LYRIC }, false);
+    public static final Index IDX_HYMNS_NJP_TRGM = Internal.createIndex(DSL.name("idx_hymns_njp_trgm"), Hymns.HYMNS, new OrderField[] { Hymns.HYMNS.NAME_JP }, false);
+    public static final Index IDX_HYMNS_NKR_TRGM = Internal.createIndex(DSL.name("idx_hymns_nkr_trgm"), Hymns.HYMNS, new OrderField[] { Hymns.HYMNS.NAME_KR }, false);
     public static final Index ROLE_NAME = Internal.createIndex(DSL.name("role_name"), Roles.ROLES, new OrderField[] { Roles.ROLES.NAME }, true);
     public static final Index ROLES_NAME_UK = Internal.createIndex(DSL.name("roles_name_uk"), Roles.ROLES, new OrderField[] { Roles.ROLES.NAME }, true);
     public static final Index STUDENT_EMAIL = Internal.createIndex(DSL.name("student_email"), Students.STUDENTS, new OrderField[] { Students.STUDENTS.EMAIL }, true);

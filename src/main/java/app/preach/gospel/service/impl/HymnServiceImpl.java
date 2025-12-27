@@ -384,9 +384,13 @@ public class HymnServiceImpl implements IHymnService {
 			}
 			if (CoStringUtils.isEmpty(keyword)) {
 				final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
-						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getLyric(),
-								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-								rd.getUpdatedTime().toString(), LineNumber.SNOWY));
+						.fetch(rd -> {
+							final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp()
+									: rd.getNameJp();
+							return new HymnDto(rd.getId().toString(), hymnName, rd.getNameKr(), rd.getLyric(),
+									rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+									rd.getUpdatedTime().toString(), LineNumber.SNOWY);
+						});
 				final var pagination = Pagination.of(hymnDtos.subList(offset, margrave), totalRecords, pageNum,
 						ProjectConstants.DEFAULT_PAGE_SIZE);
 				this.nlpCache.put(docKey, hymnDtos);
@@ -396,10 +400,13 @@ public class HymnServiceImpl implements IHymnService {
 				if (keyword.toLowerCase().contains(starngement) || keyword.length() >= 100) {
 					log.warn("怪しいキーワード： " + keyword);
 					final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-							.orderBy(HYMNS.ID.asc())
-							.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(),
-									rd.getLyric(), rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-									rd.getUpdatedTime().toString(), LineNumber.SNOWY));
+							.orderBy(HYMNS.ID.asc()).fetch(rd -> {
+								final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp()
+										: rd.getNameJp();
+								return new HymnDto(rd.getId().toString(), hymnName, rd.getNameKr(), rd.getLyric(),
+										rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+										rd.getUpdatedTime().toString(), LineNumber.SNOWY);
+							});
 					final var pagination = Pagination.of(
 							hymnDtos.subList(offset, offset + ProjectConstants.DEFAULT_PAGE_SIZE), totalRecords,
 							pageNum, ProjectConstants.DEFAULT_PAGE_SIZE);
@@ -421,11 +428,14 @@ public class HymnServiceImpl implements IHymnService {
 				final Condition condition4 = smlField2.gt(0.33f).and(smlField4.gt(0.33f));
 				final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-						.and(condition1.or(condition2).or(condition3).or(condition4))
-						.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP),
-								rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
-								rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
-								LineNumber.BURGUNDY));
+						.and(condition1.or(condition2).or(condition3).or(condition4)).fetch(rd -> {
+							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+									: rd.get(HYMNS.NAME_JP);
+							return new HymnDto(rd.get(HYMNS.ID).toString(), hymnName, rd.get(HYMNS.NAME_KR),
+									rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+									rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+									LineNumber.BURGUNDY);
+						});
 				final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
 				final String detailKeyword1 = CoStringUtils.getDetailKeyword(splits[0]);
 				final String detailKeyword2 = CoStringUtils.getDetailKeyword(splits[1]);
@@ -451,10 +461,11 @@ public class HymnServiceImpl implements IHymnService {
 							if (withNameLikeIds.contains(hymnId)) {
 								return null;
 							}
-							return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
-									rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
-									rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
-									LineNumber.NAPLES);
+							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+									: rd.get(HYMNS.NAME_JP);
+							return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+									rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+									rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 						});
 				withRandomFive.removeIf(a -> a == null);
 				final var withRandomFiveIds = withRandomFive.stream().map(HymnDto::id).toList();
@@ -464,10 +475,11 @@ public class HymnServiceImpl implements IHymnService {
 							if (withNameLikeIds.contains(hymnId) || withRandomFiveIds.contains(hymnId)) {
 								return null;
 							}
-							return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
-									rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
-									rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
-									LineNumber.SNOWY);
+							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+									: rd.get(HYMNS.NAME_JP);
+							return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+									rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+									rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.SNOWY);
 						});
 				otherHymns.removeIf(a -> a == null);
 				final var hymnDtos = new ArrayList<HymnDto>(withNameLike);
@@ -482,10 +494,14 @@ public class HymnServiceImpl implements IHymnService {
 			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword)))
-					.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
-							rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
-							rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.CADMIUM));
+					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))).fetch(rd -> {
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(rd.get(HYMNS.ID).toString(), hymnName, rd.get(HYMNS.NAME_KR),
+								rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+								rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+								LineNumber.CADMIUM);
+					});
 			final var hymnDtos = new ArrayList<HymnDto>(withName);
 			final var withNameIds = withName.stream().map(HymnDto::id).toList();
 			final String searchStr = getHymnSpecification(keyword);
@@ -500,7 +516,9 @@ public class HymnServiceImpl implements IHymnService {
 						if (withNameIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
@@ -521,7 +539,9 @@ public class HymnServiceImpl implements IHymnService {
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 					});
@@ -534,7 +554,9 @@ public class HymnServiceImpl implements IHymnService {
 								|| withRandomFiveIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.SNOWY);
 					});
@@ -562,28 +584,123 @@ public class HymnServiceImpl implements IHymnService {
 			for (final String starngement : STRANGE_ARRAY) {
 				if (keyword.toLowerCase().contains(starngement) || keyword.length() >= 100) {
 					final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-							.orderBy(HYMNS.ID.asc()).limit(ProjectConstants.DEFAULT_PAGE_SIZE)
-							.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(),
-									rd.getLyric(), rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-									rd.getUpdatedTime().toString(), LineNumber.SNOWY));
+							.orderBy(HYMNS.ID.asc()).limit(ProjectConstants.DEFAULT_PAGE_SIZE).fetch(rd -> {
+								final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp()
+										: rd.getNameJp();
+								return new HymnDto(rd.getId().toString(), hymnName, rd.getNameKr(), rd.getLyric(),
+										rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+										rd.getUpdatedTime().toString(), LineNumber.SNOWY);
+							});
 					log.warn("怪しいキーワード： " + keyword);
 					return CoResult.ok(hymnDtos);
 				}
 			}
 			if (CoStringUtils.isEmpty(keyword)) {
 				final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-						.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getLyric(),
-								rd.getLink(), null, null, rd.getUpdatedUser().toString(),
-								rd.getUpdatedTime().toString(), LineNumber.SNOWY));
+						.orderBy(HYMNS.ID.asc()).fetch(rd -> {
+							final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp()
+									: rd.getNameJp();
+							return new HymnDto(rd.getId().toString(), hymnName, rd.getNameKr(), rd.getLyric(),
+									rd.getLink(), null, null, rd.getUpdatedUser().toString(),
+									rd.getUpdatedTime().toString(), LineNumber.SNOWY);
+						});
 				final List<HymnDto> hymnDtos = this.randomFiveLoop2(totalRecords);
 				return CoResult.ok(hymnDtos);
 			}
+			final String[] splits = keyword.split("&");
+			if (splits.length > 1) {
+				final String searchStr1 = getHymnSpecification(splits[0]);
+				final String searchStr2 = getHymnSpecification(splits[1]);
+				final Field<Float> smlField1 = similarity(HYMNS.NAME_JP, val(splits[0]));
+				final Field<Float> smlField2 = similarity(HYMNS.NAME_KR, val(splits[0]));
+				final Field<Float> smlField3 = similarity(HYMNS.NAME_JP, val(splits[1]));
+				final Field<Float> smlField4 = similarity(HYMNS.NAME_KR, val(splits[1]));
+				final Condition condition1 = HYMNS.NAME_JP.like(searchStr1).and(HYMNS.NAME_JP.like(searchStr2));
+				final Condition condition2 = HYMNS.NAME_KR.like(searchStr1).and(HYMNS.NAME_KR.like(searchStr2));
+				final Condition condition3 = smlField1.gt(0.33f).and(smlField3.gt(0.33f));
+				final Condition condition4 = smlField2.gt(0.33f).and(smlField4.gt(0.33f));
+				final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+						.and(condition1.or(condition2).or(condition3).or(condition4)).fetch(rd -> {
+							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+									: rd.get(HYMNS.NAME_JP);
+							return new HymnDto(rd.get(HYMNS.ID).toString(), hymnName, rd.get(HYMNS.NAME_KR),
+									rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+									rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+									LineNumber.BURGUNDY);
+						});
+				if (withNameLike.size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
+					final List<HymnDto> randomFiveLoop = this.randomFiveLoop2(withNameLike);
+					return CoResult.ok(randomFiveLoop.stream()
+							.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
+				}
+				final var withNameLikeIds = withNameLike.stream().map(HymnDto::id).toList();
+				final String detailKeyword1 = CoStringUtils.getDetailKeyword(splits[0]);
+				final String detailKeyword2 = CoStringUtils.getDetailKeyword(splits[1]);
+				final var tokenizer = new Tokenizer();
+				final var sBuilder1 = new StringBuilder();
+				final var sBuilder2 = new StringBuilder();
+				final List<Token> tokens1 = tokenizer.tokenize(splits[0]);
+				final List<Token> tokens2 = tokenizer.tokenize(splits[1]);
+				tokens1.forEach(ab -> {
+					sBuilder1.append(ab.getPronunciation());
+				});
+				final String detailKeyword3 = CoStringUtils.getDetailKeyword(sBuilder1.toString());
+				tokens2.forEach(ab -> {
+					sBuilder2.append(ab.getPronunciation());
+				});
+				final String detailKeyword4 = CoStringUtils.getDetailKeyword(sBuilder2.toString());
+				final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
+						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+						.and((HYMNS.LYRIC.like(detailKeyword1).and(HYMNS.LYRIC.like(detailKeyword2))).or(
+								HYMNS_WORK.FURIGANA.like(detailKeyword3).and(HYMNS_WORK.FURIGANA.like(detailKeyword4))))
+						.fetch(rd -> {
+							final String hymnId = rd.get(HYMNS.ID).toString();
+							if (withNameLikeIds.contains(hymnId)) {
+								return null;
+							}
+							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+									: rd.get(HYMNS.NAME_JP);
+							return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+									rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+									rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
+						});
+				withRandomFive.removeIf(a -> a == null);
+				if (withNameLike.size() + withRandomFive.size() >= ProjectConstants.DEFAULT_PAGE_SIZE) {
+					final List<HymnDto> randomFiveLoop = this.randomFiveLoop(withNameLike, withRandomFive);
+					return CoResult.ok(randomFiveLoop.stream()
+							.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
+				}
+				final var withRandomFiveIds = withRandomFive.stream().map(HymnDto::id).toList();
+				final var otherHymns = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
+						.fetch(rd -> {
+							final String hymnId = rd.get(HYMNS.ID).toString();
+							if (withNameLikeIds.contains(hymnId) || withRandomFiveIds.contains(hymnId)) {
+								return null;
+							}
+							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+									: rd.get(HYMNS.NAME_JP);
+							return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+									rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
+									rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.SNOWY);
+						});
+				otherHymns.removeIf(a -> a == null);
+				final var hymnDtos = new ArrayList<HymnDto>(withNameLike);
+				hymnDtos.addAll(withRandomFive);
+				final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos, withRandomFive);
+				return CoResult.ok(randomFiveLoop.stream()
+						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
+			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword)))
-					.fetch(rd -> new HymnDto(rd.get(HYMNS.ID).toString(), rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR),
-							rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
-							rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.CADMIUM));
+					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))).fetch(rd -> {
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(rd.get(HYMNS.ID).toString(), hymnName, rd.get(HYMNS.NAME_KR),
+								rd.get(HYMNS.LYRIC), rd.get(HYMNS.LINK), null, null,
+								rd.get(HYMNS.UPDATED_USER).toString(), rd.get(HYMNS.UPDATED_TIME).toString(),
+								LineNumber.CADMIUM);
+					});
 			final var hymnDtos = new ArrayList<HymnDto>(withName);
 			final var withNameIds = withName.stream().map(HymnDto::id).toList();
 			final String searchStr = getHymnSpecification(keyword);
@@ -598,7 +715,9 @@ public class HymnServiceImpl implements IHymnService {
 						if (withNameIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.BURGUNDY);
 					});
@@ -613,19 +732,21 @@ public class HymnServiceImpl implements IHymnService {
 			final String detailKeyword = CoStringUtils.getDetailKeyword(keyword);
 			final var tokenizer = new Tokenizer();
 			final var sBuilder = new StringBuilder();
-			final List<Token> tokens = tokenizer.tokenize(detailKeyword);
+			final List<Token> tokens = tokenizer.tokenize(keyword);
 			tokens.forEach(ab -> {
 				sBuilder.append(ab.getPronunciation());
 			});
+			final String detailKeyword2 = CoStringUtils.getDetailKeyword(sBuilder.toString());
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
 					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
-					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(sBuilder.toString())))
-					.fetch(rd -> {
+					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(detailKeyword2))).fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
 							return null;
 						}
-						return new HymnDto(hymnId, rd.get(HYMNS.NAME_JP), rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
+						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
+								: rd.get(HYMNS.NAME_JP);
+						return new HymnDto(hymnId, hymnName, rd.get(HYMNS.NAME_KR), rd.get(HYMNS.LYRIC),
 								rd.get(HYMNS.LINK), null, null, rd.get(HYMNS.UPDATED_USER).toString(),
 								rd.get(HYMNS.UPDATED_TIME).toString(), LineNumber.NAPLES);
 					});
@@ -639,10 +760,11 @@ public class HymnServiceImpl implements IHymnService {
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
 			}
-			final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
-					.fetch(rd -> new HymnDto(rd.getId().toString(), rd.getNameJp(), rd.getNameKr(), rd.getLyric(),
-							rd.getLink(), null, null, rd.getUpdatedUser().toString(), rd.getUpdatedTime().toString(),
-							LineNumber.SNOWY));
+			final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).fetch(rd -> {
+				final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp() : rd.getNameJp();
+				return new HymnDto(rd.getId().toString(), hymnName, rd.getNameKr(), rd.getLyric(), rd.getLink(), null,
+						null, rd.getUpdatedUser().toString(), rd.getUpdatedTime().toString(), LineNumber.SNOWY);
+			});
 			final List<HymnDto> randomFiveLoop = this.randomFiveLoop(hymnDtos, totalRecords);
 			return CoResult.ok(randomFiveLoop.stream()
 					.sorted(Comparator.comparingInt(item -> item.lineNumber().getLineNo())).toList());
