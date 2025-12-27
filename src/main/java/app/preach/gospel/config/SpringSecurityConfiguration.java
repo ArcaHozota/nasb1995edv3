@@ -49,6 +49,11 @@ public class SpringSecurityConfiguration {
 	private final ProjectAuthenticationEntryPoint projectAuthenticationEntryPoint;
 
 	/**
+	 * ログアウトサービス
+	 */
+	private final ProjectLogoutSuccessHandler projectLogoutSuccessHandler;
+
+	/**
 	 * ログインサービス
 	 */
 	private final ProjectUserDetailsService projectUserDetailsService;
@@ -109,8 +114,7 @@ public class SpringSecurityConfiguration {
 				.logout(logout -> logout
 						.logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
 								.concat(ProjectURLConstants.URL_LOGOUT))
-						.logoutSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
-								.concat(ProjectURLConstants.URL_TO_LOGIN)));
+						.logoutSuccessHandler(this.projectLogoutSuccessHandler));
 		log.info(ProjectConstants.MESSAGE_SPRING_SECURITY);
 		return httpSecurity.build();
 	}

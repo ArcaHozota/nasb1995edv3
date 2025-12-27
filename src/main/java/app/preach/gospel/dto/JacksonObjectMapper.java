@@ -1,4 +1,4 @@
-package app.preach.gospel.config;
+package app.preach.gospel.dto;
 
 import java.io.Serial;
 import java.math.BigInteger;

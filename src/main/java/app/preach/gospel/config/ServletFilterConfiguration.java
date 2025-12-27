@@ -30,7 +30,7 @@ public class ServletFilterConfiguration {
 	@Bean
 	@Qualifier("nlpCache")
 	protected Cache<Object, Object> nlpCache() {
-		return Caffeine.newBuilder().maximumSize(3300).expireAfterWrite(Duration.ofHours(6)).recordStats().build();
+		return Caffeine.newBuilder().maximumSize(3300).expireAfterWrite(Duration.ofHours(3L)).recordStats().build();
 	}
 
 	/**
