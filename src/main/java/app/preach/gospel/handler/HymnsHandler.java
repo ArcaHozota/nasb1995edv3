@@ -213,7 +213,7 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	 * @return String
 	 */
 	public String infoUpdate() {
-		final CoResult<String, DataAccessException> infoUpdation = this.iHymnService.infoUpdate(this.getHymnDto());
+		final CoResult<String, DataAccessException> infoUpdation = this.iHymnService.infoUpdate(this.getModel());
 		if (!infoUpdation.isOk()) {
 			throw infoUpdation.getErr();
 		}

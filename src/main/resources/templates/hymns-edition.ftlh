@@ -35,12 +35,12 @@
 					<div class="card-body">
 						<form id="editForm">
 							<input type="hidden" value="${pageNum}" id="pageNumContainer">
-							<input type="hidden" value="${arawaseta.id()}" id="idContainer">
-							<input type="hidden" value="${arawaseta.updatedTime()}" id="datestampContainer">
+							<input type="hidden" value="${arawaseta.id}" id="idContainer">
+							<input type="hidden" value="${arawaseta.updatedTime}" id="datestampContainer">
 							<div class="form-group row">
 								<label for="nameJpEdit" class="col-sm-3 col-form-label text-end">日本語名称</label>
 								<div class="col-sm-7" style="height: 8vh;">
-									<input type="text" class="form-control" value="${arawaseta.nameJp()}" id="nameJpEdit"
+									<input type="text" class="form-control" value="${arawaseta.nameJp}" id="nameJpEdit"
 										placeholder="日本語名称を入力してください">
 									<span class="form-text" style="font-size: 10px;margin-top: 0px;"></span>
 								</div>
@@ -48,7 +48,7 @@
 							<div class="form-group row">
 								<label for="nameKrEdit" class="col-sm-3 col-form-label text-end">韓国語名称</label>
 								<div class="col-sm-7" style="height: 8vh;">
-									<input type="text" class="form-control" value="${arawaseta.nameKr()}" id="nameKrEdit"
+									<input type="text" class="form-control" value="${arawaseta.nameKr}" id="nameKrEdit"
 										placeholder="韓国語名称を入力してください">
 									<span class="form-text" style="font-size: 10px;margin-top: 0px;"></span>
 								</div>
@@ -56,7 +56,7 @@
 							<div class="form-group row">
 								<label for="linkEdit" class="col-sm-3 col-form-label text-end">リンク</label>
 								<div class="col-sm-7" style="height: 8vh;">
-									<input type="text" class="form-control" value="${arawaseta.link()}" id="linkEdit"
+									<input type="text" class="form-control" value="${arawaseta.link}" id="linkEdit"
 										placeholder="リンクを入力してください">
 									<span class="form-text" style="font-size: 10px;margin-top: 0px;"></span>
 								</div>
@@ -65,13 +65,13 @@
 								<label for="serifEdit" class="col-sm-3 col-form-label text-end">歌詞</label>
 								<div class="col-sm-7" style="height: 26vh;">
 									<textarea class="form-control" style="height: 100%" id="serifEdit"
-										placeholder="セリフを入力してください">${arawaseta.lyric()}</textarea>
+										placeholder="セリフを入力してください">${arawaseta.lyric}</textarea>
 									<span class="form-text" style="font-size: 10px;margin-top: 0px;"></span>
 								</div>
 							</div>
 							<div class="form-group row">
 								<p class="col-sm-7 offset-sm-3" style="font-size: 10px;margin-top: 0px;margin-bottom: 0px;">
-									最終更新者：${arawaseta.updatedUser()}＠${arawaseta.updatedTime()}日本標準時間
+									最終更新者：${arawaseta.updatedUser}＠${arawaseta.updatedTime}日本標準時間
 								</p>
 							</div>
 						</form>
