@@ -104,21 +104,27 @@
 		</action>
 		<action name="info-deletion"
 			class="app.preach.gospel.handler.HymnsHandler" method="infoDeletion">
-			<interceptor-ref name="json" />
+			<interceptor-ref name="json">
+				<param name="root">hymnDto</param>
+			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
 		<action name="info-storage"
 			class="app.preach.gospel.handler.HymnsHandler" method="infoStorage">
-			<interceptor-ref name="json" />
+			<interceptor-ref name="json">
+				<param name="root">hymnDto</param>
+			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
 		<action name="info-update"
 			class="app.preach.gospel.handler.HymnsHandler" method="infoUpdate">
-			<interceptor-ref name="json" />
+			<interceptor-ref name="json">
+				<param name="root">hymnDto</param>
+			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
@@ -126,7 +132,6 @@
 		<action name="check-duplicated"
 			class="app.preach.gospel.handler.HymnsHandler"
 			method="checkDuplicated">
-			<interceptor-ref name="defaultStack" />
 			<result name="error" type="json">
 				<param name="root">responseError</param>
 			</result>
@@ -137,7 +142,6 @@
 		<action name="check-duplicated2"
 			class="app.preach.gospel.handler.HymnsHandler"
 			method="checkDuplicated2">
-			<interceptor-ref name="defaultStack" />
 			<result name="error" type="json">
 				<param name="root">responseError</param>
 			</result>
@@ -164,7 +168,6 @@
 		<action name="check-duplicated"
 			class="app.preach.gospel.handler.StudentsHandler"
 			method="checkDuplicated">
-			<interceptor-ref name="defaultStack" />
 			<result name="error" type="json">
 				<param name="root">responseError</param>
 			</result>
@@ -175,7 +178,9 @@
 		<action name="info-updation"
 			class="app.preach.gospel.handler.StudentsHandler"
 			method="infoUpdation">
-			<interceptor-ref name="json" />
+			<interceptor-ref name="json">
+				<param name="root">studentDto</param>
+			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
