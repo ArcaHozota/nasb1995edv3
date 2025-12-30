@@ -78,13 +78,13 @@
 			</result>
 		</action>
 		<action name="to-score-upload"
-			class="app.preach.gospel.handler.ScoreUploadHandler"
+			class="app.preach.gospel.handler.HymnsScoreHandler"
 			method="toScoreUpload">
 			<result name="success" type="freemarker">/templates/hymns-score-upload.ftlh
 			</result>
 		</action>
 		<action name="score-upload"
-			class="app.preach.gospel.handler.ScoreUploadHandler" method="execute">
+			class="app.preach.gospel.handler.HymnsScoreHandler" method="execute">
 			<result name="error" type="json">
 				<param name="root">responseError</param>
 			</result>
@@ -93,7 +93,7 @@
 			</result>
 		</action>
 		<action name="score-download"
-			class="app.preach.gospel.handler.ScoreUploadHandler"
+			class="app.preach.gospel.handler.HymnsScoreHandler"
 			method="scoreDownload">
 			<result name="success" type="stream">
 				<param name="contentType">${contentType}</param>

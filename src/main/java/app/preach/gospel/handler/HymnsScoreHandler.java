@@ -38,7 +38,7 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class ScoreUploadHandler extends DefaultActionSupport implements ServletRequestAware {
+public class HymnsScoreHandler extends DefaultActionSupport implements ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = 4949258675703419344L;
