@@ -41,15 +41,15 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	private static final long serialVersionUID = -6535194800678567557L;
 
 	/**
-	 * 賛美歌情報転送クラス
-	 */
-	private HymnDto hymnDto = new HymnDto();
-
-	/**
 	 * 賛美歌サービスインターフェス
 	 */
 	@Resource
 	private IHymnService iHymnService;
+
+	/**
+	 * 賛美歌情報転送クラス
+	 */
+	private HymnDto model = new HymnDto();
 
 	/**
 	 * エラーリスポンス
@@ -135,7 +135,7 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 
 	@Override
 	public HymnDto getModel() {
-		return this.getHymnDto();
+		return this.model;
 	}
 
 	/**
@@ -169,36 +169,12 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	}
 
 	/**
-	 * 金海氏の検索を行う
-	 *
-	 * @return String
-	 * @throws DataAccessException 例外
-	 */
-//	public String kanumiRetrieve() {
-//		final String hymnId = this.getServletRequest().getParameter("hymnId");
-//		final CoResult<List<HymnDto>, DataAccessException> kanumiList = this.iHymnService
-//				.getKanumiList(Long.valueOf(hymnId));
-//		if (!kanumiList.isOk()) {
-//			throw kanumiList.getErr();
-//		}
-//		try {
-//			Thread.sleep(90000);
-//		} catch (final InterruptedException e) {
-//			this.setResponseError(e.getMessage());
-//			return ERROR;
-//		}
-//		final List<HymnDto> hymnDtos = kanumiList.getData();
-//		this.setResponseJsonData(JSON.toJSON(hymnDtos));
-//		return NONE;
-//	}
-
-	/**
 	 * 賛美歌情報を保存する
 	 *
 	 * @return String
 	 */
 	public String infoStorage() {
-		final CoResult<Integer, DataAccessException> infoStorage = this.iHymnService.infoStorage(this.getHymnDto());
+		final CoResult<Integer, DataAccessException> infoStorage = this.iHymnService.infoStorage(this.getModel());
 		if (!infoStorage.isOk()) {
 			throw infoStorage.getErr();
 		}

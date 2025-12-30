@@ -45,6 +45,11 @@ public class StudentsHandler extends DefaultActionSupport implements ModelDriven
 	private IStudentService iStudentService;
 
 	/**
+	 * 奉仕者情報転送クラス
+	 */
+	private StudentDto model = new StudentDto();
+
+	/**
 	 * エラーリスポンス
 	 */
 	private transient String responseError;
@@ -58,11 +63,6 @@ public class StudentsHandler extends DefaultActionSupport implements ModelDriven
 	 * リクエスト
 	 */
 	private transient HttpServletRequest servletRequest;
-
-	/**
-	 * 奉仕者情報転送クラス
-	 */
-	private StudentDto studentDto = new StudentDto();
 
 	/**
 	 * アカウント重複チェック
@@ -87,7 +87,7 @@ public class StudentsHandler extends DefaultActionSupport implements ModelDriven
 
 	@Override
 	public StudentDto getModel() {
-		return this.getStudentDto();
+		return this.model;
 	}
 
 	/**
