@@ -29,7 +29,7 @@
 					<div class="card-body">
 						<form id="inputForm">
 							<input type="hidden" value="${pageNum}" id="pageNumContainer">
-							<input type="hidden" value="${arawaseta.id()}" id="idContainer">
+							<input type="hidden" value="${arawaseta.id}" id="idContainer">
 							<div class="form-group row">
 								<label for="scoreEdit" class="col-sm-3 col-form-label text-end">楽譜</label>
 								<div class="col-sm-7" style="height: 8vh;">
