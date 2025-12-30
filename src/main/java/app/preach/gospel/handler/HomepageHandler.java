@@ -95,15 +95,6 @@ public class HomepageHandler extends DefaultActionSupport implements ServletRequ
 	}
 
 	/**
-	 * 一覧表へ移動する
-	 *
-	 * @return String
-	 */
-	public String toIchiranhyo() {
-		return this.toHomePage();
-	}
-
-	/**
 	 * メインメニューへ移動する
 	 *
 	 * @return String
