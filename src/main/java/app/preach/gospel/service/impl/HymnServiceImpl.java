@@ -312,7 +312,7 @@ public class HymnServiceImpl implements IHymnService {
 	private List<HymnDto> findTopThreeMatches(final HymnDto target, final List<HymnDto> elements) {
 		final String corpusVersion = this.getCorpusVersion();
 		final var hymnsStream = elements.stream().map(e -> this.tokenize(KR, "KOMORAN", e.getLyric()));
-		final Object2DoubleOpenHashMap<String> idf = this.getIdf(target.getUpdatedTime().toString(), hymnsStream);
+		final Object2DoubleOpenHashMap<String> idf = this.getIdf(target.getUpdatedTime(), hymnsStream);
 		final double[] targetVector = this.computeTfIdfVector(KR, corpusVersion, Long.valueOf(target.getId()),
 				target.getLyric(), idf);
 		final var elementVectors = elements.stream().map(
