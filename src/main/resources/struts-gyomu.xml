@@ -190,11 +190,8 @@
 			<result name="success" type="freemarker">/templates/students-edition.ftlh
 			</result>
 		</action>
-		<action name="initial"
-			class="app.preach.gospel.handler.StudentsHandler" method="initial">
-			<result name="none" type="json">
-				<param name="root">responseJsonData</param>
-			</result>
-		</action>
+		<!-- <action name="initial" class="app.preach.gospel.handler.StudentsHandler" 
+			method="initial"> <result name="none" type="json"> <param name="root">responseJsonData</param> 
+			</result> </action> -->
 	</package>
 </struts>

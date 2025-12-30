@@ -10,8 +10,6 @@ import org.jooq.exception.DataAccessException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
-import com.alibaba.fastjson2.JSON;
-
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.StudentDto;
 import app.preach.gospel.service.IStudentService;
@@ -101,22 +99,6 @@ public class StudentsHandler extends DefaultActionSupport implements ModelDriven
 			throw infoUpdation.getErr();
 		}
 		this.setResponseJsonData(infoUpdation.getData());
-		return NONE;
-	}
-
-	/**
-	 * ユーザ情報初期化する
-	 *
-	 * @return String
-	 */
-	public String initial() {
-		final String studentId = this.getServletRequest().getParameter("editId");
-		final CoResult<StudentDto, DataAccessException> studentInfoById = this.iStudentService
-				.getStudentInfoById(Long.valueOf(studentId));
-		if (!studentInfoById.isOk()) {
-			throw studentInfoById.getErr();
-		}
-		this.setResponseJsonData(JSON.toJSON(studentInfoById.getData()));
 		return NONE;
 	}
 
