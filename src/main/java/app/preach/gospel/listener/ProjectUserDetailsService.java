@@ -6,7 +6,6 @@ import static app.preach.gospel.jooq.Tables.STUDENTS;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -63,7 +62,7 @@ public class ProjectUserDetailsService implements UserDetailsService {
 		studentDto.setDateOfBirth(DateTimeFormatter.ofPattern("yyyy-MM-dd").format(studentsRecord.getDateOfBirth()));
 		studentDto.setRoleId(studentsRecord.getRoleId().toString());
 		final List<SimpleGrantedAuthority> authorities = authoritiesRecords.stream()
-				.map(item -> new SimpleGrantedAuthority(item.getName())).collect(Collectors.toList());
+				.map(item -> new SimpleGrantedAuthority(item.getName())).toList();
 		return new SecurityAdmin(studentDto, authorities);
 	}
 
