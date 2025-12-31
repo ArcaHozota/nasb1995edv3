@@ -1,8 +1,10 @@
 package app.preach.gospel.handler;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serial;
+import java.util.Base64;
 
 import org.apache.struts2.ActionContext;
 import org.apache.struts2.ModelDriven;
@@ -13,11 +15,14 @@ import org.jooq.exception.NoDataFoundException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.CoStringUtils;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -84,21 +89,24 @@ public class HymnsScoreHandler extends DefaultActionSupport implements ModelDriv
 	 *
 	 * @return String
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public String execute() {
-		// // 获取 JSON 数据
-		// final ObjectMapper mapper = new ObjectMapper();
-		// @SuppressWarnings("unchecked")
-		// final Object2ObjectOpenHashMap<String, String> data =
-		// mapper.readValue(this.getServletRequest().getReader(),
-		// Object2ObjectOpenHashMap.class);
-		// // 获取参数
-		// final String editId = data.get("id");
-		// final String fileDataStr = data.get("score");
-		// // 将 base64 文件数据解码并保存
-		// final byte[] fileBytes = Base64.getDecoder().decode(fileDataStr);
-		final CoResult<String, DataAccessException> scoreStorage = this.iHymnService
-				.scoreStorage(this.getModel().getScore(), Long.valueOf(this.getModel().getId()));
+		// 获取 JSON 数据
+		final ObjectMapper mapper = new ObjectMapper();
+		Object2ObjectOpenHashMap<String, String> data;
+		try {
+			data = mapper.readValue(this.getServletRequest().getReader(), Object2ObjectOpenHashMap.class);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		// 获取参数
+		final String editId = data.get("id");
+		final String fileDataStr = data.get("score");
+		// 将 base64 文件数据解码并保存
+		final byte[] fileBytes = Base64.getDecoder().decode(fileDataStr);
+		final CoResult<String, DataAccessException> scoreStorage = this.iHymnService.scoreStorage(fileBytes,
+				Long.valueOf(editId));
 		if (!scoreStorage.isOk()) {
 			throw scoreStorage.getErr();
 		}
