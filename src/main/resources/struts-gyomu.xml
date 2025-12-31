@@ -87,9 +87,6 @@
 		</action>
 		<action name="score-upload"
 			class="app.preach.gospel.handler.HymnsScoreHandler" method="execute">
-			<interceptor-ref name="json">
-				<param name="root">model</param>
-			</interceptor-ref>
 			<result name="error" type="json">
 				<param name="root">responseError</param>
 			</result>
