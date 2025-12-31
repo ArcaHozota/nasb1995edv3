@@ -75,8 +75,8 @@ public class BookServiceImpl implements IBookService {
 
 	@Override
 	public CoResult<String, DataAccessException> infoStorage(final @NotNull PhraseDto phraseDto) {
-		final var id = Long.valueOf(phraseDto.id());
-		final var chapterId = Integer.valueOf(phraseDto.chapterId());
+		final var id = Long.valueOf(phraseDto.getId());
+		final var chapterId = Integer.valueOf(phraseDto.getChapterId());
 		try {
 			final var chaptersRecord = this.dslContext.selectFrom(CHAPTERS).where(CHAPTERS.ID.eq(chapterId))
 					.fetchSingle();
@@ -86,28 +86,28 @@ public class BookServiceImpl implements IBookService {
 					.fetchOne();
 			if (fetchOne != null) {
 				fetchOne.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
-				fetchOne.setTextJp(phraseDto.textJp());
+				fetchOne.setTextJp(phraseDto.getTextJp());
 				fetchOne.setChapterId(chapterId);
-				final var textEn = phraseDto.textEn();
+				final var textEn = phraseDto.getTextEn();
 				if (textEn.endsWith("#")) {
 					fetchOne.setTextEn(textEn.replace("#", CoStringUtils.EMPTY_STRING));
 					fetchOne.setChangeLine(Boolean.TRUE);
 				} else {
-					fetchOne.setTextEn(phraseDto.textEn());
+					fetchOne.setTextEn(phraseDto.getTextEn());
 					fetchOne.setChangeLine(Boolean.FALSE);
 				}
 				fetchOne.update();
 				return CoResult.ok(ProjectConstants.MESSAGE_STRING_UPDATED);
 			}
 			phrasesRecord.setName(chaptersRecord.getName().concat("\u003a").concat(id.toString()));
-			phrasesRecord.setTextJp(phraseDto.textJp());
+			phrasesRecord.setTextJp(phraseDto.getTextJp());
 			phrasesRecord.setChapterId(chapterId);
-			final var textEn = phraseDto.textEn();
+			final var textEn = phraseDto.getTextEn();
 			if (textEn.endsWith("#")) {
 				phrasesRecord.setTextEn(textEn.replace("#", CoStringUtils.EMPTY_STRING));
 				phrasesRecord.setChangeLine(Boolean.TRUE);
 			} else {
-				phrasesRecord.setTextEn(phraseDto.textEn());
+				phrasesRecord.setTextEn(phraseDto.getTextEn());
 				phrasesRecord.setChangeLine(Boolean.FALSE);
 			}
 			phrasesRecord.insert();

@@ -1,12 +1,11 @@
 package app.preach.gospel.handler;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serial;
-import java.util.Base64;
 
 import org.apache.struts2.ActionContext;
+import org.apache.struts2.ModelDriven;
 import org.apache.struts2.action.ServletRequestAware;
 import org.apache.struts2.dispatcher.DefaultActionSupport;
 import org.jooq.exception.DataAccessException;
@@ -14,17 +13,13 @@ import org.jooq.exception.NoDataFoundException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.HymnDto;
 import app.preach.gospel.service.IHymnService;
 import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.CoStringUtils;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,7 +33,7 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class HymnsScoreHandler extends DefaultActionSupport implements ServletRequestAware {
+public class HymnsScoreHandler extends DefaultActionSupport implements ModelDriven<HymnDto>, ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = 4949258675703419344L;
@@ -65,6 +60,11 @@ public class HymnsScoreHandler extends DefaultActionSupport implements ServletRe
 	private IHymnService iHymnService;
 
 	/**
+	 * 賛美歌情報転送クラス
+	 */
+	private transient HymnDto model = new HymnDto();
+
+	/**
 	 * エラーリスポンス
 	 */
 	private transient String responseError;
@@ -86,29 +86,24 @@ public class HymnsScoreHandler extends DefaultActionSupport implements ServletRe
 	 */
 	@Override
 	public String execute() {
-		try {
-			// 获取 JSON 数据
-			final ObjectMapper mapper = new ObjectMapper();
-			@SuppressWarnings("unchecked")
-			final Object2ObjectOpenHashMap<String, String> data = mapper.readValue(this.getServletRequest().getReader(),
-					Object2ObjectOpenHashMap.class);
-			// 获取参数
-			final String editId = data.get("id");
-			final String fileDataStr = data.get("score");
-			// 将 base64 文件数据解码并保存
-			final byte[] fileBytes = Base64.getDecoder().decode(fileDataStr);
-			final CoResult<String, DataAccessException> scoreStorage = this.iHymnService.scoreStorage(fileBytes,
-					Long.valueOf(editId));
-			if (!scoreStorage.isOk()) {
-				throw scoreStorage.getErr();
-			}
-			this.setResponseJsonData(scoreStorage.getData());
-			return NONE;
-		} catch (final IOException e) {
-			this.setResponseError(e.getMessage());
-			ActionContext.getContext().getServletResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return ERROR;
+		// // 获取 JSON 数据
+		// final ObjectMapper mapper = new ObjectMapper();
+		// @SuppressWarnings("unchecked")
+		// final Object2ObjectOpenHashMap<String, String> data =
+		// mapper.readValue(this.getServletRequest().getReader(),
+		// Object2ObjectOpenHashMap.class);
+		// // 获取参数
+		// final String editId = data.get("id");
+		// final String fileDataStr = data.get("score");
+		// // 将 base64 文件数据解码并保存
+		// final byte[] fileBytes = Base64.getDecoder().decode(fileDataStr);
+		final CoResult<String, DataAccessException> scoreStorage = this.iHymnService
+				.scoreStorage(this.getModel().getScore(), Long.valueOf(this.getModel().getId()));
+		if (!scoreStorage.isOk()) {
+			throw scoreStorage.getErr();
 		}
+		this.setResponseJsonData(scoreStorage.getData());
+		return NONE;
 	}
 
 	/**
@@ -120,15 +115,19 @@ public class HymnsScoreHandler extends DefaultActionSupport implements ServletRe
 		return new ByteArrayInputStream(this.getFileData());
 	}
 
+	@Override
+	public HymnDto getModel() {
+		return this.model;
+	}
+
 	/**
 	 * 賛美歌楽譜をダウンロードする
 	 *
 	 * @return String
 	 */
 	public String scoreDownload() {
-		final String scoreId = this.getServletRequest().getParameter("scoreId");
-		final CoResult<HymnDto, DataAccessException> hymnInfoById = this.iHymnService
-				.getHymnInfoById(Long.valueOf(scoreId));
+		final Long scoreId = Long.valueOf(this.getModel().getId());
+		final CoResult<HymnDto, DataAccessException> hymnInfoById = this.iHymnService.getHymnInfoById(scoreId);
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}

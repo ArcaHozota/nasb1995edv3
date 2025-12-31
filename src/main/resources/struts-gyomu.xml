@@ -8,7 +8,9 @@
 		namespace="/books">
 		<action name="info-storage"
 			class="app.preach.gospel.handler.BooksHandler" method="infoStorage">
-			<interceptor-ref name="json" />
+			<interceptor-ref name="json">
+				<param name="root">model</param>
+			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
@@ -85,6 +87,9 @@
 		</action>
 		<action name="score-upload"
 			class="app.preach.gospel.handler.HymnsScoreHandler" method="execute">
+			<interceptor-ref name="json">
+				<param name="root">model</param>
+			</interceptor-ref>
 			<result name="error" type="json">
 				<param name="root">responseError</param>
 			</result>
@@ -105,7 +110,7 @@
 		<action name="info-deletion"
 			class="app.preach.gospel.handler.HymnsHandler" method="infoDeletion">
 			<interceptor-ref name="json">
-				<param name="root">hymnDto</param>
+				<param name="root">model</param>
 			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
@@ -114,7 +119,7 @@
 		<action name="info-storage"
 			class="app.preach.gospel.handler.HymnsHandler" method="infoStorage">
 			<interceptor-ref name="json">
-				<param name="root">hymnDto</param>
+				<param name="root">model</param>
 			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
@@ -123,7 +128,7 @@
 		<action name="info-update"
 			class="app.preach.gospel.handler.HymnsHandler" method="infoUpdate">
 			<interceptor-ref name="json">
-				<param name="root">hymnDto</param>
+				<param name="root">model</param>
 			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
@@ -179,7 +184,7 @@
 			class="app.preach.gospel.handler.StudentsHandler"
 			method="infoUpdation">
 			<interceptor-ref name="json">
-				<param name="root">studentDto</param>
+				<param name="root">model</param>
 			</interceptor-ref>
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>

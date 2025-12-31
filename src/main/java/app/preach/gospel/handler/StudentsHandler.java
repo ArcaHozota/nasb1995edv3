@@ -45,7 +45,7 @@ public class StudentsHandler extends DefaultActionSupport implements ModelDriven
 	/**
 	 * 奉仕者情報転送クラス
 	 */
-	private StudentDto model = new StudentDto();
+	private transient StudentDto model = new StudentDto();
 
 	/**
 	 * エラーリスポンス

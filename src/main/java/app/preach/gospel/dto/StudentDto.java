@@ -3,9 +3,8 @@ package app.preach.gospel.dto;
 import java.io.Serial;
 import java.io.Serializable;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 奉仕者情報転送クラス
@@ -13,9 +12,8 @@ import lombok.Setter;
  * @author ArkamaHozota
  * @since 1.00beta
  */
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
+@EqualsAndHashCode(callSuper = false)
 public final class StudentDto implements Serializable {
 
 	@Serial

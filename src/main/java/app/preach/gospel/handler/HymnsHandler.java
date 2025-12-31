@@ -49,7 +49,7 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	/**
 	 * 賛美歌情報転送クラス
 	 */
-	private HymnDto model = new HymnDto();
+	private transient HymnDto model = new HymnDto();
 
 	/**
 	 * エラーリスポンス

@@ -4,10 +4,9 @@ import java.io.Serial;
 import java.util.List;
 
 import org.apache.struts2.ActionContext;
+import org.apache.struts2.ModelDriven;
 import org.apache.struts2.action.ServletRequestAware;
 import org.apache.struts2.dispatcher.DefaultActionSupport;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.exception.DataAccessException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -34,15 +33,10 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class BooksHandler extends DefaultActionSupport implements ServletRequestAware {
+public class BooksHandler extends DefaultActionSupport implements ModelDriven<PhraseDto>, ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = -6535194800678567557L;
-
-	/**
-	 * 章節ID
-	 */
-	private String chapterId;
 
 	/**
 	 * 聖書章節サービスインターフェス
@@ -51,14 +45,9 @@ public class BooksHandler extends DefaultActionSupport implements ServletRequest
 	private IBookService iBookService;
 
 	/**
-	 * ID
+	 * 節別情報転送クラス
 	 */
-	private String id;
-
-	/**
-	 * 名称
-	 */
-	private String name;
+	private transient PhraseDto model = new PhraseDto();
 
 	/**
 	 * エラーリスポンス
@@ -74,16 +63,6 @@ public class BooksHandler extends DefaultActionSupport implements ServletRequest
 	 * リクエスト
 	 */
 	private transient HttpServletRequest servletRequest;
-
-	/**
-	 * 内容
-	 */
-	private String textEn;
-
-	/**
-	 * 日本語内容
-	 */
-	private String textJp;
 
 	/**
 	 * 章節情報を取得する
@@ -102,12 +81,9 @@ public class BooksHandler extends DefaultActionSupport implements ServletRequest
 		return NONE;
 	}
 
-	/**
-	 * 節別情報転送クラス
-	 */
-	@Contract(" -> new")
-	private @NotNull PhraseDto getPhraseDto() {
-		return new PhraseDto(this.getId(), this.getName(), this.getTextEn(), this.getTextJp(), this.getChapterId());
+	@Override
+	public PhraseDto getModel() {
+		return this.model;
 	}
 
 	/**
@@ -116,7 +92,7 @@ public class BooksHandler extends DefaultActionSupport implements ServletRequest
 	 * @return String
 	 */
 	public String infoStorage() {
-		final CoResult<String, DataAccessException> infoStorage = this.iBookService.infoStorage(this.getPhraseDto());
+		final CoResult<String, DataAccessException> infoStorage = this.iBookService.infoStorage(this.getModel());
 		if (!infoStorage.isOk()) {
 			throw infoStorage.getErr();
 		}

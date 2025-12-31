@@ -8,9 +8,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import app.preach.gospel.utils.LineNumber;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * 賛美情報転送クラス
@@ -18,9 +16,7 @@ import lombok.Setter;
  * @author ArkamaHozota
  * @since 1.00beta
  */
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public final class HymnDto implements Serializable {
 
 	@Serial
