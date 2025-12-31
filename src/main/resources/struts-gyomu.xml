@@ -180,9 +180,9 @@
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
-		<action name="info-updation"
+		<action name="info-update"
 			class="app.preach.gospel.handler.StudentsHandler"
-			method="infoUpdation">
+			method="infoUpdate">
 			<interceptor-ref name="json">
 				<param name="root">model</param>
 			</interceptor-ref>

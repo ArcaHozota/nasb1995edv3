@@ -93,7 +93,7 @@ public class StudentsHandler extends DefaultActionSupport implements ModelDriven
 	 *
 	 * @return String
 	 */
-	public String infoUpdation() {
+	public String infoUpdate() {
 		final CoResult<String, DataAccessException> infoUpdation = this.iStudentService.infoUpdation(this.getModel());
 		if (!infoUpdation.isOk()) {
 			throw infoUpdation.getErr();
