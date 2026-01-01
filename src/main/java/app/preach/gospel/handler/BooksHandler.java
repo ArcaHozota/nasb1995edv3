@@ -15,7 +15,7 @@ import com.alibaba.fastjson2.JSON;
 
 import app.preach.gospel.dto.BookDto;
 import app.preach.gospel.dto.ChapterDto;
-import app.preach.gospel.dto.PhraseDto;
+import app.preach.gospel.dto.VerseDto;
 import app.preach.gospel.service.IBookService;
 import app.preach.gospel.utils.CoResult;
 import jakarta.annotation.Resource;
@@ -33,7 +33,7 @@ import lombok.Setter;
 @Setter
 @Controller
 @Scope("prototype")
-public class BooksHandler extends DefaultActionSupport implements ModelDriven<PhraseDto>, ServletRequestAware {
+public class BooksHandler extends DefaultActionSupport implements ModelDriven<VerseDto>, ServletRequestAware {
 
 	@Serial
 	private static final long serialVersionUID = -6535194800678567557L;
@@ -47,7 +47,7 @@ public class BooksHandler extends DefaultActionSupport implements ModelDriven<Ph
 	/**
 	 * 節別情報転送クラス
 	 */
-	private transient PhraseDto model = new PhraseDto();
+	private transient VerseDto model = new VerseDto();
 
 	/**
 	 * エラーリスポンス
@@ -82,7 +82,7 @@ public class BooksHandler extends DefaultActionSupport implements ModelDriven<Ph
 	}
 
 	@Override
-	public PhraseDto getModel() {
+	public VerseDto getModel() {
 		return this.model;
 	}
 

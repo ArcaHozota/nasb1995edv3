@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import app.preach.gospel.common.ProjectConstants;
 import app.preach.gospel.dto.BookDto;
 import app.preach.gospel.dto.ChapterDto;
-import app.preach.gospel.dto.PhraseDto;
+import app.preach.gospel.dto.VerseDto;
 import app.preach.gospel.service.IBookService;
 import app.preach.gospel.utils.CoResult;
 import app.preach.gospel.utils.CoStringUtils;
@@ -74,7 +74,7 @@ public class BookServiceImpl implements IBookService {
 	}
 
 	@Override
-	public CoResult<String, DataAccessException> infoStorage(final @NotNull PhraseDto phraseDto) {
+	public CoResult<String, DataAccessException> infoStorage(final @NotNull VerseDto phraseDto) {
 		final var id = Long.valueOf(phraseDto.getId());
 		final var chapterId = Integer.valueOf(phraseDto.getChapterId());
 		try {

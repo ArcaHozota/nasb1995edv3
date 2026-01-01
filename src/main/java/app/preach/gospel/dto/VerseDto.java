@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public final class PhraseDto implements Serializable {
+public final class VerseDto implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 4733931779755040721L;

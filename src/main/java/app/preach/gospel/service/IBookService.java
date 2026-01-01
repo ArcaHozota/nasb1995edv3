@@ -6,7 +6,7 @@ import org.jooq.exception.DataAccessException;
 
 import app.preach.gospel.dto.BookDto;
 import app.preach.gospel.dto.ChapterDto;
-import app.preach.gospel.dto.PhraseDto;
+import app.preach.gospel.dto.VerseDto;
 import app.preach.gospel.utils.CoResult;
 
 /**
@@ -38,5 +38,5 @@ public interface IBookService {
 	 * @param phraseDto 節別情報転送クラス
 	 * @return CoResult<String, DataAccessException>
 	 */
-	CoResult<String, DataAccessException> infoStorage(PhraseDto phraseDto);
+	CoResult<String, DataAccessException> infoStorage(VerseDto phraseDto);
 }
