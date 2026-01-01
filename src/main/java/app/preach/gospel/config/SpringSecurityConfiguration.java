@@ -90,9 +90,9 @@ public class SpringSecurityConfiguration {
 								.hasAuthority("students%retrievEdition").anyRequest().authenticated())
 				.csrf(csrf -> csrf
 						.ignoringRequestMatchers(ProjectURLConstants.URL_STATIC_RESOURCE,
-								ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+								ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 										.concat(ProjectURLConstants.URL_LOGIN),
-								ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+								ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 										.concat(ProjectURLConstants.URL_LOGOUT))
 						.csrfTokenRepository(new CookieCsrfTokenRepository()))
 				.exceptionHandling(handling -> {
@@ -104,15 +104,15 @@ public class SpringSecurityConfiguration {
 					});
 				})
 				.formLogin(formLogin -> formLogin
-						.loginPage(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+						.loginPage(ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 								.concat(ProjectURLConstants.URL_TO_LOGIN))
-						.loginProcessingUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+						.loginProcessingUrl(ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 								.concat(ProjectURLConstants.URL_LOGIN))
-						.defaultSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+						.defaultSuccessUrl(ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 								.concat(ProjectURLConstants.URL_TO_MAINMENU_WITH_LOGIN), true)
 						.permitAll().usernameParameter("loginAcct").passwordParameter("userPswd"))
 				.logout(logout -> logout
-						.logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+						.logoutUrl(ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 								.concat(ProjectURLConstants.URL_LOGOUT))
 						.logoutSuccessHandler(this.projectLogoutSuccessHandler));
 		log.info(ProjectConstants.MESSAGE_SPRING_SECURITY);

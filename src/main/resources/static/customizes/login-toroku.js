@@ -19,14 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
             torokuBox.classList.remove("slide-up");
         }
     });
-
     loginBox.querySelector(".login-title").addEventListener("click", () => {
         if (loginBox.classList.contains("slide-up")) {
             torokuBox.classList.add("slide-up");
             loginBox.classList.remove("slide-up");
         }
     });
-
     let flag = 0;
     eyeIcons.addEventListener("click", (e) => {
         if (flag === 0) {
@@ -39,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
             flag = 0;
         }
     });
-
     const message1 = torokuMsgContainer?.value;
     if (message1 !== emptyString && message1 !== null && message1 !== undefined) {
         layer.msg(message1);

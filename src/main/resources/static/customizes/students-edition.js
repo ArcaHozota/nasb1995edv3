@@ -25,7 +25,6 @@ accountEdit.addEventListener("change", (e) => {
 
 infoUpdateBtn.addEventListener("click", () => {
     const inputArrays = [accountEdit, nameEdit, passwordEdit, birthdayEdit, emailEdit];
-
     inputArrays.forEach(el => {
         el.classList.remove("is-valid", "is-invalid");
         const feedback = el.nextElementSibling;
@@ -34,9 +33,7 @@ infoUpdateBtn.addEventListener("click", () => {
             feedback.textContent = emptyString;
         }
     });
-
     const listArray = projectInputContextGet(inputArrays.map(el => `#${el.id}`));
-
     if (listArray.includes(emptyString)) {
         projectNullInputBoxDiscern(inputArrays.map(el => `#${el.id}`));
     } else if (editForm.querySelector(".is-invalid")) {
@@ -50,7 +47,6 @@ infoUpdateBtn.addEventListener("click", () => {
             email: emailEdit.value,
             dateOfBirth: birthdayEdit.value
         });
-
         projectAjaxModify('/students/info-update', PUT, putData, studentsPutSuccessFunction);
     }
 });

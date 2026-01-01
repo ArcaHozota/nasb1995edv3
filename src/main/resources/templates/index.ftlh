@@ -53,7 +53,7 @@
 				</a>
 			</div>
 			<div class="d-flex justify-content-end">
-				<a href="/category/login" type="button" class="btn btn-primary me-2" style="font-weight: 600;">
+				<a href="/home/login" type="button" class="btn btn-primary me-2" style="font-weight: 600;">
 					<i class="fa-solid fa-right-to-bracket"></i> ログイン
 				</a>
 			</div>

@@ -31,13 +31,6 @@
 			class="app.preach.gospel.handler.HomepageHandler" method="toHomePage">
 			<result name="success" type="freemarker">/templates/index.ftlh</result>
 		</action>
-		<!-- 其他 Action 显式添加 <action name="to-list" class="app.preach.gospel.handler.HomepageHandler" 
-			method="toIchiranhyo"> <result name="success" type="freemarker">/templates/index2.ftlh</result> 
-			</action> -->
-	</package>
-	<!-- 共通ハンドラ -->
-	<package name="categoryHandler" extends="projectPackage"
-		namespace="/category">
 		<action name="login"
 			class="app.preach.gospel.handler.HomepageHandler" method="login">
 			<result name="login" type="freemarker">/templates/login-toroku.ftlh
@@ -62,5 +55,8 @@
 			method="toSystemError">
 			<result name="error" type="freemarker">/templates/error.ftlh</result>
 		</action>
+		<!-- 其他 Action 显式添加 <action name="to-list" class="app.preach.gospel.handler.HomepageHandler" 
+			method="toIchiranhyo"> <result name="success" type="freemarker">/templates/index2.ftlh</result> 
+			</action> -->
 	</package>
 </struts>

@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     [toMainmenu, toMainmenu2].forEach(el => el?.addEventListener("click", (e) => {
         e.preventDefault();
-        window.location.replace('/category/to-mainmenu');
+        window.location.replace('/home/to-mainmenu');
     }));
 
     toPersonal?.addEventListener("click", (e) => {

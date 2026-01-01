@@ -50,7 +50,7 @@
 			<h2 class="login-title">
 				<span>すでにアカウント持ち？</span>ログイン
 			</h2>
-			<form class="input-box" action="/category/do-login" method="post" id="loginForm">
+			<form class="input-box" action="/home/do-login" method="post" id="loginForm">
 				<#if registeredEmail?exists>
 					<input type="text" value="${registeredEmail}" name="loginAcct" id="accountIpt" placeholder="アカウント">
 				<#else>
@@ -66,7 +66,7 @@
 				<h2 class="toroku-title">
 					<span>アカウント無し？</span>登録
 				</h2>
-				<form class="input-box" action="/category/toroku" method="post" id="torokuForm">
+				<form class="input-box" action="/home/toroku" method="post" id="torokuForm">
 					<input type="email" name="email" id="emailIpt" placeholder="メール">
 					<input type="password" name="password" id="passwordIpt1" placeholder="パスワード">
 					<input type="password" id="passwordIpt2" placeholder="パス再入力">

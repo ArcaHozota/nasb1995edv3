@@ -47,7 +47,7 @@ public class ProjectLogoutSuccessHandler implements LogoutSuccessHandler {
 		// 如有需要可打印统计信息
 		log.info("Caffeine stats: {}", this.nlpCache.stats());
 		// 重定向到登录页
-		response.sendRedirect(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
+		response.sendRedirect(ProjectURLConstants.URL_HOME_NAMESPACE.concat(CoStringUtils.SLASH)
 				.concat(ProjectURLConstants.URL_TO_LOGIN));
 	}
 
