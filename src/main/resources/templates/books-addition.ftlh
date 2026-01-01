@@ -41,14 +41,14 @@
 						</form>
 						<form id="inputForm2">
                             <div class="form-group row" style="margin-top: 2.2rem;">
-                                <label for="phraseTextEnInput" class="col-md-1 col-form-label text-end">英語文書</label>
+                                <label for="phraseTextEnInput" class="col-md-1 col-form-label text-end">英語</label>
                                 <div class="col-md-11" style="height: 12vh;">
                                     <textarea class="form-control" style="height: 100%"
                                         id="phraseTextEnInput"></textarea>
                                 </div>
                             </div>
                             <div class="form-group row" style="margin-top: 0.4rem;">
-                                <label for="phraseTextJpInput" class="col-md-1 col-form-label text-end">日本語文書</label>
+                                <label for="phraseTextJpInput" class="col-md-1 col-form-label text-end">日本語</label>
                                 <div class="col-md-11" style="height: 12vh;">
                                     <textarea class="form-control" style="height: 100%"
                                         id="phraseTextJpInput"></textarea>

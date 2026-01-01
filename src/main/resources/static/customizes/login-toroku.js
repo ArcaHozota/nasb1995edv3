@@ -12,7 +12,6 @@ const passwordIpt1 = document.getElementById("passwordIpt1");
 const passwordIpt2 = document.getElementById("passwordIpt2");
 const accountIpt = document.getElementById("accountIpt");
 
-
 document.addEventListener("DOMContentLoaded", () => {
     torokuBox.querySelector(".toroku-title").addEventListener("click", () => {
         if (torokuBox.classList.contains("slide-up")) {
@@ -47,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-emailIpt.addEventListener("change", function () {
+emailIpt.addEventListener("change", function() {
     const inputEmail = this.value;
     const regularEmail = /^[a-zA-Z\d._%+-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/;
     if (inputEmail.includes("@") && !regularEmail.test(inputEmail)) {
@@ -58,7 +57,6 @@ emailIpt.addEventListener("change", function () {
 loginBtn.addEventListener("click", () => {
     const account = accountIpt.value.trim();
     const password = passwordIpt.value.trim();
-
     if (account === emptyString && password === emptyString) {
         layer.msg('アカウントとパスワードを入力してください。');
     } else if (account === emptyString) {
@@ -72,17 +70,14 @@ loginBtn.addEventListener("click", () => {
 
 torokuBtn.addEventListener("click", () => {
     const inputElements = [emailIpt, passwordIpt1, passwordIpt2];
-
     for (const el of inputElements) {
         if (el.value.trim() === emptyString) {
             layer.msg('入力しなかった情報があります。');
             return;
         }
     }
-
     const password01 = passwordIpt1.value;
     const password02 = passwordIpt2.value;
-
     if (password01 !== password02) {
         layer.msg('入力したパスワードが不一致です。');
     } else {

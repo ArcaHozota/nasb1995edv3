@@ -109,7 +109,7 @@ public class SpringSecurityConfiguration {
 						.loginProcessingUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
 								.concat(ProjectURLConstants.URL_LOGIN))
 						.defaultSuccessUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)
-								.concat(ProjectURLConstants.URL_TO_MAINMENU_WITH_LOGIN))
+								.concat(ProjectURLConstants.URL_TO_MAINMENU_WITH_LOGIN), true)
 						.permitAll().usernameParameter("loginAcct").passwordParameter("userPswd"))
 				.logout(logout -> logout
 						.logoutUrl(ProjectURLConstants.URL_CATEGORY_NAMESPACE.concat(CoStringUtils.SLASH)

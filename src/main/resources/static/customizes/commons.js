@@ -193,7 +193,7 @@ function normalDeleteBtnFunction(url, msg, deleteId) {
         });
 }
 
-function usernameInitial() {
+/* function usernameInitial() {
     fetch('/category/get-username')
         .then(res => res.text())
         .then(response => {
@@ -203,7 +203,7 @@ function usernameInitial() {
             const message = trimQuote(await xhr.text());
             layer.msg(message);
         });
-}
+} */
 
 function checkLink(element) {
     const allLinkedNavs = document.querySelectorAll('.nav-link');
