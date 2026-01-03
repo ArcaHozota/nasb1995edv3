@@ -92,6 +92,12 @@ public class HymnServiceImpl implements IHymnService {
 	protected static final Condition COMMON_CONDITION = HYMNS.VISIBLE_FLG.eq(Boolean.TRUE);
 
 	/**
+	 * 共通検索条件
+	 */
+	protected static final Condition COMMON_CONDITION2 = HYMNS.VISIBLE_FLG.eq(Boolean.TRUE)
+			.and(HYMNS.CLASSICAL.eq(Boolean.FALSE));
+
+	/**
 	 * 日時フォマーター
 	 */
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -650,7 +656,7 @@ public class HymnServiceImpl implements IHymnService {
 		try {
 			for (final String starngement : STRANGE_ARRAY) {
 				if (keyword.toLowerCase().contains(starngement) || keyword.length() >= 100) {
-					final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+					final var hymnDtos = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION2)
 							.orderBy(HYMNS.ID.asc()).limit(ProjectConstants.DEFAULT_PAGE_SIZE).fetch(rd -> {
 								final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp()
 										: rd.getNameJp();
@@ -670,7 +676,7 @@ public class HymnServiceImpl implements IHymnService {
 				}
 			}
 			if (CoStringUtils.isEmpty(keyword)) {
-				final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION)
+				final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION2)
 						.orderBy(HYMNS.ID.asc()).fetch(rd -> {
 							final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp()
 									: rd.getNameJp();
@@ -701,7 +707,7 @@ public class HymnServiceImpl implements IHymnService {
 				final Condition condition3 = smlField1.gt(0.33f).and(smlField3.gt(0.33f));
 				final Condition condition4 = smlField2.gt(0.33f).and(smlField4.gt(0.33f));
 				final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION2)
 						.and(condition1.or(condition2).or(condition3).or(condition4)).fetch(rd -> {
 							final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
 									: rd.get(HYMNS.NAME_JP);
@@ -738,7 +744,7 @@ public class HymnServiceImpl implements IHymnService {
 				});
 				final String detailKeyword4 = CoStringUtils.getDetailKeyword(sBuilder2.toString());
 				final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+						.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION2)
 						.and((HYMNS.LYRIC.like(detailKeyword1).and(HYMNS.LYRIC.like(detailKeyword2))).or(
 								HYMNS_WORK.FURIGANA.like(detailKeyword3).and(HYMNS_WORK.FURIGANA.like(detailKeyword4))))
 						.fetch(rd -> {
@@ -766,8 +772,8 @@ public class HymnServiceImpl implements IHymnService {
 							.sorted(Comparator.comparingInt(item -> item.getLineNumber().getLineNo())).toList());
 				}
 				final var withRandomFiveIds = withRandomFive.stream().map(HymnDto::getId).toList();
-				final var otherHymns = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).orderBy(HYMNS.ID.asc())
-						.fetch(rd -> {
+				final var otherHymns = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION2)
+						.orderBy(HYMNS.ID.asc()).fetch(rd -> {
 							final String hymnId = rd.get(HYMNS.ID).toString();
 							if (withNameLikeIds.contains(hymnId) || withRandomFiveIds.contains(hymnId)) {
 								return null;
@@ -793,7 +799,7 @@ public class HymnServiceImpl implements IHymnService {
 						.sorted(Comparator.comparingInt(item -> item.getLineNumber().getLineNo())).toList());
 			}
 			final var withName = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION2)
 					.and(HYMNS.NAME_JP.eq(keyword).or(HYMNS.NAME_KR.eq(keyword))).fetch(rd -> {
 						final String hymnName = rd.get(HYMNS.CLASSICAL).booleanValue() ? "★" + rd.get(HYMNS.NAME_JP)
 								: rd.get(HYMNS.NAME_JP);
@@ -814,7 +820,7 @@ public class HymnServiceImpl implements IHymnService {
 			final Field<Float> smlField1 = similarity(HYMNS.NAME_JP, val(keyword));
 			final Field<Float> smlField2 = similarity(HYMNS.NAME_KR, val(keyword));
 			final var withNameLike = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION2)
 					.and(HYMNS.NAME_JP.like(searchStr).or(HYMNS.NAME_KR.like(searchStr)).or(smlField1.gt(0.33f))
 							.or(smlField2.gt(0.33f)))
 					.fetch(rd -> {
@@ -852,7 +858,7 @@ public class HymnServiceImpl implements IHymnService {
 			});
 			final String detailKeyword2 = CoStringUtils.getDetailKeyword(sBuilder.toString());
 			final var withRandomFive = this.dslContext.select(HYMNS.fields()).from(HYMNS).innerJoin(HYMNS_WORK)
-					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION)
+					.onKey(Keys.HYMNS_WORK__HYMNS_WORK_HYMNS_TO_WORK).where(COMMON_CONDITION2)
 					.and(HYMNS.LYRIC.like(detailKeyword).or(HYMNS_WORK.FURIGANA.like(detailKeyword2))).fetch(rd -> {
 						final String hymnId = rd.get(HYMNS.ID).toString();
 						if (withNameIds.contains(hymnId) || withNameLikeIds.contains(hymnId)) {
@@ -881,7 +887,7 @@ public class HymnServiceImpl implements IHymnService {
 				return CoResult.ok(randomFiveLoop.stream()
 						.sorted(Comparator.comparingInt(item -> item.getLineNumber().getLineNo())).toList());
 			}
-			final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).fetch(rd -> {
+			final var totalRecords = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION2).fetch(rd -> {
 				final String hymnName = rd.getClassical().booleanValue() ? "★" + rd.getNameJp() : rd.getNameJp();
 				final var hymnDto = new HymnDto();
 				hymnDto.setId(rd.getId().toString());
