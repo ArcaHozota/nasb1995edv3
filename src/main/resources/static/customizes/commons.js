@@ -184,7 +184,7 @@ function normalDeleteBtnFunction(url, msg, deleteId) {
                 confirmButtonColor: '#7f0020'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    layer.msg('削除機能はまだ実装されていません');
+                    layer.msg('削除機能はまだ実装されておりません');
                     // projectAjaxModify(url + 'info-delete?id=' + deleteId, 'DELETE', null, normalDeleteSuccessFunction);
                 }
             });
