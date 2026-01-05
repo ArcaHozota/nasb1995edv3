@@ -78,6 +78,6 @@ torokuBtn.addEventListener("click", () => {
     if (password01 !== password02) {
         layer.msg('入力したパスワードが不一致です。');
     } else {
-        layer.msg('すみませんが、当機能はまだ実装されていません');
+        layer.msg('すみませんが、当機能はまだ実装されておりません');
     }
 });
