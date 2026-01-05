@@ -11,7 +11,7 @@
 						<i class="fa-solid fa-magnifying-glass"></i>
 					</button>
 				</div>
-				<form id="logoutForm" method="post" action="/category/do-logout" style="display: none;">
+				<form id="logoutForm" method="post" action="/home/do-logout" style="display: none;">
 				</form>
 				<div class="d-flex">
 					<button id="logoutBtn" type="button" class="btn btn-danger me-2">

@@ -31,7 +31,7 @@
 				</a>
 			</div>
 		</div>
-		<form id="logoutForm" method="post" action="/category/do-logout" style="display: none;"></form>
+		<form id="logoutForm" method="post" action="/home/do-logout" style="display: none;"></form>
 	</nav>
 	<div class="container" style="margin-top: 60px;">
 		<div class="text-center">
