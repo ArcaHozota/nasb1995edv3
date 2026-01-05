@@ -97,10 +97,20 @@ public class SpringSecurityConfiguration {
 						.csrfTokenRepository(new CookieCsrfTokenRepository()))
 				.exceptionHandling(handling -> {
 					handling.authenticationEntryPoint(this.projectAuthenticationEntryPoint);
-					handling.accessDeniedHandler((request, response, accessDeniedException) -> {
-						response.sendError(HttpStatus.FORBIDDEN.value(),
-								ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH);
-						log.warn(ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH);
+					handling.accessDeniedHandler((request, response, ex) -> {
+						response.setStatus(HttpStatus.FORBIDDEN.value());
+						response.setContentType("application/json;charset=UTF-8");
+						final String body = """
+								{
+								  "status": 403,
+								  "error": "Forbidden",
+								  "message": "%s",
+								  "path": "%s"
+								}
+								""".formatted(ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH,
+								request.getRequestURI());
+						response.getWriter().write(body);
+						log.warn(ProjectConstants.MESSAGE_SPRINGSECURITY_REQUIRED_AUTH, ex);
 					});
 				})
 				.formLogin(formLogin -> formLogin
