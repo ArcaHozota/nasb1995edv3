@@ -38,7 +38,7 @@ tableBody?.addEventListener("click", (e) => {
         checkPermissionAndTransfer(url);
     } else if (target.classList.contains("score-btn")) {
         const scoreId = target.getAttribute("data-score-id");
-        const url = `/hymns/to-score-upload?scoreId=${scoreId}&pageNum=${pageNum}`;
+        const url = `/hymns/to-score-upload?scoreId=${scoreId}&pageNum=${pageNum}&keyword=${keyword}`;
         checkPermissionAndTransfer(url);
     } else if (target.classList.contains("link-btn")) {
         e.preventDefault();
