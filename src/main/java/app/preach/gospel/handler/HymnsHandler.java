@@ -272,12 +272,12 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	public String toPages() {
 		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
 		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
-		if (CoStringUtils.isDigital(pageNum) && CoStringUtils.isNotEmpty(keyword)) {
-			ActionContext.getContext().put(ProjectConstants.ATTRNAME_KEYWORD, keyword);
+		if (CoStringUtils.isDigital(pageNum)) {
 			ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
-			return SUCCESS;
+		} else {
+			ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, "1");
 		}
-		ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, "1");
+		ActionContext.getContext().put(ProjectConstants.ATTRNAME_KEYWORD, keyword);
 		return SUCCESS;
 	}
 
