@@ -158,14 +158,16 @@ public class HymnsScoreHandler extends DefaultActionSupport implements ModelDriv
 	 */
 	public String toScoreUpload() {
 		final String scoreId = this.getServletRequest().getParameter("scoreId");
-		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
-		ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 		final CoResult<HymnDto, DataAccessException> hymnInfoById = this.iHymnService
 				.getHymnInfoById(Long.valueOf(scoreId));
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}
 		final HymnDto hymnDto = hymnInfoById.getData();
+		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
+		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
+		ActionContext.getContext().put(ProjectConstants.ATTRNAME_KEYWORD, keyword);
+		ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 		ActionContext.getContext().put(ProjectConstants.ATTRNAME_EDITED_INFO, hymnDto);
 		return SUCCESS;
 	}

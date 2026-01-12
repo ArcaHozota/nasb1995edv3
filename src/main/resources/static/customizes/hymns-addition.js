@@ -1,5 +1,5 @@
-let pageNum = document.getElementById("pageNumContainer")?.value;
-let keyword = document.getElementById("keywordContainer")?.value;
+const pageNum = document.getElementById("pageNumContainer")?.value;
+const keyword = document.getElementById("keywordContainer")?.value;
 
 document.addEventListener("DOMContentLoaded", () => {
     const toCollection = document.getElementById("toCollection");

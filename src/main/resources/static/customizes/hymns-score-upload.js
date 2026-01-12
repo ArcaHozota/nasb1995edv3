@@ -1,4 +1,5 @@
 const pageNum = document.getElementById("pageNumContainer")?.value;
+const keyword = document.getElementById("keywordContainer")?.value;
 
 document.addEventListener("DOMContentLoaded", () => {
     const toCollection = document.getElementById("toCollection");
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("toHymnPages")?.addEventListener("click", (e) => {
     e.preventDefault();
-    const url = '/hymns/to-pages?pageNum=' + pageNum;
+    const url = '/hymns/to-pages?pageNum=' + pageNum + '&keyword=' + keyword;
     checkPermissionAndTransfer(url);
 });
 
@@ -55,7 +56,7 @@ document.getElementById("scoreUploadBtn")?.addEventListener("click", () => {
             .then(response => {
                 const message = trimQuote(response);
                 localStorage.setItem('redirectMessage', message);
-                window.location.replace('/hymns/to-pages?pageNum=' + pageNum);
+                window.location.replace('/hymns/to-pages?pageNum=' + pageNum + '&keyword=' + keyword);
             })
             .catch(async (xhr) => {
                 const message = trimQuote(await xhr.text());
