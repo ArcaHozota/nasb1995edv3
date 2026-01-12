@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
         toCollection.classList.remove('text-white');
         toCollection.classList.add('active');
     }
+    keyword = document.getElementById("keywordInput")?.value;
     if (keyword === undefined) {
         keyword = emptyString;
     }
@@ -33,7 +34,7 @@ tableBody?.addEventListener("click", (e) => {
         normalDeleteBtnFunction('/hymns/', `この「${nameJp}」という歌の情報を削除するとよろしいでしょうか。`, deleteId);
     } else if (target.classList.contains("edit-btn")) {
         const editId = target.getAttribute("data-edit-id");
-        const url = `/hymns/to-edition?editId=${editId}&pageNum=${pageNum}`;
+        const url = `/hymns/to-edition?editId=${editId}&pageNum=${pageNum}&keyword=${keyword}`;
         checkPermissionAndTransfer(url);
     } else if (target.classList.contains("score-btn")) {
         const scoreId = target.getAttribute("data-score-id");

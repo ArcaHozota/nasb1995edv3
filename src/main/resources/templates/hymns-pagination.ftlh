@@ -23,8 +23,13 @@
 						<div class="row">
 							<form class="form-inline col-md-5" role="form">
 								<div class="input-group col-md-5">
+								<#if keyword?exists>
+									<input id="keywordInput" value="${keyword}" class="form-control" type="text"
+										placeholder="キーワードを入力してください">
+								<#else>
 									<input id="keywordInput" class="form-control" type="text"
 										placeholder="キーワードを入力してください">
+								</#if>
 									<button id="searchBtn2" class="btn btn-info my-2 my-sm-0" type="button">
 										<i class="fa-solid fa-magnifying-glass"></i> 検索
 									</button>

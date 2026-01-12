@@ -250,14 +250,16 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	 */
 	public String toEdition() {
 		final String editId = this.getServletRequest().getParameter("editId");
-		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
-		ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 		final CoResult<HymnDto, DataAccessException> hymnInfoById = this.iHymnService
 				.getHymnInfoById(Long.valueOf(editId));
 		if (!hymnInfoById.isOk()) {
 			throw hymnInfoById.getErr();
 		}
 		final HymnDto hymnInfoByIdOk = hymnInfoById.getData();
+		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
+		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
+		ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
+		ActionContext.getContext().put(ProjectConstants.ATTRNAME_KEYWORD, keyword);
 		ActionContext.getContext().put(ProjectConstants.ATTRNAME_EDITED_INFO, hymnInfoByIdOk);
 		return SUCCESS;
 	}
@@ -269,7 +271,9 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	 */
 	public String toPages() {
 		final String pageNum = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_PAGE_NUMBER);
-		if (CoStringUtils.isDigital(pageNum)) {
+		final String keyword = this.getServletRequest().getParameter(ProjectConstants.ATTRNAME_KEYWORD);
+		if (CoStringUtils.isDigital(pageNum) && CoStringUtils.isNotEmpty(keyword)) {
+			ActionContext.getContext().put(ProjectConstants.ATTRNAME_KEYWORD, keyword);
 			ActionContext.getContext().put(ProjectConstants.ATTRNAME_PAGE_NUMBER, pageNum);
 			return SUCCESS;
 		}

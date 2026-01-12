@@ -35,6 +35,7 @@
 					<div class="card-body">
 						<form id="editForm">
 							<input type="hidden" value="${pageNum}" id="pageNumContainer">
+							<input type="hidden" value="${keyword}" id="keywordContainer">
 							<input type="hidden" value="${arawaseta.id}" id="idContainer">
 							<input type="hidden" value="${arawaseta.updatedTime}" id="datestampContainer">
 							<div class="form-group row">
