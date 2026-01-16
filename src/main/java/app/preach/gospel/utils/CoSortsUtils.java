@@ -219,9 +219,9 @@ public final class CoSortsUtils {
 	/**
 	 * トーナメントソート-昇順
 	 *
-	 * @param a アレー
+	 * @param arr アレー
 	 */
-	public static void tournamentSortASc(final int[] arr) {
+	public static void tournamentSortAsc(final int[] arr) {
 		if (arr.length <= 1) {
 			return;
 		}
@@ -252,6 +252,53 @@ public final class CoSortsUtils {
 			while (idx > 1) {
 				idx >>= 1;
 				tree[idx] = Math.min(tree[idx << 1], tree[idx << 1 | 1]);
+			}
+		}
+	}
+
+	/**
+	 * トーナメントソート-降順
+	 *
+	 * @param arr アレー
+	 */
+	public static void tournamentSortDesc(final int[] arr) {
+		if (arr.length <= 1) {
+			return;
+		}
+		int size = 1;
+		while (size < arr.length) {
+			size <<= 1;
+		}
+		// 最大値トーナメント用
+		final int[] tree = new int[2 * size];
+		Arrays.fill(tree, Integer.MIN_VALUE);
+		// 葉にデータを配置
+		for (int i = 0; i < arr.length; i++) {
+			tree[size + i] = arr[i];
+		}
+		// 木を構築（最大値）
+		for (int i = size - 1; i > 0; i--) {
+			tree[i] = Math.max(tree[i << 1], tree[i << 1 | 1]);
+		}
+		// 最大値を順に取り出す
+		for (int i = 0; i < arr.length; i++) {
+			final int maxVal = tree[1];
+			arr[i] = maxVal;
+			// 葉まで降りる
+			int idx = 1;
+			while (idx < size) {
+				if (tree[idx << 1] == maxVal) {
+					idx <<= 1;
+				} else {
+					idx = idx << 1 | 1;
+				}
+			}
+			// 取り出した要素を無効化
+			tree[idx] = Integer.MIN_VALUE;
+			// 上に更新
+			while (idx > 1) {
+				idx >>= 1;
+				tree[idx] = Math.max(tree[idx << 1], tree[idx << 1 | 1]);
 			}
 		}
 	}
