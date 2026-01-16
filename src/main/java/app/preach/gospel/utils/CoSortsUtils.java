@@ -21,8 +21,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CoSortsUtils {
 
-	private static final int INSERTION_SORT_THRESHOLD = 32;
-
 	private static BufferedImage applyOrientation(final BufferedImage src, final int orientation) {
 		// よくあるのは 6(90°) / 3(180°) / 8(270°) / 1(そのまま)
 		double theta;
@@ -58,40 +56,6 @@ public final class CoSortsUtils {
 		g2.drawImage(src, 0, 0, null);
 		g2.dispose();
 		return dst;
-	}
-
-	// =========================
-	// 1. 非负整数基数排序 (LSD, 基数=256)
-	// =========================
-	// 对某一字节做稳定的计数排序
-	private static void countingPass(final int[] src, final int[] dst, final int[] cnt, final int shift) {
-		Arrays.fill(cnt, 0);
-		// 统计频次
-		for (final int v : src) {
-			cnt[(v >>> shift) & 0xFF]++;
-		}
-		// 前缀和 -> 累计位置
-		for (int i = 1; i < 256; i++) {
-			cnt[i] += cnt[i - 1];
-		}
-		// 逆序遍历，保证稳定性
-		for (int i = src.length - 1; i >= 0; i--) {
-			final int v = src[i];
-			dst[--cnt[(v >>> shift) & 0xFF]] = v;
-		}
-	}
-
-	// 插入排序 [lo, hi)
-	private static void insertionSort(final int[] a, final int lo, final int hi) {
-		for (int i = lo + 1; i < hi; i++) {
-			final int v = a[i];
-			int j = i - 1;
-			while (j >= lo && a[j] > v) {
-				a[j + 1] = a[j];
-				j--;
-			}
-			a[j + 1] = v;
-		}
 	}
 
 	// =========================
@@ -142,16 +106,18 @@ public final class CoSortsUtils {
 	/**
 	 * 稳定归并排序（top-down），对 int[] 全局排序。 小片段使用插入排序优化。
 	 */
-	public static void mergeSort(final int[] a) {
-		final int n = a.length;
-		if (n <= 1) {
+	public static void mergeSortAsc(final int[] a) {
+		if (a.length <= 1) {
 			return;
 		}
-		final int[] tmp = new int[n];
-		mergeSortRecursive(a, 0, n, tmp);
+		final int[] tmp = new int[a.length];
+		mergeSortRecursive(a, 0, a.length, tmp);
 	}
 
 	public static void mergeSortDesc(final int[] a) {
+		if (a.length <= 1) {
+			return;
+		}
 		final int[] tmp = new int[a.length];
 		mergeSortRecursiveDesc(a, 0, a.length, tmp);
 	}
@@ -160,11 +126,6 @@ public final class CoSortsUtils {
 	private static void mergeSortRecursive(final int[] a, final int lo, final int hi, final int[] tmp) {
 		final int size = hi - lo;
 		if (size <= 1) {
-			return;
-		}
-		// 小段用插入排序优化
-		if (size <= INSERTION_SORT_THRESHOLD) {
-			insertionSort(a, lo, hi);
 			return;
 		}
 		final int mid = (lo + hi) >>> 1;
@@ -183,63 +144,14 @@ public final class CoSortsUtils {
 		if (size <= 1) {
 			return;
 		}
-		// 小段用插入排序优化
-		if (size <= INSERTION_SORT_THRESHOLD) {
-			insertionSort(a, lo, hi);
-			return;
-		}
 		final int mid = (lo + hi) >>> 1;
-		mergeSortRecursive(a, lo, mid, tmp);
-		mergeSortRecursive(a, mid, hi, tmp);
+		mergeSortRecursiveDesc(a, lo, mid, tmp);
+		mergeSortRecursiveDesc(a, mid, hi, tmp);
 		// 如果已经有序，则直接跳过 merge
 		if (a[mid - 1] <= a[mid]) {
 			return;
 		}
 		mergeDesc(a, lo, mid, hi, tmp);
-	}
-
-	/**
-	 * 对非负 int 数组进行稳定的基数排序。 使用 8-bit 一轮的 LSD 基数排序 (基数 256)，按字节分三轮或更多轮。 要求：所有元素 >= 0。
-	 */
-	public static void radixSort(final int[] a) {
-		final int n = a.length;
-		if (n <= 1) {
-			return;
-		}
-		int max = 0;
-		for (final int v : a) {
-			if (v < 0) {
-				throw new IllegalArgumentException("radixSort only allows non-negative ints");
-			}
-			if (v > max) {
-				max = v;
-			}
-		}
-		if (max == 0) {
-			return; // 全是0，已经有序
-		}
-		final int[] tmp = new int[n];
-		final int[] cnt = new int[256];
-		int[] src = a;
-		int[] dst = tmp;
-		int shift = 0;
-		// 根据最大值动态决定需要多少轮（每轮 8 bit）
-		while ((max >>> shift) != 0) {
-			countingPass(src, dst, cnt, shift);
-			final int[] t = src;
-			src = dst;
-			dst = t;
-			shift += 8;
-		}
-		// 如果最后结果在 tmp 中，拷回 a
-		if (src != a) {
-			System.arraycopy(src, 0, a, 0, n);
-		}
-	}
-
-	public static void radixSortDesc(final int[] a) {
-		radixSort(a);
-		reverse(a); // 最快最稳
 	}
 
 	public static BufferedImage readAndNormalizeOrientation(final byte[] jpgBytes) throws Exception {
@@ -297,46 +209,39 @@ public final class CoSortsUtils {
 		}
 	}
 
-	// =========================
-	// 3. smartSort：自动选择算法
-	// =========================
-	/**
-	 * 根据数组长度和元素范围自动选择排序算法： - n <= 32：直接插入排序 - 所有元素 >= 0 且 n 较大：使用
-	 * radixSortNonNegative - 否则：使用稳定归并排序
-	 *
-	 * 这是针对刷题/业务中常见 int 场景的一个简单 heuristics， 重点兼顾「速度 + 稳定性 + 简洁实现」。
-	 */
-	public static void smartSort(final int[] a) {
-		final int n = a.length;
-		if (n <= 1) {
+	public static void tournamentSortASc(final int[] arr) {
+		if (arr.length <= 1) {
 			return;
 		}
-		// 小数组直接插入排序
-		if (n <= INSERTION_SORT_THRESHOLD) {
-			insertionSort(a, 0, n);
-			return;
+		int size = 1;
+		while (size < arr.length) {
+			size <<= 1;
 		}
-		boolean hasNegative = a[0] < 0;
-		for (int i = 1; i < n; i++) {
-			final int v = a[i];
-			if (v < 0) {
-				hasNegative = true;
-				break;
+		final int[] tree = new int[2 * size];
+		Arrays.fill(tree, Integer.MAX_VALUE);
+		for (int i = 0; i < arr.length; i++) {
+			tree[size + i] = arr[i];
+		}
+		for (int i = size - 1; i > 0; i--) {
+			tree[i] = Math.min(tree[i << 1], tree[i << 1 | 1]);
+		}
+		for (int i = 0; i < arr.length; i++) {
+			final int minVal = tree[1];
+			arr[i] = minVal;
+			int idx = 1;
+			while (idx < size) {
+				if (tree[idx << 1] == minVal) {
+					idx <<= 1;
+				} else {
+					idx = idx << 1 | 1;
+				}
+			}
+			tree[idx] = Integer.MAX_VALUE;
+			while (idx > 1) {
+				idx >>= 1;
+				tree[idx] = Math.min(tree[idx << 1], tree[idx << 1 | 1]);
 			}
 		}
-		if (hasNegative) {
-			// 含负数：使用稳定归并排序
-			mergeSort(a);
-		} else {
-			// 全是非负数：优先使用基数排序
-			// 你实测中基数排序在这种场景非常快
-			radixSort(a);
-		}
-	}
-
-	public static void smartSortDesc(final int[] a) {
-		smartSort(a);
-		reverse(a);
 	}
 
 }
