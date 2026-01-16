@@ -104,7 +104,9 @@ public final class CoSortsUtils {
 	}
 
 	/**
-	 * 稳定归并排序（top-down），对 int[] 全局排序。 小片段使用插入排序优化。
+	 * マージソート-昇順
+	 *
+	 * @param a アレー
 	 */
 	public static void mergeSortAsc(final int[] a) {
 		if (a.length <= 1) {
@@ -114,6 +116,11 @@ public final class CoSortsUtils {
 		mergeSortRecursive(a, 0, a.length, tmp);
 	}
 
+	/**
+	 * マージソート-降順
+	 *
+	 * @param a アレー
+	 */
 	public static void mergeSortDesc(final int[] a) {
 		if (a.length <= 1) {
 			return;
@@ -209,6 +216,11 @@ public final class CoSortsUtils {
 		}
 	}
 
+	/**
+	 * トーナメントソート-昇順
+	 *
+	 * @param a アレー
+	 */
 	public static void tournamentSortASc(final int[] arr) {
 		if (arr.length <= 1) {
 			return;
