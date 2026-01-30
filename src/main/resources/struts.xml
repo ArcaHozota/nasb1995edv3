@@ -32,7 +32,7 @@
 		value="/static/.*" />
 	<!-- リクエストのsuffix -->
 	<constant name="struts.action.extension" value="" />
-	<!-- アップロードファイルのサイズは最大2MBにする -->
+	<!-- アップロードファイルのサイズは最大3MBにする -->
 	<constant name="struts.multipart.maxSize" value="3145728" />
 	<!-- アップロードファイルの一時保存するフォルダ -->
 	<constant name="struts.multipart.saveDir"
