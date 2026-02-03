@@ -98,6 +98,22 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Source:
+		https://mvnrepository.com/artifact/software.amazon.awssdk/secretsmanager -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>secretsmanager</artifactId>
+			<version>2.41.19</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Source:
+		https://mvnrepository.com/artifact/software.amazon.awssdk/regions -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>regions</artifactId>
+			<version>2.41.19</version>
+			<scope>compile</scope>
+		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.jetbrains/annotations -->
 		<dependency>
