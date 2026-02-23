@@ -104,11 +104,8 @@
 				<param name="bufferSize">3072</param>
 			</result>
 		</action>
-		<action name="info-deletion"
-			class="app.preach.gospel.handler.HymnsHandler" method="infoDeletion">
-			<interceptor-ref name="json">
-				<param name="root">model</param>
-			</interceptor-ref>
+		<action name="info-delete"
+			class="app.preach.gospel.handler.HymnsHandler" method="infoDelete">
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>
@@ -151,8 +148,8 @@
 				<param name="root">responseJsonData</param>
 			</result>
 		</action>
-		<action name="deletion-check"
-			class="app.preach.gospel.handler.HymnsHandler" method="deletionCheck">
+		<action name="delete-check"
+			class="app.preach.gospel.handler.HymnsHandler" method="deleteCheck">
 			<result name="none" type="json">
 				<param name="root">responseJsonData</param>
 			</result>

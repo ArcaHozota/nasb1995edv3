@@ -167,7 +167,7 @@ function normalDeleteSuccessFunction(result) {
 }
 
 function normalDeleteBtnFunction(url, msg, deleteId) {
-    fetch(url + 'deletion-check')
+    fetch(url + 'delete-check')
         .then(async res => {
             if (!res.ok) {
                 const jsonText = await res.json();
@@ -184,8 +184,7 @@ function normalDeleteBtnFunction(url, msg, deleteId) {
                 confirmButtonColor: '#7f0020'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    layer.msg('削除機能はまだ実装されておりません');
-                    // projectAjaxModify(url + 'info-delete?id=' + deleteId, 'DELETE', null, normalDeleteSuccessFunction);
+                    projectAjaxModify(url + 'info-delete?id=' + deleteId, 'DELETE', null, normalDeleteSuccessFunction);
                 }
             });
         }).catch(err => {

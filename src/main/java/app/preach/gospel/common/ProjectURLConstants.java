@@ -14,11 +14,11 @@ public final class ProjectURLConstants {
 
 	public static final String URL_BOOKS_NAMESPACE = "/books";
 
-	public static final String URL_HOME_NAMESPACE = "/home";
-
-	public static final String URL_CHECK_DELETE = "deletion-check";
+	public static final String URL_CHECK_DELETE = "delete-check";
 
 	public static final String URL_CHECK_EDITION = "edition-check";
+
+	public static final String URL_HOME_NAMESPACE = "/home";
 
 	public static final String URL_HYMNS_NAMESPACE = "/hymns";
 

@@ -113,7 +113,7 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	 *
 	 * @return String
 	 */
-	public String deletionCheck() {
+	public String deleteCheck() {
 		return NONE;
 	}
 
@@ -157,8 +157,8 @@ public class HymnsHandler extends DefaultActionSupport implements ModelDriven<Hy
 	 *
 	 * @return String
 	 */
-	public String infoDeletion() {
-		final String deleteId = this.getServletRequest().getParameter("deleteId");
+	public String infoDelete() {
+		final String deleteId = this.getServletRequest().getParameter("id");
 		final CoResult<String, DataAccessException> infoDeletion = this.iHymnService
 				.infoDeletion(Long.valueOf(deleteId));
 		if (!infoDeletion.isOk()) {
