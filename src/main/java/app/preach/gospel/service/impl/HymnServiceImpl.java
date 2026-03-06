@@ -278,18 +278,17 @@ public class HymnServiceImpl implements IHymnService {
 			final float imgWidth = image.getWidth();
 			final float imgHeight = image.getHeight();
 			// 描画サイズ計算
-			float drawWidth;
-			float drawHeight;
-			// 画像が A4 より小さい → 拡大しない
-			if (imgWidth <= pageWidth && imgHeight <= pageHeight) {
-				drawWidth = imgWidth;
-				drawHeight = imgHeight;
-			} else {
-				// 画像が A4 より大きい → A4 に収まるように縮小
-				final float scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-				drawWidth = imgWidth * scale;
-				drawHeight = imgHeight * scale;
-			}
+//			float scale;
+//			if (imgWidth <= pageWidth && imgHeight <= pageHeight) {
+//				// 画像が A4 より小さい → A4 に満たされように拡大
+//				scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+//			} else {
+//				// 画像が A4 より大きい → A4 に収まるように縮小
+//				scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+//			}
+			final float scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+			final float drawWidth = imgWidth * scale;
+			final float drawHeight = imgHeight * scale;
 			// 画像オブジェクト作成
 			final PDImageXObject pdfImage = LosslessFactory.createFromImage(doc, image);
 			// 中央配置用の座標計算（原点は左下）
