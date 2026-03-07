@@ -40,7 +40,7 @@ tableBody.addEventListener("click", (e) => {
         if (transferVal) window.open(transferVal);
     } else if (e.target.classList.contains("score-download-btn")) {
         e.preventDefault();
-        const scoreId = target.getAttribute("data-score-id");
+        const scoreId = e.target.getAttribute("data-score-id");
         window.location.href = `/hymns/score-download?id=${scoreId}`;
     }
 });
