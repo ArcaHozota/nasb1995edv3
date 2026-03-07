@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("toHymnPages")?.addEventListener("click", (e) => {
     e.preventDefault();
-    const url = '/hymns/to-pages?pageNum=' + pageNum;
+    const url = '/hymns/to-pages?pageNum=' + pageNum + '&keyword=' + keyword;
     checkPermissionAndTransfer(url);
 });
 
