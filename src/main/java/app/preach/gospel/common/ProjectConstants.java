@@ -70,6 +70,8 @@ public final class ProjectConstants {
 
 	public static final String MESSAGE_STRING_LOGIN_SUCCESS = "ログイン成功";
 
+	public static final String MESSAGE_STRING_MUSICSHEET_UNAVAILABLE = "楽譜なし";
+
 	public static final String MESSAGE_STRING_NO_CHANGE = "変更なし";
 
 	public static final String MESSAGE_STRING_NOT_LOGIN = "ログインしてください";

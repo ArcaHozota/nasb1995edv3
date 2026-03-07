@@ -11,8 +11,8 @@ import org.apache.struts2.ModelDriven;
 import org.apache.struts2.action.ServletRequestAware;
 import org.apache.struts2.dispatcher.DefaultActionSupport;
 import org.jooq.exception.DataAccessException;
-import org.jooq.exception.NoDataFoundException;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -142,7 +142,9 @@ public class HymnsScoreHandler extends DefaultActionSupport implements ModelDriv
 		final HymnDto hymnDto = hymnInfoById.getData();
 		final String biko = hymnDto.getBiko();
 		if (CoStringUtils.isEmpty(biko)) {
-			throw new NoDataFoundException(ProjectConstants.MESSAGE_STRING_FATAL_ERROR);
+			this.setContentType(MediaType.APPLICATION_JSON_VALUE);
+			this.setResponseJsonData(ProjectConstants.MESSAGE_STRING_MUSICSHEET_UNAVAILABLE);
+			return NONE;
 		}
 		final int indexOf = biko.indexOf(CoStringUtils.SLASH) + 1;
 		this.setContentType(biko);
