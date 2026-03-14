@@ -1022,7 +1022,7 @@ public class HymnServiceImpl implements IHymnService {
 			final var hymnsRecord = this.dslContext.selectFrom(HYMNS).where(COMMON_CONDITION).and(HYMNS.ID.eq(id))
 					.fetchSingle();
 			hymnsRecord.setVisibleFlg(Boolean.FALSE);
-			this.dslContext.deleteFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id)).execute();
+			// this.dslContext.deleteFrom(HYMNS_WORK).where(HYMNS_WORK.WORK_ID.eq(id)).execute();
 			hymnsRecord.update();
 			return CoResult.ok(ProjectConstants.MESSAGE_STRING_DELETED);
 		} catch (final DataAccessException e) {
