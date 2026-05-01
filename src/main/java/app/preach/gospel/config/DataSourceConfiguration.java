@@ -39,8 +39,8 @@ public class DataSourceConfiguration {
 
 	@Bean
 	protected DataSource dataSource() throws Exception {
-		final String secretJson = getSecretString();
-		final ObjectMapper om = new ObjectMapper();
+		final var secretJson = getSecretString();
+		final var om = new ObjectMapper();
 		final JsonNode n = om.readTree(secretJson);
 		final String host = n.get("host").asText();
 		final int port = n.get("port").asInt();
@@ -48,7 +48,7 @@ public class DataSourceConfiguration {
 		final String username = n.get("username").asText();
 		final String password = n.get("password").asText();
 		final String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + "/" + dbname + "?sslmode=require";
-		final HikariDataSource ds = new HikariDataSource();
+		final var ds = new HikariDataSource();
 		ds.setJdbcUrl(jdbcUrl);
 		ds.setUsername(username);
 		ds.setPassword(password);

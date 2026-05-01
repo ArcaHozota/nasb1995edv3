@@ -14,8 +14,8 @@ spring:
       name: nasb1995edv3
    servlet:
       multipart:
-         max-file-size: 4MB
-         max-request-size: 4MB
+         max-file-size: 10MB
+         max-request-size: 10MB
    datasource:
       hikari:
          maximum-pool-size: 40
