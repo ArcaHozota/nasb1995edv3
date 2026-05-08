@@ -41,8 +41,8 @@ function buildPageNavi(result) {
         li.appendChild(a);
         return li;
     };
-    ul.appendChild(createPageItem("最初へ", !result.hasPrevPage, () => toSelectedPg(1, keyword)));
-    ul.appendChild(createPageItem("&laquo;", !result.hasPrevPage, () => toSelectedPg(pageNum - 1, keyword)));
+    ul.appendChild(createPageItem("&laquo;", !result.hasPrevPage, () => toSelectedPg(1, keyword)));
+    ul.appendChild(createPageItem("&lsaquo;", !result.hasPrevPage, () => toSelectedPg(pageNum - 1, keyword)));
     result.navigateNos.forEach(item => {
         const li = document.createElement('li');
         li.className = 'page-item';
@@ -57,8 +57,8 @@ function buildPageNavi(result) {
         li.addEventListener('click', () => toSelectedPg(item, keyword));
         ul.appendChild(li);
     });
-    ul.appendChild(createPageItem("&raquo;", !result.hasNextPage, () => toSelectedPg(pageNum + 1, keyword)));
-    ul.appendChild(createPageItem("最後へ", !result.hasNextPage, () => toSelectedPg(totalPages, keyword)));
+    ul.appendChild(createPageItem("&rsaquo;", !result.hasNextPage, () => toSelectedPg(pageNum + 1, keyword)));
+    ul.appendChild(createPageItem("&raquo;", !result.hasNextPage, () => toSelectedPg(totalPages, keyword)));
     const nav = document.createElement('nav');
     nav.appendChild(ul);
     pageNavi.appendChild(nav);
