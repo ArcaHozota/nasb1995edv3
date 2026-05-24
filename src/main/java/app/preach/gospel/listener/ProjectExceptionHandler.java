@@ -56,9 +56,7 @@ public final class ProjectExceptionHandler extends DefaultDispatcherErrorHandler
 			// Log illegal state instead of passing unrecoverable exception to calling
 			// thread
 			log.warn("Unable to send error response, code: {}; isCommited: {};", code, response.isCommitted(), e);
-			for (final var en : e.getStackTrace()) {
-				log.error(en.toString());
-			}
+			log.error(e);
 		}
 	}
 
